@@ -50,6 +50,16 @@ The confidence ranges for energy and emissions factors are based on:
 2. **Moderate Confidence**: Web-based calculations using heuristics (±15-25% uncertainty).
 3. **Low Confidence**: Fallback estimations (±30-50% uncertainty).
 
+## Recent Updates
+
+### Version 1.0.0
+- **Exports**: Added exports mapping in `package.json` for proper module resolution.
+- **Versioning**: Updated package version to 1.0.0.
+
+- **Added Models**: Updated emission factors to include new AI models such as Llama-2 (7B, 13B, 70B), Mistral-7B, Mistral-8x7B, Falcon-7B/40B, BLOOM-176B, StableDiffusion, Whisper, DALL-E 3, Midjourney, Phi-2, Gemini-Nano, TinyLlama.
+- **Regional Variants**: Introduced regional-specific variants (`gpt-4-us`, `gpt-4-eu`, etc.) with customized emission factors.
+- **Enhanced Detection**: Improved fuzzy logic in `getAIFactor` to detect new model names and sizes effectively.
+
 ---
 
 This document will be updated regularly to reflect advancements in methodologies and changes in underlying factors like model efficiency, data center efficiency, and regional carbon intensity.
