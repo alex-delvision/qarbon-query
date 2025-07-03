@@ -1,0 +1,40 @@
+{
+  "entryPoints": ["src/calculator.ts", "src/adapters/index.ts", "src/factors.ts"],
+  "out": "docs",
+  "name": "@qarbon/emissions API Documentation",
+  "readme": "README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeProtected": false,
+  "excludeExternals": true,
+  "excludeNotDocumented": false,
+  "skipErrorChecking": true,
+  "plugin": [],
+  "theme": "default",
+  "categorizeByGroup": true,
+  "categoryOrder": [
+    "Calculator",
+    "Adapters", 
+    "Data Types",
+    "Utilities",
+    "Other"
+  ],
+  "sort": ["source-order"],
+  "validation": {
+    "notExported": false,
+    "invalidLink": false,
+    "notDocumented": false
+  },
+  "treatWarningsAsErrors": false,
+  "githubPages": false,
+  "gaID": "",
+  "hideGenerator": false,
+  "searchInComments": true,
+  "cleanOutputDir": true,
+  "watch": false,
+  "preserveWatchOutput": false,
+  "help": false,
+  "version": false,
+  "showConfig": false,
+  "logLevel": "Warn"
+}

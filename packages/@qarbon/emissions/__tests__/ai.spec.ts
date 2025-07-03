@@ -1,16 +1,4 @@
-/**
- * @jest-environment node
- */
-
-// Mock the shared package to avoid module resolution issues
-jest.mock('@qarbon/shared', () => ({
-  generateFootprint: jest.fn(() => ({
-    total: 100,
-    breakdown: { ai: 100 },
-    period: 'monthly'
-  }))
-}));
-
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EmissionsCalculator } from '../src/calculator';
 import { getAIFactor, AI_FACTORS } from '../src/factors';
 
@@ -22,8 +10,8 @@ describe('AI Emissions Calculator', () => {
   });
 
   describe('GPT-3.5 Emissions', () => {
-    it('should calculate ≈2.2g CO2e for 1000 tokens', () => {
-      const result = calculator.calculateAIEmissions(1000, 'gpt-3.5');
+    it('should calculate ≈2.2g CO2e for 1000 tokens', async () => {
+      const result = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
       
       // GPT-3.5 should emit approximately 2.2g CO2e per 1000 tokens
       // Using a tolerance of ±0.1g to account for rounding
@@ -33,26 +21,26 @@ describe('AI Emissions Calculator', () => {
       expect(result.source).toBe('gpt-3.5_inference');
     });
 
-    it('should calculate emissions based on token count', () => {
-      const result500 = calculator.calculateAIEmissions(500, 'gpt-3.5');
-      const result1000 = calculator.calculateAIEmissions(1000, 'gpt-3.5');
-      const result2000 = calculator.calculateAIEmissions(2000, 'gpt-3.5');
+    it('should calculate emissions based on token count', async () => {
+      const result500 = await calculator.calculateAIEmissions(500, 'gpt-3.5');
+      const result1000 = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
+      const result2000 = await calculator.calculateAIEmissions(2000, 'gpt-3.5');
 
       // Emissions should scale linearly with token count
       expect(result1000.amount).toBeCloseTo(result500.amount * 2, 1);
       expect(result2000.amount).toBeCloseTo(result1000.amount * 2, 1);
     });
 
-    it('should handle zero tokens with fallback to query-based emissions', () => {
-      const result = calculator.calculateAIEmissions(0, 'gpt-3.5');
+    it('should handle zero tokens with fallback to query-based emissions', async () => {
+      const result = await calculator.calculateAIEmissions(0, 'gpt-3.5');
       
       // Should use co2PerQuery value (2.2g) when tokens = 0
       expect(result.amount).toBe(2.2);
       expect(result.unit).toBe('g');
     });
 
-    it('should include confidence intervals', () => {
-      const result = calculator.calculateAIEmissions(1000, 'gpt-3.5');
+    it('should include confidence intervals', async () => {
+      const result = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
       
       expect(result.confidence).toBeDefined();
       expect(result.confidence).toEqual({ low: 1.8, high: 2.6 });
@@ -60,10 +48,10 @@ describe('AI Emissions Calculator', () => {
   });
 
   describe('Multiple AI Models', () => {
-    it('should calculate different emissions for different models', () => {
-      const gpt35Result = calculator.calculateAIEmissions(1000, 'gpt-3.5');
-      const gpt4Result = calculator.calculateAIEmissions(1000, 'gpt-4');
-      const claudeResult = calculator.calculateAIEmissions(1000, 'claude-2');
+    it('should calculate different emissions for different models', async () => {
+      const gpt35Result = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
+      const gpt4Result = await calculator.calculateAIEmissions(1000, 'gpt-4');
+      const claudeResult = await calculator.calculateAIEmissions(1000, 'claude-2');
 
       // GPT-4 should emit more than GPT-3.5
       expect(gpt4Result.amount).toBeGreaterThan(gpt35Result.amount);
@@ -74,20 +62,19 @@ describe('AI Emissions Calculator', () => {
       expect(claudeResult.amount).toBeGreaterThan(0);
     });
 
-    it('should handle fuzzy model name matching', () => {
-      const direct = calculator.calculateAIEmissions(1000, 'gpt-3.5');
-      const fuzzy1 = calculator.calculateAIEmissions(1000, 'gpt-3.5-turbo');
-      const fuzzy2 = calculator.calculateAIEmissions(1000, 'gpt-3.5-turbo-16k');
+    it('should handle fuzzy model name matching', async () => {
+      const direct = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
+      const fuzzy1 = await calculator.calculateAIEmissions(1000, 'gpt-3.5-turbo');
+      const fuzzy2 = await calculator.calculateAIEmissions(1000, 'gpt-3.5-turbo-16k');
 
       // Should all resolve to same emissions
       expect(fuzzy1.amount).toBe(direct.amount);
       expect(fuzzy2.amount).toBe(direct.amount);
     });
 
-    it('should throw error for unknown models', () => {
-      expect(() => {
-        calculator.calculateAIEmissions(1000, 'unknown-model');
-      }).toThrow('Unknown AI model: unknown-model');
+    it('should throw error for unknown models', async () => {
+      await expect(calculator.calculateAIEmissions(1000, 'unknown-model'))
+        .rejects.toThrow('Unknown AI model: unknown-model');
     });
   });
 
@@ -134,8 +121,8 @@ describe('AI Emissions Calculator', () => {
   });
 
   describe('Emissions Data Structure', () => {
-    it('should return properly structured emission data', () => {
-      const result = calculator.calculateAIEmissions(1000, 'gpt-3.5');
+    it('should return properly structured emission data', async () => {
+      const result = await calculator.calculateAIEmissions(1000, 'gpt-3.5');
       
       expect(result).toHaveProperty('id');
       expect(result).toHaveProperty('timestamp');
@@ -152,8 +139,8 @@ describe('AI Emissions Calculator', () => {
       expect(result.category).toBe('ai');
     });
 
-    it('should round emissions to 2 decimal places', () => {
-      const result = calculator.calculateAIEmissions(333, 'gpt-3.5');
+    it('should round emissions to 2 decimal places', async () => {
+      const result = await calculator.calculateAIEmissions(333, 'gpt-3.5');
       
       // 333 * 0.0022 = 0.7326, should round to 0.73
       expect(result.amount).toBe(0.73);
@@ -162,22 +149,22 @@ describe('AI Emissions Calculator', () => {
   });
 
   describe('Edge Cases', () => {
-    it('should handle very large token counts', () => {
-      const result = calculator.calculateAIEmissions(1000000, 'gpt-3.5');
+    it('should handle very large token counts', async () => {
+      const result = await calculator.calculateAIEmissions(1000000, 'gpt-3.5');
       
       expect(result.amount).toBe(2200); // 1M * 0.0022 = 2200g
       expect(result.unit).toBe('g');
     });
 
-    it('should handle negative token counts gracefully', () => {
+    it('should handle negative token counts gracefully', async () => {
       // Should use fallback to query-based emissions
-      const result = calculator.calculateAIEmissions(-100, 'gpt-3.5');
+      const result = await calculator.calculateAIEmissions(-100, 'gpt-3.5');
       
       expect(result.amount).toBe(2.2);
     });
 
-    it('should handle fractional token counts', () => {
-      const result = calculator.calculateAIEmissions(1000.5, 'gpt-3.5');
+    it('should handle fractional token counts', async () => {
+      const result = await calculator.calculateAIEmissions(1000.5, 'gpt-3.5');
       
       expect(result.amount).toBeCloseTo(2.2, 2);
     });

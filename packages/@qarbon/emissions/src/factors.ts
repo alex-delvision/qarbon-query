@@ -110,6 +110,91 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
     co2PerQuery: 1.5, // g CO₂e per average query
     confidence: { low: 1.2, high: 1.8 },
   },
+  'llama-2-7b': {
+    energyPerToken: 0.00000055,
+    co2PerToken: 0.00028,
+    confidence: { low: 0.00024, high: 0.00032 },
+  },
+  'llama-2-13b': {
+    energyPerToken: 0.00000065,
+    co2PerToken: 0.00031,
+    confidence: { low: 0.00027, high: 0.00035 },
+  },
+  'llama-2-70b': {
+    energyPerToken: 0.00000175,
+    co2PerToken: 0.00102,
+    confidence: { low: 0.0009, high: 0.00114 },
+  },
+  'mistral-8x7b': {
+    energyPerToken: 0.00000078,
+    co2PerToken: 0.00035,
+    confidence: { low: 0.0003, high: 0.0004 },
+  },
+  'falcon-7b': {
+    energyPerToken: 0.00000045,
+    co2PerToken: 0.00022,
+    confidence: { low: 0.00019, high: 0.00025 },
+  },
+  'falcon-40b': {
+    energyPerToken: 0.00000145,
+    co2PerToken: 0.00078,
+    confidence: { low: 0.0007, high: 0.00086 },
+  },
+  'bloom-176b': {
+    energyPerToken: 0.0000041,
+    co2PerToken: 0.0023,
+    confidence: { low: 0.002, high: 0.0026 },
+  },
+  'stablediffusion': {
+    energyPerToken: 0.0000029,
+    co2PerToken: 0.0016,
+    confidence: { low: 0.0014, high: 0.0018 },
+  },
+  'whisper': {
+    energyPerToken: 0.000002,
+    co2PerToken: 0.0011,
+    confidence: { low: 0.001, high: 0.0012 },
+  },
+  'dalle-3': {
+    energyPerToken: 0.0000031,
+    co2PerToken: 0.00176,
+    confidence: { low: 0.0015, high: 0.002 },
+  },
+  'midjourney': {
+    energyPerToken: 0.0000024,
+    co2PerToken: 0.0013,
+    confidence: { low: 0.0011, high: 0.0015 },
+  },
+  'phi-2': {
+    energyPerToken: 0.0000013,
+    co2PerToken: 0.0007,
+    confidence: { low: 0.0006, high: 0.0008 },
+  },
+  'gemini-nano': {
+    energyPerToken: 0.00000017,
+    co2PerToken: 0.00009,
+    confidence: { low: 0.00008, high: 0.0001 },
+  },
+  'tinyllama': {
+    energyPerToken: 0.0000002,
+    co2PerToken: 0.00011,
+    confidence: { low: 0.0001, high: 0.00012 },
+  },
+  'gpt-4-us': {
+    energyPerToken: 0.0000026,
+    co2PerToken: 0.0013,
+    confidence: { low: 0.0012, high: 0.0014 },
+  },
+  'gpt-4-eu': {
+    energyPerToken: 0.0000026,
+    co2PerToken: 0.00078,
+    confidence: { low: 0.0007, high: 0.00086 },
+  },
+  'gpt-4-asia': {
+    energyPerToken: 0.0000026,
+    co2PerToken: 0.0011,
+    confidence: { low: 0.001, high: 0.0012 },
+  }
 };
 
 const ALL_FACTORS = {
@@ -198,6 +283,23 @@ export function getAIFactor(model: string): AIEmissionFactor | null {
     // Mistral models
     { pattern: /mistral-?7b/, key: 'mistral-7b' },
     { pattern: /mistral/, key: 'mistral-7b' },
+    { pattern: /llama-?2-?7b/, key: 'llama-2-7b' },
+    { pattern: /llama-?2-?13b/, key: 'llama-2-13b' },
+    { pattern: /llama-?2-?70b/, key: 'llama-2-70b' },
+    { pattern: /mistral-?8x7b/, key: 'mistral-8x7b' },
+    { pattern: /falcon-?7b/, key: 'falcon-7b' },
+    { pattern: /falcon-?40b/, key: 'falcon-40b' },
+    { pattern: /bloom-?176b/, key: 'bloom-176b' },
+    { pattern: /stablediffusion/, key: 'stablediffusion' },
+    { pattern: /whisper/, key: 'whisper' },
+    { pattern: /dalle-?3/, key: 'dalle-3' },
+    { pattern: /midjourney/, key: 'midjourney' },
+    { pattern: /phi-?2/, key: 'phi-2' },
+    { pattern: /gemini-?nano/, key: 'gemini-nano' },
+    { pattern: /tinyllama/, key: 'tinyllama' },
+    { pattern: /gpt-?4-?us/, key: 'gpt-4-us' },
+    { pattern: /gpt-?4-?eu/, key: 'gpt-4-eu' },
+    { pattern: /gpt-?4-?asia/, key: 'gpt-4-asia' },
   ];
   
   for (const { pattern, key } of patterns) {

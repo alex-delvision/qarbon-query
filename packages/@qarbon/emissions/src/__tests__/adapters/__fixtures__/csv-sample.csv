@@ -1,0 +1,5 @@
+timestamp,co2_kg,energy_kwh,power_w,duration_h,source,location
+2023-07-15T10:30:00Z,0.125,0.25,125,2,ml_training,datacenter_1
+2023-07-15T12:30:00Z,0.089,0.18,90,2,web_server,datacenter_1
+2023-07-15T14:30:00Z,0.156,0.31,155,2,data_processing,datacenter_2
+2023-07-15T16:30:00Z,0.203,0.42,210,2,database_queries,datacenter_1

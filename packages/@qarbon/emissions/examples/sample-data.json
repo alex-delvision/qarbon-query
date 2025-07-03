@@ -1,0 +1,73 @@
+{
+  "measurements": [
+    {
+      "id": "measurement_001",
+      "timestamp": "2023-07-15T10:30:00Z",
+      "metrics": {
+        "carbon": {
+          "total_kg": 0.125,
+          "intensity": 445.2
+        },
+        "energy": {
+          "consumption_kwh": 0.25,
+          "power_w": 125
+        }
+      },
+      "metadata": {
+        "source_system": "monitoring_platform",
+        "device_id": "server_01",
+        "location": "datacenter_west",
+        "activity": "ml_training"
+      }
+    },
+    {
+      "id": "measurement_002", 
+      "timestamp": "2023-07-15T12:30:00Z",
+      "metrics": {
+        "carbon": {
+          "total_kg": 0.089,
+          "intensity": 412.8
+        },
+        "energy": {
+          "consumption_kwh": 0.18,
+          "power_w": 90
+        }
+      },
+      "metadata": {
+        "source_system": "monitoring_platform",
+        "device_id": "server_02",
+        "location": "datacenter_west",
+        "activity": "web_server"
+      }
+    },
+    {
+      "id": "measurement_003",
+      "timestamp": "2023-07-15T14:30:00Z",
+      "metrics": {
+        "carbon": {
+          "total_kg": 0.156,
+          "intensity": 503.2
+        },
+        "energy": {
+          "consumption_kwh": 0.31,
+          "power_w": 155
+        }
+      },
+      "metadata": {
+        "source_system": "monitoring_platform",
+        "device_id": "server_03",
+        "location": "datacenter_east",
+        "activity": "data_processing"
+      }
+    }
+  ],
+  "summary": {
+    "total_measurements": 3,
+    "time_range": {
+      "start": "2023-07-15T10:30:00Z",
+      "end": "2023-07-15T14:30:00Z"
+    },
+    "total_emissions_kg": 0.37,
+    "total_energy_kwh": 0.74
+  }
+}

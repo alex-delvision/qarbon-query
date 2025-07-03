@@ -1,0 +1,36 @@
+{
+  "measurements": [
+    {
+      "timestamp": "2023-07-15T10:30:00Z",
+      "emissions": {
+        "co2": 125.5,
+        "unit": "g"
+      },
+      "energy": {
+        "consumed": 0.25,
+        "unit": "kWh"
+      },
+      "source": "server_monitoring",
+      "metadata": {
+        "device_id": "server_01",
+        "location": "aws_us_west_2"
+      }
+    },
+    {
+      "timestamp": "2023-07-15T12:30:00Z",
+      "emissions": {
+        "co2": 89.2,
+        "unit": "g"
+      },
+      "energy": {
+        "consumed": 0.18,
+        "unit": "kWh"
+      },
+      "source": "server_monitoring",
+      "metadata": {
+        "device_id": "server_02",
+        "location": "aws_us_west_2"
+      }
+    }
+  ]
+}
