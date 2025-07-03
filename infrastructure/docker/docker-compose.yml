@@ -1,0 +1,98 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres_qarbon
+    environment:
+      POSTGRES_USER: qarbon
+      POSTGRES_PASSWORD: qarbonsecret
+      POSTGRES_DB: qarbon_dev
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5433:5432
+    networks:
+      - qarbon-network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "qarbon"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:alpine
+    container_name: redis_qarbon
+    ports:
+      - 6380:6379
+    networks:
+      - qarbon-network
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    container_name: adminer_qarbon
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - qarbon-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_qarbon
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - 8082:80
+    networks:
+      - qarbon-network
+    restart: unless-stopped
+
+  mock-carbon-api:
+    image: node:18-alpine
+    container_name: mock_carbon_api
+    working_dir: /usr/src/app
+    volumes:
+      - ./mocks:/usr/src/app
+    command: sh -c "npm install && npm start"
+    ports:
+      - 3004:3004
+    networks:
+      - qarbon-network
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3004",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  qarbon-network:
+    driver: bridge

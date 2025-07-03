@@ -1,0 +1,202 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://api.openai.com/v1/chat/completions",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://api.anthropic.com/v1/messages",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://generativelanguage.googleapis.com/v1*/models/*:generateContent",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://bedrock*.amazonaws.com/model/*/invoke*",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://chat.openai.com/backend-api/conversation",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 6,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://claude.ai/api/organizations/*/chat_conversations/*/completion",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 7,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://bard.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        {
+          "header": "X-Carbon-Tracker",
+          "operation": "set",
+          "value": "qarbon-query"
+        }
+      ],
+      "responseHeaders": [
+        {
+          "header": "Access-Control-Expose-Headers",
+          "operation": "set",
+          "value": "*"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*",
+      "resourceTypes": ["xmlhttprequest", "fetch"]
+    }
+  }
+]

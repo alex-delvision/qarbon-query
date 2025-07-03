@@ -1,0 +1,15 @@
+{
+  "name": "@qarbon/api-gateway",
+  "version": "0.1.0",
+  "description": "QarbonQuery component",
+  "private": true,
+  "scripts": {
+    "build": "echo 'Build not implemented yet'",
+    "dev": "echo 'Dev mode not implemented yet'",
+    "lint": "echo 'Lint not implemented yet'",
+    "check-types": "echo 'Type check not implemented yet'",
+    "test": "echo 'Tests not implemented yet'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

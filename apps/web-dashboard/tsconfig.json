@@ -1,0 +1,32 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+    "jsx": "preserve",
+    "allowJs": true,
+    "incremental": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": false,
+    "moduleDetection": "auto",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["next-env.d.ts", "src/**/*", "app/**/*", "pages/**/*", "components/**/*", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next", "out", "dist"],
+  "references": [
+    {
+      "path": "../../packages/@qarbon/shared"
+    },
+    {
+      "path": "../../packages/@qarbon/sdk"
+    },
+    {
+      "path": "../../packages/@qarbon/ui"
+    }
+  ]
+}

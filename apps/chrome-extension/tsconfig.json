@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "noEmit": false,
+    "moduleResolution": "node",
+    "allowImportingTsExtensions": false,
+    "moduleDetection": "auto",
+    "verbatimModuleSyntax": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist", "extension", "node_modules", "**/*.test.*", "**/*.spec.*"],
+  "references": [
+    {
+      "path": "../../packages/@qarbon/shared"
+    },
+    {
+      "path": "../../packages/@qarbon/sdk"
+    }
+  ]
+}

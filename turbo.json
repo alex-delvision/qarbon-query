@@ -1,21 +1,159 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "tui",
+  "globalDependencies": [
+    "**/.env*",
+    "**/tsconfig.json",
+    "**/package.json",
+    "**/tailwind.config.*",
+    "**/next.config.*",
+    "**/webpack.config.*",
+    "**/vite.config.*"
+  ],
+  "globalEnv": ["NODE_ENV", "CI", "VERCEL", "NEXT_PUBLIC_*", "CHROME_EXTENSION_*"],
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env*"],
-      "outputs": [".next/**", "!.next/cache/**"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"]
-    },
-    "check-types": {
-      "dependsOn": ["^check-types"]
+      "dependsOn": ["^build", "check-types"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env*",
+        "public/**",
+        "assets/**",
+        "manifest.json",
+        "src/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "utils/**",
+        "styles/**"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**", "build/**", "out/**", "extension/**"],
+      "env": ["NODE_ENV", "NEXT_PUBLIC_*", "CHROME_EXTENSION_*"]
     },
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT", "NEXT_PUBLIC_*", "CHROME_EXTENSION_*"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "env": ["NODE_ENV", "PORT", "NEXT_PUBLIC_*"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc*",
+        ".eslintignore",
+        "eslint.config.*",
+        "src/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "utils/**",
+        "__tests__/**",
+        "tests/**"
+      ],
+      "outputs": []
+    },
+    "lint:fix": {
+      "dependsOn": ["^lint:fix"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".eslintrc*",
+        ".eslintignore",
+        "eslint.config.*",
+        "src/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "utils/**"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "tsconfig.json",
+        "tsconfig.*.json",
+        "src/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "utils/**",
+        "types/**"
+      ],
+      "outputs": ["dist/**/*.d.ts", "build/**/*.d.ts"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.*",
+        "vitest.config.*",
+        "src/**",
+        "__tests__/**",
+        "tests/**",
+        "**/*.test.*",
+        "**/*.spec.*"
+      ],
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"]
+    },
+    "test:watch": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.*",
+        "vitest.config.*",
+        "src/**",
+        "__tests__/**",
+        "tests/**",
+        "**/*.test.*",
+        "**/*.spec.*"
+      ],
+      "env": ["NODE_ENV"]
+    },
+    "test:coverage": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "jest.config.*",
+        "vitest.config.*",
+        "src/**",
+        "__tests__/**",
+        "tests/**",
+        "**/*.test.*",
+        "**/*.spec.*"
+      ],
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"]
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "playwright.config.*", "e2e/**", "tests/e2e/**", "**/*.e2e.*"],
+      "outputs": ["test-results/**", "playwright-report/**"],
+      "env": ["NODE_ENV", "CI", "PLAYWRIGHT_*", "NEXT_PUBLIC_*"]
+    },
+    "clean": {
+      "cache": false,
+      "outputs": []
+    },
+    "format": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc*", ".prettierignore", "prettier.config.*"],
+      "outputs": [],
+      "cache": false
+    },
+    "format:check": {
+      "inputs": ["$TURBO_DEFAULT$", ".prettierrc*", ".prettierignore", "prettier.config.*"],
+      "outputs": []
     }
   }
 }

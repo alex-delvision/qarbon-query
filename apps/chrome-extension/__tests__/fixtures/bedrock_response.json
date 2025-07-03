@@ -1,0 +1,23 @@
+{
+  "output": {
+    "message": {
+      "role": "assistant",
+      "content": [
+        {
+          "type": "text",
+          "text": "This is a test response from AWS Bedrock using Claude for token extraction testing. The response showcases the integration capabilities."
+        }
+      ]
+    }
+  },
+  "stopReason": "end_turn",
+  "usage": {
+    "inputTokens": 32,
+    "outputTokens": 22,
+    "totalTokens": 54
+  },
+  "metrics": {
+    "latencyMs": 1250
+  },
+  "model": "anthropic.claude-3-sonnet-20240229-v1:0"
+}

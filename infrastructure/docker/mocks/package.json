@@ -1,0 +1,12 @@
+{
+  "name": "mock-carbon-api",
+  "version": "1.0.0",
+  "description": "Mock Carbon Marketplace API for QarbonQuery development",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

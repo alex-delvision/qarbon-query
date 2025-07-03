@@ -1,0 +1,22 @@
+{
+  "name": "@qarbon/web-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "QarbonQuery Web Dashboard for carbon footprint analytics and management",
+  "scripts": {
+    "dev": "tsc -b --watch",
+    "build": "tsc -b",
+    "start": "node dist/pages/index.js",
+    "lint": "eslint src --ext .ts,.tsx",
+    "lint:fix": "eslint src --ext .ts,.tsx --fix",
+    "check-types": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:e2e": "playwright test",
+    "clean": "rm -rf .next out dist"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=18"
+  }
+}

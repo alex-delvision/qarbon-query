@@ -1,0 +1,101 @@
+{
+  "compilerOptions": {
+    // Language and environment
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "checkJs": false,
+    "jsx": "react-jsx",
+
+    // Bundler mode
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    // Linting
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    // Interop constraints
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "verbatimModuleSyntax": true,
+
+    // Language features
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "useDefineForClassFields": true,
+
+    // Output
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "importHelpers": true,
+
+    // Advanced
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "allowArbitraryExtensions": false,
+
+    // Path mapping for monorepo
+    "baseUrl": ".",
+    "paths": {
+      "@qarbon/*": ["./packages/*/src", "./packages/@qarbon/*/src"],
+      "@apps/*": ["./apps/*/src"],
+      "@services/*": ["./services/*/src"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/build",
+    "**/.next",
+    "**/out",
+    "**/coverage",
+    "**/.turbo",
+    "**/playwright-report",
+    "**/test-results"
+  ],
+  "references": [
+    {
+      "path": "./packages/@qarbon/shared"
+    },
+    {
+      "path": "./packages/@qarbon/emissions"
+    },
+    {
+      "path": "./packages/@qarbon/sdk"
+    },
+    {
+      "path": "./packages/@qarbon/tracker-adapters"
+    },
+    {
+      "path": "./packages/@qarbon/ui"
+    },
+    {
+      "path": "./apps/chrome-extension"
+    },
+    {
+      "path": "./apps/web-dashboard"
+    }
+  ],
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}
