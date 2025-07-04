@@ -1,6 +1,6 @@
 {
   "name": "@qarbon/chrome-extension",
-  "version": "0.1.1",
+  "version": "1.1.0",
   "private": true,
   "description": "QarbonQuery Chrome Extension for real-time carbon footprint tracking",
   "main": "src/background.ts",
@@ -24,8 +24,8 @@
     "audit": "node scripts/audit-summary.js"
   },
   "dependencies": {
-    "qarbon-emissions": "^1.1.0",
-    "@qarbon/tracker-adapters": "file:../../packages/@qarbon/tracker-adapters"
+    "@qarbon/tracker-adapters": "file:../../packages/@qarbon/tracker-adapters",
+    "qarbon-emissions": "^1.1.0"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.246",
@@ -38,12 +38,13 @@
     "ts-loader": "^9.5.2",
     "typescript": "^5.0.0",
     "webpack": "^5.99.9",
+    "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^5.1.4"
   },
   "manifest": {
     "manifest_version": 3,
     "name": "QarbonQuery Carbon Tracker",
-    "version": "0.1.1",
+    "version": "1.1.0",
     "description": "Track your digital carbon footprint in real-time",
     "permissions": [
       "activeTab",
