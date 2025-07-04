@@ -3,6 +3,7 @@
   "name": "QarbonQuery Carbon Tracker",
   "version": "1.1.0",
   "description": "Track your digital carbon footprint in real-time",
+  "homepage_url": "https://alex-delvision.github.io/qarbon-query/",
   "permissions": [
     "activeTab",
     "storage",
@@ -60,9 +61,15 @@
       "path": "dnr_rules.json"
     }]
   },
+  "options_page": "settings.html",
   "web_accessible_resources": [
     {
-      "resources": ["icons/*.png"],
+      "resources": [
+        "popup.html", 
+        "settings.html", 
+        "onboarding.html",
+        "icons/platforms/*.svg"
+      ],
       "matches": ["<all_urls>"]
     }
   ]
