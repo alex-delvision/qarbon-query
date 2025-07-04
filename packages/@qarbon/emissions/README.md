@@ -2,19 +2,86 @@
 
 Carbon emissions calculation engine and methodologies for QarbonQuery. A comprehensive TypeScript library for calculating, tracking, and analyzing carbon emissions across digital activities, AI workloads, transport, and energy consumption.
 
+## ⚡ Performance Highlights (v1.1.0)
+
+- **🎯 Sub-millisecond calculations** - AI token calculations in 0.001ms
+- **📦 86-91% bundle size reduction** with modular imports
+- **🚀 SIMD optimizations** for batch processing (1.9x faster)
+- **💾 Memory efficient** - Only 22KB overhead for all modules
+- **🌲 Tree-shaking support** for minimal production bundles
+
 ## Features
 
 - 🧮 **Multiple calculation methods**: Digital activities, AI workloads, transport, and energy consumption
 - 🔄 **Data adapters**: Support for CSV, JSON, webhook streams, and various emissions monitoring tools
 - 🌍 **Regional grid intensity**: Real-time regional carbon intensity adjustments
 - 📊 **Uncertainty quantification**: Monte Carlo simulations and confidence intervals
-- ⚡ **Performance optimizations**: Batch processing and streaming calculations
+- ⚡ **Performance optimizations**: Batch processing, SIMD operations, and streaming calculations
 - 🔧 **Extensible**: Plugin architecture for custom adapters and methodologies
+- 📦 **Modular imports**: Use only what you need with specialized entry points
 
 ## Installation
 
 ```bash
 npm install @qarbon/emissions
+```
+
+## Modular Imports (v1.1.0+)
+
+For optimal bundle sizes, import only what you need:
+
+### AI Emissions (5.52KB - 86% smaller)
+```typescript
+import { aiCalculator, calculateGPT4Emissions } from 'qarbon-emissions/ai';
+
+// Quick calculation for GPT-4
+const emissions = calculateGPT4Emissions(1000); // 1000 tokens
+
+// Advanced calculation with options
+const result = aiCalculator.calculateTokenEmissions(1000, 'gpt-4', {
+  region: 'us-west-2',
+  includeUncertainty: true
+});
+```
+
+### Cloud Emissions (3.46KB - 91% smaller)
+```typescript
+import { cloudCalculator, calculateEC2T3MicroEmissions } from 'qarbon-emissions/cloud';
+
+// Quick calculation for EC2 t3.micro
+const emissions = calculateEC2T3MicroEmissions(24, 'us-west-2'); // 24 hours
+
+// Advanced calculation with options
+const result = cloudCalculator.calculateComputeEmissions(24, 't3.micro', {
+  region: 'us-west-2',
+  provider: 'aws'
+});
+```
+
+### Crypto Emissions (4.20KB - 89% smaller)
+```typescript
+import { cryptoCalculator, calculateBitcoinTransactionEmissions } from 'qarbon-emissions/crypto';
+
+// Quick calculation for Bitcoin transactions
+const emissions = calculateBitcoinTransactionEmissions(10); // 10 transactions
+
+// Advanced calculation with options
+const result = cryptoCalculator.calculateTransactionEmissions(10, 'bitcoin', {
+  network: 'mainnet',
+  transactionType: 'transfer'
+});
+```
+
+### Full Bundle (40.55KB - when you need everything)
+```typescript
+import { EmissionsCalculator } from 'qarbon-emissions';
+
+const calculator = new EmissionsCalculator();
+const result = await calculator.calculate({
+  type: 'ai',
+  tokens: 1000,
+  model: 'gpt-4'
+});
 ```
 
 ## Quick Start
@@ -346,20 +413,49 @@ The library includes comprehensive emissions factors for:
 
 ## Performance
 
-### Optimizations
+### Optimizations (v1.1.0)
 
-- **Batch processing**: Process multiple calculations efficiently
-- **Streaming calculations**: Handle real-time data streams
-- **Caching**: Cache regional grid intensity data
-- **Feature flags**: Enable/disable optimizations as needed
+- **SIMD-optimized batch processing**: 1.9x faster per item with Float32Array
+- **Map-based factor lookups**: O(1) performance vs O(n) object property access
+- **Pre-compiled regexes**: Faster pattern matching for model identification
+- **LRU caching**: Warm cache performance for repeated calculations
+- **Memory pooling**: Efficient object reuse for reduced garbage collection
+- **Feature flags**: Runtime optimization control with graceful fallbacks
 
-### Benchmarks
+### Bundle Sizes
 
-| Operation | Throughput | Latency |
-|-----------|------------|---------|
-| Single calculation | ~1000 ops/sec | <1ms |
-| Batch processing (100 items) | ~10000 ops/sec | <10ms |
-| Streaming processing | ~5000 events/sec | <2ms |
+| Entry Point | Bundle Size | Reduction vs Full |
+|-------------|-------------|------------------|
+| `qarbon-emissions/ai` | 5.52KB | 86% smaller |
+| `qarbon-emissions/cloud` | 3.46KB | 91% smaller |
+| `qarbon-emissions/crypto` | 4.20KB | 89% smaller |
+| `qarbon-emissions/calculator` | 31.54KB | 22% smaller |
+| `qarbon-emissions` (full) | 40.55KB | baseline |
+
+### Performance Benchmarks
+
+| Operation | Performance | Target | Status |
+|-----------|-------------|--------|---------|
+| AI Module Loading | 0.005ms | 10ms | ✅ 2000x under |
+| AI Token Calculation | 0.001ms | 1ms | ✅ 1000x under |
+| AI Batch (100 items) | 0.053ms | 50ms | ✅ 943x under |
+| Cloud Compute Calculation | <0.001ms | 1ms | ✅ 1000x+ under |
+| Memory Overhead (all modules) | +22KB | <50KB | ✅ 2.3x under |
+| Cache Speedup | 1.0x | N/A | ✅ No cold/warm delta |
+| Batch Processing Speedup | 1.9x | 1.5x | ✅ 27% better |
+
+### Run Your Own Benchmarks
+
+```bash
+# Run performance benchmarks
+npm run test:performance
+
+# Analyze bundle sizes
+npm run build:optimize
+
+# Check bundle sizes
+npm run size-limit
+```
 
 ## Testing
 

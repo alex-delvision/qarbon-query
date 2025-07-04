@@ -312,6 +312,47 @@ export function getAIFactor(model: string): AIEmissionFactor | null {
 }
 
 /**
- * Export AI factors for direct access
+ * Get cloud factor for instance type
+ */
+export function getCloudFactor(instanceType: string): any | null {
+  // Use the digital factors for cloud compute
+  return DIGITAL_FACTORS[instanceType] || null;
+}
+
+/**
+ * Basic crypto emission factors (should be updated with real data)
+ */
+const CRYPTO_FACTORS_DATA: Record<string, any> = {
+  bitcoin: {
+    co2PerTransaction: 707,
+    co2PerHashPerHour: 0.0000015,
+    confidence: { low: 600, high: 850 },
+    consensusMechanism: 'proof-of-work'
+  },
+  ethereum: {
+    co2PerTransaction: 0.0212,
+    co2PerStakedTokenPerHour: 0.000001,
+    confidence: { low: 0.015, high: 0.030 },
+    consensusMechanism: 'proof-of-stake'
+  },
+  litecoin: {
+    co2PerTransaction: 18.5,
+    co2PerHashPerHour: 0.00000025,
+    confidence: { low: 15, high: 22 },
+    consensusMechanism: 'proof-of-work'
+  }
+};
+
+/**
+ * Get crypto factor for currency
+ */
+export function getCryptoFactor(currency: string): any | null {
+  return CRYPTO_FACTORS_DATA[currency.toLowerCase()] || null;
+}
+
+/**
+ * Export factor collections for direct access
  */
 export { AI_FACTORS };
+export const CLOUD_FACTORS = DIGITAL_FACTORS;
+export const CRYPTO_FACTORS = CRYPTO_FACTORS_DATA;

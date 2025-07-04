@@ -1,11 +1,40 @@
 {
-  "name": "@qarbon/emissions",
-  "version": "1.0.0",
+  "name": "qarbon-emissions",
+  "version": "1.1.0",
+  "type": "module",
   "exports": {
-    ".": "./dist/index.js",
-    "./calculator": "./dist/calculator.js",
-    "./factors": "./dist/factors.js",
-    "./compatibility": "./dist/compatibility.js"
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./ai": {
+      "import": "./dist/ai.js",
+      "require": "./dist/ai.cjs",
+      "types": "./dist/ai.d.ts"
+    },
+    "./cloud": {
+      "import": "./dist/cloud.js",
+      "require": "./dist/cloud.cjs",
+      "types": "./dist/cloud.d.ts"
+    },
+    "./crypto": {
+      "import": "./dist/crypto.js",
+      "require": "./dist/crypto.cjs",
+      "types": "./dist/crypto.d.ts"
+    },
+    "./calculator": {
+      "import": "./dist/calculator.js",
+      "require": "./dist/calculator.cjs",
+      "types": "./dist/calculator.d.ts"
+    },
+    "./factors": {
+      "import": "./dist/factors.js",
+      "require": "./dist/factors.cjs",
+      "types": "./dist/factors.d.ts"
+    },
+    "./browser": "./dist/qarbon-emissions.browser.js",
+    "./package.json": "./package.json"
   },
   "description": "Carbon emissions calculation engine and methodologies for QarbonQuery",
   "repository": {
@@ -15,7 +44,13 @@
   },
   "main": "./dist/index.js",
   "scripts": {
-    "build": "tsc -b",
+    "build": "npm run clean && npm run build:types && npm run build:rollup",
+    "build:optimized": "node scripts/build-optimized.js",
+    "build:types": "tsc -b",
+    "build:rollup": "rollup -c",
+    "build:dev": "npm run clean && npm run build:types && rollup -c --watch",
+    "build:analyze": "npm run build && node scripts/analyze-bundle.js",
+    "build:optimize": "npm run build:optimized && node scripts/optimize-bundle.js",
     "dev": "tsc -b --watch",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
@@ -25,13 +60,16 @@
     "test:coverage": "vitest run --coverage",
     "test:browser": "vitest run --browser",
     "test:ai": "vitest run --grep='ai|emission|gpt'",
+    "test:performance": "node benchmarks/index.js",
     "clean": "rm -rf dist",
-    "docs": "typedoc --skipErrorChecking --excludeExternals --out docs src/calculator.ts src/adapters/index.ts src/factors.ts"
+    "docs": "typedoc --skipErrorChecking --excludeExternals --out docs src/calculator.ts src/adapters/index.ts src/factors.ts",
+    "size-limit": "npm run build && du -sh dist/*",
+    "prepare": "npm run build"
   },
-  "dependencies": {
-    "@qarbon/shared": "file:../shared"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-terser": "^0.4.4",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
@@ -41,11 +79,15 @@
     "@vitest/browser": "^1.0.0",
     "@vitest/coverage-v8": "^1.0.0",
     "@vitest/ui": "^1.0.0",
+    "esbuild": "^0.25.5",
     "playwright": "^1.40.0",
+    "rollup": "^4.44.1",
+    "rollup-plugin-esbuild": "^6.2.1",
     "semantic-release": "^24.2.6",
     "tslib": "^2.8.1",
     "typedoc": "^0.25.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "webpack-bundle-analyzer": "^4.10.2"
   }
 }
