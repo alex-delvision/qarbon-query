@@ -44,7 +44,7 @@ export class StreamingCalculator extends Transform {
   /**
    * Transform implementation for processing emission inputs
    */
-  _transform(
+  override _transform(
     chunk: EmissionInput | EmissionInput[],
     encoding: BufferEncoding,
     callback: TransformCallback
@@ -73,7 +73,7 @@ export class StreamingCalculator extends Transform {
   /**
    * Flush remaining items in buffer
    */
-  _flush(callback: TransformCallback): void {
+  override _flush(callback: TransformCallback): void {
     if (this.buffer.length > 0) {
       this.processBatch()
         .then(() => callback())
@@ -175,7 +175,7 @@ export class LogProcessor extends Transform {
   /**
    * Transform log lines into emission inputs
    */
-  _transform(
+  override _transform(
     chunk: Buffer,
     encoding: BufferEncoding,
     callback: TransformCallback
@@ -206,7 +206,7 @@ export class LogProcessor extends Transform {
   /**
    * Flush remaining buffer
    */
-  _flush(callback: TransformCallback): void {
+  override _flush(callback: TransformCallback): void {
     if (this.lineBuffer.trim()) {
       const input = this.parser(this.lineBuffer);
       if (input) {
@@ -235,7 +235,7 @@ export class ResultAggregator extends Transform {
   /**
    * Aggregate emission results over time windows
    */
-  _transform(
+  override _transform(
     chunk: EmissionOutput,
     encoding: BufferEncoding,
     callback: TransformCallback
@@ -261,7 +261,7 @@ export class ResultAggregator extends Transform {
   /**
    * Flush final window
    */
-  _flush(callback: TransformCallback): void {
+  override _flush(callback: TransformCallback): void {
     this.flushWindow();
     callback();
   }

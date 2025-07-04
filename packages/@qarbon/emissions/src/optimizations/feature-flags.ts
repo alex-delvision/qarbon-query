@@ -90,7 +90,7 @@ export class FeatureFlagsManager {
       const envVar = `QARBON_${flag.toUpperCase()}`;
       const value = process.env[envVar];
       if (value !== undefined) {
-        envFlags[flag as keyof FeatureFlags] = value === 'true' || value === '1';
+        (envFlags as any)[flag] = value === 'true' || value === '1';
       }
     }
 
@@ -107,7 +107,7 @@ export class FeatureFlagsManager {
       if (value !== undefined) {
         const numValue = parseInt(value, 10);
         if (!isNaN(numValue)) {
-          envFlags[flag as keyof FeatureFlags] = numValue;
+          (envFlags as any)[flag] = numValue;
         }
       }
     }

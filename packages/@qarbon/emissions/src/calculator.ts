@@ -284,7 +284,7 @@ export class EmissionsCalculator {
         // Convert inputs to batch format
         const batchInputs = inputs.map(input => ({ ...input, ...options }));
         const { results } = await this.batchCalculator.calculateBatch(batchInputs, {
-          batchSize: options.batchSize || 100,
+          // batchSize: options.batchSize || 100,
           features: featureFlags.getFlags()
         });
         

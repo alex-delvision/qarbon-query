@@ -253,7 +253,7 @@ export function getAIFactor(model: string): AIEmissionFactor | null {
   
   // Direct match first
   if (AI_FACTORS[normalizedModel]) {
-    return AI_FACTORS[normalizedModel];
+  return AI_FACTORS[normalizedModel] || null;
   }
   
   // Fuzzy matching patterns

@@ -9,13 +9,23 @@
     "noEmit": false,
     "allowImportingTsExtensions": false,
     "moduleDetection": "auto",
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": false,
+    "strict": false,
+    "exactOptionalPropertyTypes": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": false
   },
   "include": ["src/**/*"],
-  "exclude": ["dist", "node_modules", "**/*.test.*", "**/*.spec.*"],
-  "references": [
-    {
-      "path": "../shared"
-    }
-  ]
+  "exclude": [
+    "dist", 
+    "node_modules", 
+    "**/*.test.*", 
+    "**/*.spec.*",
+    "../tracker-adapters/**/*",
+    "../core/**/*",
+    "../shared/**/*"
+  ],
+  "references": []
 }

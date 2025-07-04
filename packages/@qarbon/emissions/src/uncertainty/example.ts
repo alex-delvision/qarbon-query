@@ -5,7 +5,7 @@
 import { monteCarlo, simpleMonteCarloRange } from './monteCarlo';
 import { sensitivityAnalysis } from './sensitivityAnalysis';
 import { propagateUncertainty } from './uncertaintyPropagation';
-import { calculateAIEmissionsWithUncertainty } from '../compatibility';
+import { EmissionsCalculator } from '../calculator';
 
 /**
  * Example 1: Basic Monte Carlo simulation for AI emissions
@@ -115,7 +115,8 @@ export function exampleAIEmissionsWithUncertainty() {
     console.log(`\n${model.toUpperCase()} (1000 tokens):`);
     
     confidenceLevels.forEach(level => {
-      const result = calculateAIEmissionsWithUncertainty(1000, model, {
+      const calculator = new EmissionsCalculator();
+      const result = calculator.calculateAIEmissionsWithUncertainty(1000, model, {
         includeUncertainty: true,
         confidenceLevel: level,
         method: 'montecarlo',
