@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@qarbon/tracker-adapters": "file:../../packages/@qarbon/tracker-adapters",
+    "chart.js": "^4.5.0",
     "qarbon-emissions": "^1.1.0"
   },
   "devDependencies": {

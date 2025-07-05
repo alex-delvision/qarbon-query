@@ -1,15 +1,19 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development';
   
   return {
     mode: argv.mode || 'production',
+    target: ['web', 'es2020'],
     entry: {
       background: './src/background-clean.ts',
-      content: './src/content-fixed.ts',
-      popup: './src/popup.ts',
+      content: './src/content-sse.ts',
+      popup: './src/popup-hybrid.ts',
+      settings: './src/settings.ts',
+      tracker: './src/lib/browser-agnostic-tracker.ts',
     },
     output: {
       path: path.resolve(__dirname, 'extension'),
@@ -36,7 +40,7 @@ module.exports = (env, argv) => {
               loader: 'ts-loader',
               options: {
                 configFile: path.resolve(__dirname, 'tsconfig.json'),
-                transpileOnly: false,
+                transpileOnly: true,
               },
             },
           ],
@@ -45,7 +49,8 @@ module.exports = (env, argv) => {
       ],
     },
     optimization: {
-      minimize: false, // Disable minification for better debugging
+      usedExports: true,
+      minimize: argv.mode !== 'development',
     },
     devtool: isDev ? 'inline-source-map' : false,
     plugins: [
@@ -60,7 +65,7 @@ module.exports = (env, argv) => {
             to: path.resolve(__dirname, 'extension/dnr_rules.json'),
           },
           {
-            from: path.resolve(__dirname, 'src/manifest-minimal.json'),
+            from: path.resolve(__dirname, 'src/manifest.json'),
             to: path.resolve(__dirname, 'extension/manifest.json'),
           },
           {
@@ -68,11 +73,26 @@ module.exports = (env, argv) => {
             to: path.resolve(__dirname, 'extension/popup.html'),
           },
           {
+            from: path.resolve(__dirname, 'src/settings.html'),
+            to: path.resolve(__dirname, 'extension/settings.html'),
+          },
+          {
             from: path.resolve(__dirname, 'src/icons'),
             to: path.resolve(__dirname, 'extension/icons'),
           },
+          {
+            from: path.resolve(__dirname, 'src/styles'),
+            to: path.resolve(__dirname, 'extension/styles'),
+          },
         ],
       }),
+      ...(argv.mode === 'production' ? [
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          reportFilename: 'stats.html',
+          openAnalyzer: false,
+        }),
+      ] : []),
     ],
   };
 };

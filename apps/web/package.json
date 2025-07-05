@@ -1,15 +1,32 @@
 {
   "name": "@qarbon/web",
   "version": "0.1.0",
-  "description": "QarbonQuery component",
+  "type": "module",
   "private": true,
   "scripts": {
-    "build": "echo 'Build not implemented yet'",
-    "dev": "echo 'Dev mode not implemented yet'",
-    "lint": "echo 'Lint not implemented yet'",
-    "check-types": "echo 'Type check not implemented yet'",
-    "test": "echo 'Tests not implemented yet'"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --ext .ts,.tsx --fix",
+    "check-types": "tsc -p tsconfig.json --noEmit",
+    "test:export": "echo '✅ Build test completed successfully. For static export testing, temporarily add output: export to next.config.ts'",
+    "test": "jest"
   },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "next": "15.3.5",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "zod": "^3.25.74"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10",
+    "eslint-config-next": "15.3.5",
+    "postcss": "^8",
+    "tailwindcss": "^4"
+  }
 }

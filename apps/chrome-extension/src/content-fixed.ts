@@ -291,13 +291,13 @@ const PLATFORM_SELECTORS_FIXED = {
     messageContainer: '[data-is-author="human"]',
     promptInput: 'div[contenteditable="true"][role="textbox"], textarea',
     sendButton: 'button[aria-label*="Send"], button:has(svg[data-icon="send"])',
-    modelSelector: 'button:has-text("Claude"), .model-selector'
+    modelSelector: 'button[aria-label*="Claude"], button[class*="model-selector"], .model-selector'
   },
   gemini: {
     messageContainer: '.user-message, [data-role="user"]',
     promptInput: 'rich-textarea, textarea, [contenteditable="true"]',
     sendButton: 'button[aria-label*="Send"], .send-button',
-    modelSelector: '.model-selector, button:has-text("Gemini")'
+    modelSelector: '.model-selector, button[aria-label*="Gemini"], button[class*="model-selector"]'
   },
   bing: {
     messageContainer: '.user-message, [data-author="user"]',
@@ -308,7 +308,7 @@ const PLATFORM_SELECTORS_FIXED = {
   unknown: {
     messageContainer: '[role="user"], .user-message, [data-role="user"]',
     promptInput: 'textarea, input[type="text"], [contenteditable="true"]',
-    sendButton: 'button[type="submit"], .send-button, button:has-text("Send")',
+    sendButton: 'button[type="submit"], .send-button, button[aria-label*="Send"]',
     modelSelector: '.model-selector, .model-switcher'
   }
 };

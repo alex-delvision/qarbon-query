@@ -1,0 +1,9 @@
+{
+  "name": "qarbon-dev",
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && turbo run build --filter=@qarbon/web...",
+  "outputDirectory": ".next",
+  "installCommand": "cd ../.. && npm install",
+  "devCommand": "cd ../.. && turbo run dev --filter=@qarbon/web",
+  "rootDirectory": "apps/web"
+}

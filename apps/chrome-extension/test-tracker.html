@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QarbonQuery Browser-Agnostic Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .stats {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .test-button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #005a8a;
+        }
+        .capture-log {
+            background: #e8f5e8;
+            border: 1px solid #c3e6c3;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .status.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌱 QarbonQuery Browser-Agnostic Tracker Test</h1>
+        
+        <div id="status" class="status">
+            <p>⏳ Loading tracker...</p>
+        </div>
+        
+        <div id="stats" class="stats">
+            <h2>📊 Current Stats:</h2>
+            <p>Loading...</p>
+        </div>
+        
+        <div>
+            <h3>🧪 Test API Calls</h3>
+            <button class="test-button" onclick="testOpenAICall()">Test OpenAI Call</button>
+            <button class="test-button" onclick="testClaudeCall()">Test Claude Call</button>
+            <button class="test-button" onclick="testGeminiCall()">Test Gemini Call</button>
+            <button class="test-button" onclick="clearData()">Clear Data</button>
+        </div>
+        
+        <div>
+            <h3>📋 Capture Log</h3>
+            <div id="captures" class="capture-log">
+                <p>No captures yet...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="extension/tracker.js"></script>
+    <script>
+        let captureCount = 0;
+        const capturesDiv = document.getElementById('captures');
+        
+        // Check if tracker loaded successfully
+        setTimeout(() => {
+            const statusDiv = document.getElementById('status');
+            if (window.qarbonTracker) {
+                statusDiv.className = 'status success';
+                statusDiv.innerHTML = '<p>✅ QarbonQuery tracker loaded successfully!</p>';
+                updateStats();
+            } else {
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = '<p>❌ Failed to load tracker. Check console for errors.</p>';
+            }
+        }, 1000);
+        
+        // Update stats display
+        function updateStats() {
+            if (!window.qarbonTracker) return;
+            
+            const stats = window.qarbonTracker.getStats();
+            document.getElementById('stats').innerHTML = `
+                <h2>📊 Current Stats:</h2>
+                <p><strong>Total Captures:</strong> ${stats.totalCaptures}</p>
+                <p><strong>Today's Emissions:</strong> ${stats.todayEmissions.toFixed(4)} g CO₂e</p>
+                <p><strong>Week Emissions:</strong> ${stats.weekEmissions.toFixed(4)} g CO₂e</p>
+                <p><strong>Month Emissions:</strong> ${stats.monthEmissions.toFixed(4)} g CO₂e</p>
+                <p><strong>Last Updated:</strong> ${new Date().toLocaleTimeString()}</p>
+            `;
+        }
+        
+        // Update stats every second
+        setInterval(updateStats, 1000);
+        
+        // Listen for captures
+        window.addEventListener('qarbon-capture', (e) => {
+            captureCount++;
+            console.log('New capture:', e.detail);
+            
+            const captureDiv = document.createElement('div');
+            captureDiv.innerHTML = `
+                <strong>#${captureCount} - ${new Date().toLocaleTimeString()}</strong><br>
+                URL: ${e.detail.url}<br>
+                Method: ${e.detail.method}<br>
+                Emissions: ${e.detail.emissions.toFixed(4)} g CO₂e<br>
+                Response Size: ${e.detail.responseSize} bytes
+                <hr style="margin: 5px 0;">
+            `;
+            
+            if (capturesDiv.children.length === 1 && capturesDiv.textContent.includes('No captures')) {
+                capturesDiv.innerHTML = '';
+            }
+            
+            capturesDiv.insertBefore(captureDiv, capturesDiv.firstChild);
+            
+            // Keep only last 10 captures
+            while (capturesDiv.children.length > 10) {
+                capturesDiv.removeChild(capturesDiv.lastChild);
+            }
+        });
+        
+        // Test functions to simulate API calls
+        function testOpenAICall() {
+            fetch('https://api.openai.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer test-key'
+                },
+                body: JSON.stringify({
+                    model: 'gpt-3.5-turbo',
+                    messages: [{ role: 'user', content: 'Test message' }]
+                })
+            }).catch(() => {
+                // Expected to fail due to CORS/auth, but tracker should capture it
+                console.log('OpenAI test call made (expected to fail)');
+            });
+        }
+        
+        function testClaudeCall() {
+            fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': 'test-key'
+                },
+                body: JSON.stringify({
+                    model: 'claude-3-sonnet-20240229',
+                    messages: [{ role: 'user', content: 'Test message' }]
+                })
+            }).catch(() => {
+                console.log('Claude test call made (expected to fail)');
+            });
+        }
+        
+        function testGeminiCall() {
+            fetch('https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: 'Test message' }] }]
+                })
+            }).catch(() => {
+                console.log('Gemini test call made (expected to fail)');
+            });
+        }
+        
+        function clearData() {
+            localStorage.removeItem('qarbon_agnostic_captures');
+            capturesDiv.innerHTML = '<p>No captures yet...</p>';
+            captureCount = 0;
+            setTimeout(updateStats, 100);
+        }
+        
+        // Add some helpful info
+        console.log('🌱 QarbonQuery Test Page');
+        console.log('📊 Use window.qarbonTracker.getStats() to get current stats');
+        console.log('🧪 Click the test buttons to simulate API calls');
+        console.log('🔍 Open developer tools to see network requests being intercepted');
+    </script>
+</body>
+</html>

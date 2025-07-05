@@ -4,16 +4,14 @@
 
 import 'jest-webextension-mock';
 import { parseTokens } from '../src/tokenExtractors';
-import { calculator } from '@qarbon/emissions';
+import { calculateAIEmissions } from 'qarbon-emissions/ai';
 
-// Mock the calculator import since it's external
-jest.mock('@qarbon/emissions', () => ({
-  calculator: {
-    calculateAIEmissions: jest.fn()
-  }
+// Mock the calculateAIEmissions function since it's external
+jest.mock('qarbon-emissions/ai', () => ({
+  calculateAIEmissions: jest.fn()
 }));
 
-const mockCalculator = calculator as jest.Mocked<typeof calculator>;
+const mockCalculateAIEmissions = calculateAIEmissions as jest.MockedFunction<typeof calculateAIEmissions>;
 
 describe('API Emissions Integration', () => {
   beforeEach(() => {
@@ -25,7 +23,7 @@ describe('API Emissions Integration', () => {
     chrome.storage.local.set.mockClear();
     
     // Setup default calculator mock
-    mockCalculator.calculateAIEmissions.mockReturnValue({
+    mockCalculateAIEmissions.mockReturnValue({
       id: 'ai_1234567890',
       timestamp: new Date().toISOString(),
       source: 'gpt-3.5_inference',
@@ -76,10 +74,10 @@ describe('API Emissions Integration', () => {
       const result = parseTokens(mockOpenAIResponse, 'openai');
       
       // Simulate emissions calculation
-      const emissions = mockCalculator.calculateAIEmissions(result.tokens.total, result.model);
+      const emissions = mockCalculateAIEmissions(result.tokens.total, result.model);
       
       // Verify calculator was called correctly
-      expect(mockCalculator.calculateAIEmissions).toHaveBeenCalledWith(87, 'gpt-3.5-turbo');
+      expect(mockCalculateAIEmissions).toHaveBeenCalledWith(87, 'gpt-3.5-turbo');
       
       // Simulate storing emissions
       const updatedEmissions = [...existingEmissions, emissions];
@@ -151,7 +149,7 @@ describe('API Emissions Integration', () => {
 
     it('should calculate emissions for Claude model', async () => {
       // Mock calculator to return Claude-specific emissions
-      mockCalculator.calculateAIEmissions.mockReturnValueOnce({
+      mockCalculateAIEmissions.mockReturnValueOnce({
         id: 'ai_claude_123',
         timestamp: new Date().toISOString(),
         source: 'claude-3_inference',
@@ -162,7 +160,7 @@ describe('API Emissions Integration', () => {
       });
 
       const result = parseTokens(mockAnthropicResponse, 'anthropic');
-      const emissions = mockCalculator.calculateAIEmissions(result.tokens.total, 'claude-3');
+      const emissions = mockCalculateAIEmissions(result.tokens.total, 'claude-3');
       
       expect(emissions.amount).toBe(4.2);
       expect(emissions.source).toBe('claude-3_inference');
@@ -244,7 +242,7 @@ describe('API Emissions Integration', () => {
       let cumulativeEmissions = 0;
 
       for (const call of apiCalls) {
-        mockCalculator.calculateAIEmissions.mockReturnValueOnce({
+        mockCalculateAIEmissions.mockReturnValueOnce({
           id: `ai_${Date.now()}`,
           timestamp: new Date().toISOString(),
           source: `${call.model}_inference`,
@@ -254,7 +252,7 @@ describe('API Emissions Integration', () => {
           confidence: { low: 0, high: 10 }
         });
 
-        const emission = mockCalculator.calculateAIEmissions(call.tokens, call.model);
+        const emission = mockCalculateAIEmissions(call.tokens, call.model);
         cumulativeEmissions += emission.amount;
         session.emissions.push(emission);
       }
@@ -304,7 +302,7 @@ describe('API Emissions Integration', () => {
       expect(result.tokens.total).toBe(0);
       
       // Calculator should handle zero tokens gracefully
-      const emissions = mockCalculator.calculateAIEmissions(0, 'gpt-3.5');
+      const emissions = mockCalculateAIEmissions(0, 'gpt-3.5');
       expect(emissions.amount).toBe(2.2); // Should use fallback query-based emission
     });
 
@@ -343,7 +341,7 @@ describe('API Emissions Integration', () => {
       }));
 
       const emissions = concurrentRequests.map(req => {
-        mockCalculator.calculateAIEmissions.mockReturnValueOnce({
+        mockCalculateAIEmissions.mockReturnValueOnce({
           id: `ai_${req.timestamp}`,
           timestamp: new Date(req.timestamp).toISOString(),
           source: 'gpt-3.5_inference',
@@ -353,11 +351,11 @@ describe('API Emissions Integration', () => {
           confidence: { low: 1.8, high: 2.6 }
         });
 
-        return mockCalculator.calculateAIEmissions(req.tokens, req.model);
+        return mockCalculateAIEmissions(req.tokens, req.model);
       });
 
       expect(emissions).toHaveLength(5);
-      expect(mockCalculator.calculateAIEmissions).toHaveBeenCalledTimes(5);
+      expect(mockCalculateAIEmissions).toHaveBeenCalledTimes(5);
     });
   });
 

@@ -1,0 +1,520 @@
+@import "tailwindcss";
+
+/* Global styles */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* Base styles */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Smooth scrolling for in-page navigation */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+  }
+}
+
+/* Component Styles using @apply */
+
+/* Button Component */
+.btn-base {
+  @apply inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm;
+}
+
+.btn-secondary {
+  @apply bg-white text-gray-900 border border-gray-300 hover:bg-gray-50 focus:ring-emerald-500 shadow-sm;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-sm;
+}
+
+.btn-md {
+  @apply px-4 py-2 text-base;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-lg;
+}
+
+.btn-disabled {
+  @apply opacity-50 cursor-not-allowed hover:bg-current;
+}
+
+/* Section Component */
+.section-base {
+  @apply w-full mx-auto;
+}
+
+.section-default {
+  @apply max-w-6xl;
+}
+
+.section-narrow {
+  @apply max-w-4xl;
+}
+
+.section-wide {
+  @apply max-w-7xl;
+}
+
+.section-full {
+  @apply max-w-none;
+}
+
+.section-padding-none {
+  @apply p-0;
+}
+
+.section-padding-sm {
+  @apply px-4 py-6 sm:px-6 sm:py-8;
+}
+
+.section-padding-md {
+  @apply px-4 py-8 sm:px-6 sm:py-12 lg:px-8 lg:py-16;
+}
+
+.section-padding-lg {
+  @apply px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20;
+}
+
+.section-padding-xl {
+  @apply px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-24;
+}
+
+/* Statistic Component */
+.statistic-base {
+  @apply text-center;
+}
+
+.statistic-default {
+  @apply space-y-1;
+}
+
+.statistic-large {
+  @apply space-y-2;
+}
+
+.statistic-compact {
+  @apply space-y-0.5;
+}
+
+.statistic-value {
+  @apply font-bold leading-tight;
+}
+
+.statistic-value-default {
+  @apply text-gray-900;
+}
+
+.statistic-value-emerald {
+  @apply text-emerald-600;
+}
+
+.statistic-value-blue {
+  @apply text-blue-600;
+}
+
+.statistic-value-orange {
+  @apply text-orange-600;
+}
+
+.statistic-value-red {
+  @apply text-red-600;
+}
+
+.statistic-default .statistic-value {
+  @apply text-3xl sm:text-4xl;
+}
+
+.statistic-large .statistic-value {
+  @apply text-4xl sm:text-5xl lg:text-6xl;
+}
+
+.statistic-compact .statistic-value {
+  @apply text-xl sm:text-2xl;
+}
+
+.statistic-label {
+  @apply font-medium text-gray-600;
+}
+
+.statistic-default .statistic-label {
+  @apply text-sm sm:text-base;
+}
+
+.statistic-large .statistic-label {
+  @apply text-base sm:text-lg;
+}
+
+.statistic-compact .statistic-label {
+  @apply text-xs sm:text-sm;
+}
+
+.statistic-description {
+  @apply text-xs text-gray-500;
+}
+
+.statistic-large .statistic-description {
+  @apply text-sm;
+}
+
+/* LiveCounter Component */
+.live-counter-base {
+  @apply text-center relative;
+}
+
+.live-counter-default {
+  @apply space-y-1;
+}
+
+.live-counter-large {
+  @apply space-y-2;
+}
+
+.live-counter-compact {
+  @apply space-y-0.5;
+}
+
+.live-counter-value {
+  @apply font-bold leading-tight transition-all duration-500 ease-out;
+}
+
+.live-counter-animating .live-counter-value {
+  @apply scale-105;
+}
+
+.live-counter-value-default {
+  @apply text-gray-900;
+}
+
+.live-counter-value-emerald {
+  @apply text-emerald-600;
+}
+
+.live-counter-value-blue {
+  @apply text-blue-600;
+}
+
+.live-counter-value-orange {
+  @apply text-orange-600;
+}
+
+.live-counter-value-red {
+  @apply text-red-600;
+}
+
+.live-counter-default .live-counter-value {
+  @apply text-3xl sm:text-4xl;
+}
+
+.live-counter-large .live-counter-value {
+  @apply text-4xl sm:text-5xl lg:text-6xl;
+}
+
+.live-counter-compact .live-counter-value {
+  @apply text-xl sm:text-2xl;
+}
+
+.live-counter-label {
+  @apply font-medium text-gray-600 flex items-center justify-center gap-2;
+}
+
+.live-counter-default .live-counter-label {
+  @apply text-sm sm:text-base;
+}
+
+.live-counter-large .live-counter-label {
+  @apply text-base sm:text-lg;
+}
+
+.live-counter-compact .live-counter-label {
+  @apply text-xs sm:text-sm;
+}
+
+.live-counter-indicator {
+  @apply text-emerald-500 animate-pulse;
+}
+
+.live-counter-description {
+  @apply text-xs text-gray-500;
+}
+
+.live-counter-large .live-counter-description {
+  @apply text-sm;
+}
+
+/* TestimonialCard Component */
+.testimonial-card-base {
+  @apply bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+}
+
+.testimonial-card-default {
+  @apply p-6;
+}
+
+.testimonial-card-compact {
+  @apply p-4;
+}
+
+.testimonial-card-featured {
+  @apply p-8 shadow-lg border-2 border-emerald-100 bg-gradient-to-br from-white to-emerald-50;
+}
+
+.testimonial-quote-icon {
+  @apply mb-4 flex justify-center;
+}
+
+.testimonial-content {
+  @apply mb-6;
+}
+
+.testimonial-card-compact .testimonial-content {
+  @apply mb-4;
+}
+
+.testimonial-quote {
+  @apply text-gray-700 leading-relaxed;
+}
+
+.testimonial-card-default .testimonial-quote {
+  @apply text-base;
+}
+
+.testimonial-card-compact .testimonial-quote {
+  @apply text-sm;
+}
+
+.testimonial-card-featured .testimonial-quote {
+  @apply text-lg font-medium text-gray-800;
+}
+
+.testimonial-quote-mark {
+  @apply text-emerald-500 font-bold text-xl;
+}
+
+.testimonial-author {
+  @apply flex items-center gap-3;
+}
+
+.testimonial-card-compact .testimonial-author {
+  @apply gap-2;
+}
+
+.testimonial-card-featured .testimonial-author {
+  @apply gap-4;
+}
+
+.testimonial-avatar {
+  @apply flex-shrink-0;
+}
+
+.testimonial-avatar-image {
+  @apply rounded-full object-cover ring-2 ring-gray-100;
+}
+
+.testimonial-card-featured .testimonial-avatar-image {
+  @apply ring-emerald-200;
+}
+
+.testimonial-author-info {
+  @apply min-w-0 flex-1;
+}
+
+.testimonial-author-name {
+  @apply font-semibold text-gray-900;
+}
+
+.testimonial-card-default .testimonial-author-name {
+  @apply text-sm;
+}
+
+.testimonial-card-compact .testimonial-author-name {
+  @apply text-xs;
+}
+
+.testimonial-card-featured .testimonial-author-name {
+  @apply text-base;
+}
+
+.testimonial-author-title {
+  @apply text-gray-600;
+}
+
+.testimonial-card-default .testimonial-author-title {
+  @apply text-xs;
+}
+
+.testimonial-card-compact .testimonial-author-title {
+  @apply text-xs;
+}
+
+.testimonial-card-featured .testimonial-author-title {
+  @apply text-sm;
+}
+
+/* Dark mode support for TestimonialCard */
+@media (prefers-color-scheme: dark) {
+  .testimonial-card-base {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .testimonial-card-featured {
+    @apply from-gray-800 to-gray-700 border-emerald-800;
+  }
+
+  .testimonial-quote {
+    @apply text-gray-300;
+  }
+
+  .testimonial-card-featured .testimonial-quote {
+    @apply text-gray-200;
+  }
+
+  .testimonial-author-name {
+    @apply text-gray-100;
+  }
+
+  .testimonial-author-title {
+    @apply text-gray-400;
+  }
+
+  .testimonial-avatar-image {
+    @apply ring-gray-600;
+  }
+
+  .testimonial-card-featured .testimonial-avatar-image {
+    @apply ring-emerald-700;
+  }
+}
+
+/* CallToAction Component */
+.cta-sticky {
+  @apply sticky bottom-0 z-50;
+}
+
+.cta-gradient {
+  @apply bg-gradient-to-r from-emerald-600 via-green-600 to-teal-600 shadow-lg border-t border-emerald-500/30;
+}
+
+.cta-code-block {
+  @apply bg-gray-900 rounded-lg p-3 flex items-center space-x-3 w-full max-w-xs;
+}
+
+.cta-code-text {
+  @apply text-green-400 font-mono text-sm flex-1 truncate;
+}
+
+.cta-copy-btn {
+  @apply text-gray-400 hover:text-white transition-colors duration-200 flex-shrink-0;
+}
+
+.cta-copy-btn:hover {
+  @apply transform scale-110;
+}
+
+.cta-form-input {
+  @apply w-full px-4 py-2 text-gray-900 placeholder-gray-500 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent;
+}
+
+.cta-honeypot {
+  @apply absolute left-[-9999px] opacity-0 pointer-events-none;
+}
+
+/* Ensure body has enough padding at bottom for sticky CTA */
+body {
+  @apply pb-20;
+}
+
+/* Mobile responsive adjustments for CTA */
+@media (max-width: 768px) {
+  .cta-gradient {
+    @apply py-3;
+  }
+  
+  .cta-code-block {
+    @apply max-w-full;
+  }
+}
+
+/* Animation for copy success */
+@keyframes copy-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.copy-success {
+  animation: copy-success 0.3s ease-in-out;
+}

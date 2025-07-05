@@ -1,0 +1,389 @@
+// QarbonQuery Popup SCSS Variables and Styles
+
+// Color Variables
+$primary-gradient-start: #667eea;
+$primary-gradient-end: #764ba2;
+$text-color-primary: #ffffff;
+$text-color-secondary: rgba(255, 255, 255, 0.8);
+$text-color-muted: rgba(255, 255, 255, 0.6);
+
+// Background Colors
+$bg-card: rgba(255, 255, 255, 0.1);
+$bg-card-hover: rgba(255, 255, 255, 0.15);
+$bg-button: rgba(255, 255, 255, 0.2);
+$bg-button-hover: rgba(255, 255, 255, 0.3);
+$bg-button-primary: rgba(255, 255, 255, 0.25);
+$bg-tab-active: rgba(255, 255, 255, 0.2);
+$bg-tab-inactive: rgba(255, 255, 255, 0.1);
+
+// Emission Level Colors
+$emission-low: #4ade80;
+$emission-medium: #fbbf24;
+$emission-high: #f97316;
+$emission-very-high: #ef4444;
+
+// Emission Level Backgrounds
+$emission-low-bg: rgba(74, 222, 128, 0.15);
+$emission-medium-bg: rgba(251, 191, 36, 0.15);
+$emission-high-bg: rgba(249, 115, 22, 0.15);
+$emission-very-high-bg: rgba(239, 68, 68, 0.15);
+
+// Dimensions
+$popup-width: 320px;
+$popup-height: 400px;
+$border-radius: 12px;
+$border-radius-small: 8px;
+$border-radius-tiny: 4px;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+
+// Animation Durations
+$animation-fast: 0.2s;
+$animation-medium: 0.3s;
+$animation-slow: 0.5s;
+$animation-pulse: 2s;
+$animation-blink: 1s;
+
+// Font Sizes
+$font-size-xs: 10px;
+$font-size-sm: 12px;
+$font-size-md: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 24px;
+$font-size-xxl: 28px;
+$font-size-xxxl: 32px;
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Z-Index
+$z-index-tab-bar: 10;
+$z-index-modal: 100;
+
+// Transition Timing
+$transition-ease: ease;
+$transition-ease-in-out: ease-in-out;
+
+// Base Styles
+body {
+  width: $popup-width;
+  height: $popup-height;
+  margin: 0;
+  padding: $spacing-lg;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, $primary-gradient-start 0%, $primary-gradient-end 100%);
+  color: $text-color-primary;
+  overflow: hidden;
+}
+
+// Layout Components
+.popup-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: $spacing-lg;
+}
+
+.header {
+  text-align: center;
+  flex-shrink: 0;
+
+  .logo {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-xs;
+  }
+
+  .tagline {
+    font-size: $font-size-sm;
+    opacity: 0.8;
+  }
+}
+
+.tab-bar {
+  display: flex;
+  background: $bg-card;
+  border-radius: $border-radius-small;
+  padding: $spacing-xs;
+  position: relative;
+  z-index: $z-index-tab-bar;
+  flex-shrink: 0;
+
+  .tab {
+    flex: 1;
+    padding: $spacing-sm $spacing-md;
+    text-align: center;
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    border-radius: $border-radius-tiny;
+    transition: all $animation-fast $transition-ease;
+    color: $text-color-secondary;
+
+    &.active {
+      background: $bg-tab-active;
+      color: $text-color-primary;
+      font-weight: $font-weight-semibold;
+    }
+
+    &:hover:not(.active) {
+      background: $bg-tab-inactive;
+      color: $text-color-primary;
+    }
+  }
+}
+
+.body-container {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+
+  .view {
+    display: none;
+    
+    &.active {
+      display: block;
+    }
+  }
+}
+
+.footer {
+  text-align: center;
+  font-size: $font-size-sm;
+  opacity: 0.6;
+  flex-shrink: 0;
+
+  &.real-time-active {
+    color: $emission-low;
+    opacity: 1;
+
+    &::before {
+      content: "🔴 ";
+      animation: blink $animation-blink infinite;
+    }
+  }
+}
+
+// Emissions Display
+.emissions-card {
+  background: $bg-card;
+  border-radius: $border-radius;
+  padding: $spacing-xl;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: all $animation-medium $transition-ease;
+
+  &.real-time {
+    border: 2px solid $bg-button;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+
+    &.low-emission {
+      background: $emission-low-bg;
+      border-color: $emission-low;
+    }
+
+    &.medium-emission {
+      background: $emission-medium-bg;
+      border-color: $emission-medium;
+    }
+
+    &.high-emission {
+      background: $emission-high-bg;
+      border-color: $emission-high;
+    }
+
+    &.very-high-emission {
+      background: $emission-very-high-bg;
+      border-color: $emission-very-high;
+    }
+  }
+
+  .emissions-total {
+    font-size: $font-size-xxxl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-sm;
+    transition: all $animation-medium $transition-ease;
+
+    &.real-time {
+      font-size: $font-size-xxl;
+    }
+
+    &.low-emission {
+      color: $emission-low;
+    }
+
+    &.medium-emission {
+      color: $emission-medium;
+    }
+
+    &.high-emission {
+      color: $emission-high;
+    }
+
+    &.very-high-emission {
+      color: $emission-very-high;
+    }
+  }
+
+  .emissions-label {
+    font-size: $font-size-md;
+    opacity: 0.8;
+  }
+}
+
+// Breakdown Section
+.breakdown-section {
+  margin-bottom: $spacing-lg;
+
+  .section-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-md;
+    opacity: 0.9;
+    display: flex;
+    align-items: center;
+  }
+
+  .category-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: $bg-card;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius-small;
+    font-size: $font-size-md;
+    transition: background $animation-fast $transition-ease;
+
+    &:hover {
+      background: $bg-card-hover;
+    }
+
+    .category-name {
+      text-transform: capitalize;
+      font-weight: $font-weight-medium;
+    }
+
+    .category-amount {
+      font-weight: $font-weight-semibold;
+    }
+  }
+}
+
+// Buttons
+.btn {
+  padding: 10px $spacing-lg;
+  border: none;
+  border-radius: $border-radius-small;
+  background: $bg-button;
+  color: $text-color-primary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: all $animation-fast $transition-ease;
+
+  &:hover {
+    background: $bg-button-hover;
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &.btn-primary {
+    background: $bg-button-primary;
+  }
+
+  &.btn-small {
+    font-size: 11px;
+    padding: 6px $spacing-sm;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+  
+  .btn {
+    flex: 1;
+  }
+}
+
+// Status Indicator
+.status-indicator {
+  display: inline-block;
+  width: $spacing-sm;
+  height: $spacing-sm;
+  border-radius: 50%;
+  background: $emission-low;
+  margin-right: $spacing-sm;
+}
+
+// Animations
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+  0%, 50% { 
+    opacity: 1; 
+  }
+  51%, 100% { 
+    opacity: 0.3; 
+  }
+}
+
+// Debug Section
+.debug-section {
+  margin-top: $spacing-sm;
+  
+  .debug-title {
+    font-size: $font-size-sm;
+    opacity: 0.7;
+  }
+
+  .debug-actions {
+    display: flex;
+    gap: $spacing-xs;
+  }
+
+  .debug-display {
+    font-size: $font-size-xs;
+    margin-top: $spacing-xs;
+    max-height: 80px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.2);
+    padding: $spacing-xs;
+    border-radius: $border-radius-tiny;
+    display: none;
+
+    &.visible {
+      display: block;
+    }
+  }
+}
