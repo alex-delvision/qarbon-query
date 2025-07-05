@@ -1,16 +1,20 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'export',
+  trailingSlash: true,
   images: {
-    // Enable image optimization for better performance on Vercel
-    unoptimized: false,
+    // Disable image optimization for static export
+    unoptimized: true,
     // Configure domains for external images if needed
     domains: [],
-    // Configure image formats for better compression
-    formats: ['image/webp', 'image/avif'],
-    // Configure image sizes for responsive images
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  // Configure for custom domain
+  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://qarbonquery.ai' : '',
+  basePath: '',
+  env: {
+    SITE_URL: 'https://qarbonquery.ai',
+    NEXT_PUBLIC_SITE_URL: 'https://qarbonquery.ai'
   },
   // Enable experimental features for better performance
   experimental: {
