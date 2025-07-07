@@ -1564,6 +1564,20 @@ chrome.runtime.onInstalled.addListener((details) => {
   } else if (details.reason === 'update') {
     logger.log('Extension updated to version:', extensionConfig.version);
   }
+  
+  // Inject content script into any existing AI tabs on install/update
+  chrome.tabs.query({}, tabs => {
+    tabs.forEach(tab => {
+      if (tab.url && ['claude.ai', 'chatgpt.com', 'chat.openai.com', 'gemini.google.com', 'bard.google.com'].some(site => tab.url.includes(site))) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content.js']
+        }).then(() => {
+          console.log(`Content script injected into existing tab: ${tab.url}`);
+        }).catch(() => {});
+      }
+    });
+  });
 });
 
 // Initialize storage when service worker starts
@@ -1730,6 +1744,25 @@ chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
     updateBadge();
   }
 });
+
+// Auto-inject content script on all AI sites
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete' && tab.url) {
+    const aiSites = ['claude.ai', 'chatgpt.com', 'chat.openai.com', 'gemini.google.com', 'bard.google.com'];
+    
+    if (aiSites.some(site => tab.url.includes(site))) {
+      chrome.scripting.executeScript({
+        target: { tabId },
+        files: ['content.js']
+      }).then(() => {
+        console.log(`Content script injected into ${tab.url}`);
+      }).catch(err => {
+        console.error('Failed to inject content script:', err);
+      });
+    }
+  }
+});
+
 
 // Initialize badge on startup
 updateBadge();

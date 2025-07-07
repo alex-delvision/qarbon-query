@@ -9,7 +9,7 @@ module.exports = (env, argv) => {
     mode: argv.mode || 'production',
     target: ['web', 'es2020'],
     entry: {
-      background: './src/background-clean.ts',
+      background: './src/background.ts',
       content: './src/content-sse.ts',
       popup: './src/popup-hybrid.ts',
       settings: './src/settings.ts',
