@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QarbonQuery Carbon Tracker</title>
+    <link rel="stylesheet" href="styles/popup.css">
+</head>
+<body>
+    <div class="popup-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">🌱 QarbonQuery</div>
+            <div class="tagline">Carbon Footprint Tracker</div>
+        </div>
+        
+        <!-- Tab Bar -->
+        <div class="tab-bar" id="qarbon-tabs">
+            <div class="tab active" data-view="today">Today</div>
+            <div class="tab" data-view="week">Week</div>
+            <div class="tab" data-view="month">Month</div>
+        </div>
+        
+        <!-- Body Container -->
+        <div class="body-container">
+            <!-- Today View -->
+            <div class="view active" id="today-view">
+                <div class="emissions-card">
+                    <div class="emissions-total" id="emissions-total">0.00 g CO₂e</div>
+                    <div class="emissions-label">today</div>
+                </div>
+                
+                <div class="trend-chart-section" id="qarbon-chart">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        14-Day Trend
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trend-chart" width="320" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="breakdown-section">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        Breakdown
+                    </div>
+                    <div class="category-breakdown" id="category-breakdown">
+                        <!-- Categories will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn" id="refresh-btn">Refresh</button>
+                    <button class="btn btn-primary" id="settings-btn" data-tooltip="settings">Settings</button>
+                </div>
+                
+                <!-- Debug section for storage testing -->
+                <div class="debug-section">
+                    <div class="debug-title">Debug Storage</div>
+                    <div class="debug-actions">
+                        <button class="btn btn-small" id="debug-storage-btn">View Storage</button>
+                        <button class="btn btn-small" id="clear-storage-btn">Clear Data</button>
+                    </div>
+                    <div id="storage-debug" class="debug-display"></div>
+                </div>
+            </div>
+            
+            <!-- Week View -->
+            <div class="view" id="week-view">
+                <div class="emissions-card">
+                    <div class="emissions-total" id="emissions-total-week">0.00 g CO₂e</div>
+                    <div class="emissions-label">this week</div>
+                </div>
+                
+                <div class="trend-chart-section">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        7-Day Trend
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trend-chart-week" width="320" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="breakdown-section">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        Weekly Breakdown
+                    </div>
+                    <div class="category-breakdown" id="category-breakdown-week">
+                        <!-- Weekly categories will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn" id="refresh-week-btn">Refresh</button>
+                    <button class="btn btn-primary" id="export-week-btn">Export</button>
+                </div>
+            </div>
+            
+            <!-- Month View -->
+            <div class="view" id="month-view">
+                <div class="emissions-card">
+                    <div class="emissions-total" id="emissions-total-month">0.00 g CO₂e</div>
+                    <div class="emissions-label">this month</div>
+                </div>
+                
+                <div class="trend-chart-section">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        30-Day Trend
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="trend-chart-month" width="320" height="100"></canvas>
+                    </div>
+                </div>
+                
+                <div class="breakdown-section">
+                    <div class="section-title">
+                        <span class="status-indicator"></span>
+                        Monthly Breakdown
+                    </div>
+                    <div class="category-breakdown" id="category-breakdown-month">
+                        <!-- Monthly categories will be populated by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <button class="btn" id="refresh-month-btn">Refresh</button>
+                    <button class="btn btn-primary" id="export-month-btn">Export</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer" id="footer-status">
+            Real-time tracking active
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

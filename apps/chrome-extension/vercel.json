@@ -1,0 +1,16 @@
+{
+  "name": "qarbon-query-baseline-v2",
+  "version": 2,
+  "builds": [
+    {
+      "src": "extension/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/extension/$1"
+    }
+  ]
+}
