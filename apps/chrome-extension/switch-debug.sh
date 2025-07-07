@@ -3,9 +3,13 @@ echo "🔍 QarbonQuery Debug Mode Switcher"
 echo ""
 
 case "$1" in
+  "simple")
+    cp extension/content-v2.3.2-simple.js extension/content.js
+    echo "✅ Switched to Simple v2.3.2 (request-time Perplexity tracking) ⭐"
+    ;;
   "final")
     cp extension/content-v2.3.1-final.js extension/content.js
-    echo "✅ Switched to Final v2.3.1 (proper Perplexity SSE handling)"
+    echo "✅ Switched to Final v2.3.1 (complex SSE handling)"
     ;;
   "perplexity")
     cp extension/content-debug-perplexity.js extension/content.js
@@ -23,29 +27,30 @@ case "$1" in
     echo "📄 Current content.js:"
     head -1 extension/content.js
     echo ""
-    echo "📋 Available scripts:"
-    ls -1 extension/content*.js | grep -E "(debug|final|backup)"
+    echo "📋 Available versions:"
+    ls -1 extension/content*.js | grep -E "(simple|final|debug|backup)"
     ;;
   "production")
-    if [ -f extension/content-v2.3.1-final.js ]; then
+    if [ -f extension/content-v2.3.2-simple.js ]; then
+      cp extension/content-v2.3.2-simple.js extension/content.js
+      echo "✅ Switched to Production mode (v2.3.2 Simple - RECOMMENDED)"
+    elif [ -f extension/content-v2.3.1-final.js ]; then
       cp extension/content-v2.3.1-final.js extension/content.js
       echo "✅ Switched to Production mode (v2.3.1 Final)"
-    elif [ -f extension/content-backup.js ]; then
-      cp extension/content-backup.js extension/content.js
-      echo "✅ Switched to Production mode (v2.3 backup)"
     else
       echo "❌ No production version found."
     fi
     ;;
   *)
-    echo "Usage: ./switch-debug.sh [final|perplexity|enhanced|websocket|current|production]"
+    echo "Usage: ./switch-debug.sh [simple|final|perplexity|enhanced|websocket|current|production]"
     echo ""
     echo "Available modes:"
-    echo "  final      - v2.3.1 Final with proper Perplexity SSE handling ⭐"
-    echo "  perplexity - Log only Perplexity requests (safe)"
-    echo "  enhanced   - Log all network activity on Perplexity"
-    echo "  websocket  - Log Fetch + WebSocket activity (comprehensive)"
-    echo "  current    - Show current active debug mode"
+    echo "  simple     - v2.3.2 Simple Perplexity tracking (RECOMMENDED) ⭐"
+    echo "  final      - v2.3.1 Complex SSE handling"
+    echo "  perplexity - Log only Perplexity requests (debug)"
+    echo "  enhanced   - Log all network activity (debug)"
+    echo "  websocket  - Log Fetch + WebSocket activity (debug)"
+    echo "  current    - Show current active version"
     echo "  production - Restore latest production version"
     ;;
 esac
