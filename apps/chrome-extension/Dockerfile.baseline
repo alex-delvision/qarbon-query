@@ -1,0 +1,10 @@
+FROM node:18-alpine
+LABEL version="2.0.0-baseline"
+LABEL description="QarbonQuery Working Baseline"
+
+WORKDIR /app
+COPY extension/ ./extension/
+COPY versions/working-v2-*/ ./baseline/
+
+RUN echo "Working baseline v2 preserved"
+CMD ["echo", "QarbonQuery baseline ready"]
