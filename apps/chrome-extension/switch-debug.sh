@@ -3,9 +3,21 @@ echo "🔍 QarbonQuery Debug Mode Switcher"
 echo ""
 
 case "$1" in
+  "all")
+    cp extension/content-v2.4-all-platforms.js extension/content.js
+    echo "✅ Switched to v2.4 All Platforms (including Perplexity estimation) ⭐"
+    ;;
+  "perplexity-test")
+    cp extension/content-perplexity-test.js extension/content.js
+    echo "✅ Switched to Perplexity Test (minimal fetch interception)"
+    ;;
+  "perplexity-ultra")
+    cp extension/content-perplexity-ultra-minimal.js extension/content.js
+    echo "✅ Switched to Ultra-Minimal Perplexity (DOM-based tracking)"
+    ;;
   "clean")
     cp extension/content-v2.3.3-clean.js extension/content.js
-    echo "✅ Switched to Clean v2.3.3 (3 platforms: ChatGPT, Claude, Gemini) ⭐"
+    echo "✅ Switched to Clean v2.3.3 (3 platforms: ChatGPT, Claude, Gemini)"
     ;;
   "simple")
     cp extension/content-v2.3.2-simple.js extension/content.js
@@ -32,31 +44,40 @@ case "$1" in
     head -1 extension/content.js
     echo ""
     echo "📋 Available versions:"
-    ls -1 extension/content*.js | grep -E "(clean|simple|final|debug|backup)"
+    ls -1 extension/content*.js | grep -E "(all|clean|simple|final|test|ultra|debug|backup)"
     ;;
   "production")
-    if [ -f extension/content-v2.3.3-clean.js ]; then
+    if [ -f extension/content-v2.4-all-platforms.js ]; then
+      cp extension/content-v2.4-all-platforms.js extension/content.js
+      echo "✅ Switched to Production mode (v2.4 All Platforms - LATEST)"
+    elif [ -f extension/content-v2.3.3-clean.js ]; then
       cp extension/content-v2.3.3-clean.js extension/content.js
-      echo "✅ Switched to Production mode (v2.3.3 Clean - MOST RELIABLE)"
-    elif [ -f extension/content-v2.3.2-simple.js ]; then
-      cp extension/content-v2.3.2-simple.js extension/content.js
-      echo "✅ Switched to Production mode (v2.3.2 Simple)"
+      echo "✅ Switched to Production mode (v2.3.3 Clean - STABLE)"
     else
       echo "❌ No production version found."
     fi
     ;;
   *)
-    echo "Usage: ./switch-debug.sh [clean|simple|final|perplexity|enhanced|websocket|current|production]"
+    echo "Usage: ./switch-debug.sh [MODE]"
     echo ""
-    echo "Available modes:"
-    echo "  clean      - v2.3.3 Clean: 3 platforms only (MOST RELIABLE) ⭐"
-    echo "  simple     - v2.3.2 Simple: 4 platforms with Perplexity estimation"
+    echo "🚀 Production Modes:"
+    echo "  all        - v2.4 All Platforms (ChatGPT, Claude, Gemini, Perplexity) ⭐"
+    echo "  clean      - v2.3.3 Clean: 3 platforms (MOST STABLE)"
+    echo "  simple     - v2.3.2 Simple: 4 platforms with estimation"
     echo "  final      - v2.3.1 Final: 4 platforms with complex SSE"
+    echo ""
+    echo "🧪 Perplexity Test Modes:"
+    echo "  perplexity-test  - Minimal fetch interception test"
+    echo "  perplexity-ultra - DOM-based tracking (no fetch modification)"
+    echo ""
+    echo "🔍 Debug Modes:"
     echo "  perplexity - Debug: Log only Perplexity requests"
     echo "  enhanced   - Debug: Log all network activity"
     echo "  websocket  - Debug: Log Fetch + WebSocket activity"
+    echo ""
+    echo "ℹ️  Utility:"
     echo "  current    - Show current active version"
-    echo "  production - Restore most reliable production version"
+    echo "  production - Restore latest production version"
     ;;
 esac
 
