@@ -8,18 +8,18 @@ export class BrowserAgnosticTracker {
     // OpenAI
     /api\.openai\.com\/v1\/chat\/completions/,
     /chat\.openai\.com\/backend-api\/conversation/,
-    
+
     // Anthropic/Claude
     /api\.anthropic\.com\/v1\/messages/,
     /claude\.ai\/api\/organizations\/.*\/chat_conversations\/.*\/completion/,
-    
+
     // Google
     /generativelanguage\.googleapis\.com\/v1.*\/models\/.*:generateContent/,
     /bard\.google\.com\/_\/BardChatUi\/data/,
     /gemini\.google\.com\/_\/BardChatUi\/data/,
-    
+
     // Others
-    /bedrock.*\.amazonaws\.com\/model\/.*\/invoke/
+    /bedrock.*\.amazonaws\.com\/model\/.*\/invoke/,
   ];
 
   private captures: any[] = [];
@@ -32,45 +32,48 @@ export class BrowserAgnosticTracker {
   private initialize(): void {
     // Intercept fetch
     this.interceptFetch();
-    
+
     // Intercept XHR
     this.interceptXHR();
-    
+
     // Load existing captures
     this.loadCaptures();
-    
+
     // Set up periodic sync
     setInterval(() => this.syncCaptures(), 30000);
   }
 
   private interceptFetch(): void {
     const originalFetch = window.fetch;
-    
+
     window.fetch = async (...args) => {
       const response = await originalFetch(...args);
-      
+
       try {
         const url = typeof args[0] === 'string' ? args[0] : args[0].url;
-        
+
         if (this.shouldCapture(url)) {
           const clonedResponse = response.clone();
-          
-          clonedResponse.text().then(body => {
-            this.captureAPICall({
-              url,
-              method: args[1]?.method || 'GET',
-              timestamp: Date.now(),
-              responseSize: body.length,
-              responseBody: this.sanitizeResponse(body)
+
+          clonedResponse
+            .text()
+            .then(body => {
+              this.captureAPICall({
+                url,
+                method: args[1]?.method || 'GET',
+                timestamp: Date.now(),
+                responseSize: body.length,
+                responseBody: this.sanitizeResponse(body),
+              });
+            })
+            .catch(err => {
+              console.warn('Failed to capture response:', err);
             });
-          }).catch(err => {
-            console.warn('Failed to capture response:', err);
-          });
         }
       } catch (error) {
         console.warn('Fetch intercept error:', error);
       }
-      
+
       return response;
     };
   }
@@ -79,32 +82,32 @@ export class BrowserAgnosticTracker {
     const XHR = XMLHttpRequest.prototype;
     const originalOpen = XHR.open;
     const originalSend = XHR.send;
-    
-    XHR.open = function(method: string, url: string, ...rest: any[]) {
+
+    XHR.open = function (method: string, url: string, ...rest: any[]) {
       (this as any)._qarbonUrl = url;
       (this as any)._qarbonMethod = method;
       return originalOpen.apply(this, [method, url, ...rest]);
     };
-    
-    XHR.send = function(body?: any) {
+
+    XHR.send = function (body?: any) {
       const url = (this as any)._qarbonUrl;
       const method = (this as any)._qarbonMethod;
       const tracker = (window as any).qarbonTracker;
-      
+
       if (url && tracker && tracker.shouldCapture(url)) {
-        this.addEventListener('load', function() {
+        this.addEventListener('load', function () {
           if (this.status >= 200 && this.status < 300) {
             tracker.captureAPICall({
               url,
               method,
               timestamp: Date.now(),
               responseSize: this.responseText.length,
-              responseBody: tracker.sanitizeResponse(this.responseText)
+              responseBody: tracker.sanitizeResponse(this.responseText),
             });
           }
         });
       }
-      
+
       return originalSend.apply(this, [body]);
     };
   }
@@ -116,16 +119,18 @@ export class BrowserAgnosticTracker {
   private captureAPICall(data: any): void {
     const capture = {
       ...data,
-      emissions: this.calculateEmissions(data)
+      emissions: this.calculateEmissions(data),
     };
-    
+
     this.captures.push(capture);
     this.saveCaptures();
-    
+
     // Emit event for real-time updates
-    window.dispatchEvent(new CustomEvent('qarbon-capture', {
-      detail: capture
-    }));
+    window.dispatchEvent(
+      new CustomEvent('qarbon-capture', {
+        detail: capture,
+      })
+    );
   }
 
   private calculateEmissions(data: any): number {
@@ -142,7 +147,7 @@ export class BrowserAgnosticTracker {
       return {
         model: parsed.model,
         usage: parsed.usage,
-        tokens: parsed.usage?.total_tokens
+        tokens: parsed.usage?.total_tokens,
       };
     } catch {
       return { responseLength: body.length };
@@ -171,7 +176,7 @@ export class BrowserAgnosticTracker {
   }
 
   private cleanupOldCaptures(): void {
-    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
     this.captures = this.captures.filter(c => c.timestamp > oneDayAgo);
     this.saveCaptures();
   }
@@ -188,11 +193,11 @@ export class BrowserAgnosticTracker {
   public getEmissions(timeframe: 'today' | 'week' | 'month' = 'today'): number {
     const now = Date.now();
     const filters: Record<string, number> = {
-      today: now - (24 * 60 * 60 * 1000),
-      week: now - (7 * 24 * 60 * 60 * 1000),
-      month: now - (30 * 24 * 60 * 60 * 1000)
+      today: now - 24 * 60 * 60 * 1000,
+      week: now - 7 * 24 * 60 * 60 * 1000,
+      month: now - 30 * 24 * 60 * 60 * 1000,
     };
-    
+
     return this.captures
       .filter(c => c.timestamp > filters[timeframe])
       .reduce((sum, c) => sum + (c.emissions || 0), 0);
@@ -203,7 +208,7 @@ export class BrowserAgnosticTracker {
       totalCaptures: this.captures.length,
       todayEmissions: this.getEmissions('today'),
       weekEmissions: this.getEmissions('week'),
-      monthEmissions: this.getEmissions('month')
+      monthEmissions: this.getEmissions('month'),
     };
   }
 }

@@ -48,7 +48,7 @@ export class WasmHelper {
       // Try to load the compiled WASM module
       // In a real implementation, this would load the actual WASM file
       const wasmModule = await this.createFallbackModule();
-      
+
       if (wasmModule) {
         this.module = wasmModule;
         this.isLoaded = true;
@@ -65,7 +65,7 @@ export class WasmHelper {
   private async createFallbackModule(): Promise<WasmModule | null> {
     // This is a fallback implementation
     // In production, you would compile and load actual Rust WASM module
-    
+
     const memory = new WebAssembly.Memory({ initial: 256 });
     const memoryView = new Float64Array(memory.buffer);
     let nextPtr = 0;
@@ -123,7 +123,7 @@ export class WasmHelper {
   ): Promise<WasmCalculationResult> {
     if (!this.isAvailable()) {
       await this.loadModule();
-      
+
       if (!this.isAvailable()) {
         return {
           results: new Float64Array(0),
@@ -160,7 +160,7 @@ export class WasmHelper {
     }
 
     const length = inputs.length;
-    
+
     // Allocate memory for inputs and results
     const valuesPtr = this.module.allocate(length * 8); // 8 bytes per Float64
     const factorsPtr = this.module.allocate(length * 8);
@@ -169,11 +169,14 @@ export class WasmHelper {
     try {
       // Get memory view
       const memoryView = new Float64Array(this.module.memory.buffer);
-      
+
       // Copy input data to WASM memory
       for (let i = 0; i < length; i++) {
         memoryView[valuesPtr + i] = inputs[i].value;
-        memoryView[factorsPtr + i] = this.getFactorForInput(inputs[i], category);
+        memoryView[factorsPtr + i] = this.getFactorForInput(
+          inputs[i],
+          category
+        );
       }
 
       // Call WASM function
@@ -209,37 +212,50 @@ export class WasmHelper {
   private getFactorForInput(input: EmissionInput, category: string): number {
     // This is a simplified factor lookup
     // In a real implementation, you would have more sophisticated factor resolution
-    
+
     switch (category) {
       case 'transport':
         switch (input.type) {
-          case 'car': return 0.21;
-          case 'train': return 0.041;
-          case 'plane': return 0.255;
-          case 'bus': return 0.089;
-          default: return 0.21;
+          case 'car':
+            return 0.21;
+          case 'train':
+            return 0.041;
+          case 'plane':
+            return 0.255;
+          case 'bus':
+            return 0.089;
+          default:
+            return 0.21;
         }
-      
+
       case 'energy':
         switch (input.type) {
-          case 'grid': return 0.5;
-          case 'renewable': return 0.05;
-          case 'fossil': return 0.85;
-          default: return 0.5;
+          case 'grid':
+            return 0.5;
+          case 'renewable':
+            return 0.05;
+          case 'fossil':
+            return 0.85;
+          default:
+            return 0.5;
         }
-      
+
       case 'digital':
         switch (input.type) {
-          case 'mobile': return 0.012;
-          case 'desktop': return 0.025;
-          case 'tablet': return 0.018;
-          default: return 0.02;
+          case 'mobile':
+            return 0.012;
+          case 'desktop':
+            return 0.025;
+          case 'tablet':
+            return 0.018;
+          default:
+            return 0.02;
         }
-      
+
       case 'ai':
         // AI factors are more complex and would need model-specific lookup
         return 0.002; // Default factor
-      
+
       default:
         return 1.0;
     }
@@ -255,7 +271,7 @@ export class WasmHelper {
     // 1. Have Rust source code for emission calculations
     // 2. Compile it to WASM using wasm-pack or similar tools
     // 3. Include the compiled WASM in your distribution
-    
+
     console.log('Rust WASM helper would be compiled here');
   }
 
@@ -266,8 +282,9 @@ export class WasmHelper {
     return {
       isLoaded: this.isLoaded,
       isAvailable: this.isAvailable(),
-      memoryPages: this.module?.memory.buffer.byteLength ? 
-        this.module.memory.buffer.byteLength / (64 * 1024) : 0,
+      memoryPages: this.module?.memory.buffer.byteLength
+        ? this.module.memory.buffer.byteLength / (64 * 1024)
+        : 0,
     };
   }
 }

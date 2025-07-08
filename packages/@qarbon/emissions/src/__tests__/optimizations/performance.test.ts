@@ -13,8 +13,8 @@ function generateTestData(size: number) {
     timestamp: new Date(Date.now() - Math.random() * 86400000).toISOString(),
     metadata: {
       user_id: `user_${Math.floor(i / 10)}`,
-      session_id: `session_${Math.floor(i / 5)}`
-    }
+      session_id: `session_${Math.floor(i / 5)}`,
+    },
   }));
 }
 
@@ -23,7 +23,7 @@ function calculateEmissionSimple(tokens: number, model: string): number {
   const factors = {
     'gpt-3.5': 0.0022,
     'gpt-4': 0.0085,
-    'claude-2': 0.0030
+    'claude-2': 0.003,
   };
   return tokens * (factors[model as keyof typeof factors] || 0.002);
 }
@@ -47,8 +47,10 @@ async function measurePerformance<T>(
   const totalTime = times.reduce((sum, time) => sum + time, 0);
   const avgTime = totalTime / iterations;
 
-  console.log(`${name}: ${avgTime.toFixed(2)}ms avg (${iterations} iterations)`);
-  
+  console.log(
+    `${name}: ${avgTime.toFixed(2)}ms avg (${iterations} iterations)`
+  );
+
   return { result: result!, avgTime, totalTime };
 }
 
@@ -87,10 +89,12 @@ describe('Performance Benchmarks', () => {
       const batchPerf = await measurePerformance(
         'Batch calculations',
         async () => {
-          return batchCalculator.calculateBatch(testData.map(item => ({
-            tokens: item.tokens,
-            model: item.model
-          })));
+          return batchCalculator.calculateBatch(
+            testData.map(item => ({
+              tokens: item.tokens,
+              model: item.model,
+            }))
+          );
         },
         iterations
       );
@@ -102,7 +106,7 @@ describe('Performance Benchmarks', () => {
       // Check for ≥2× speedup
       const speedupRatio = individualPerf.avgTime / batchPerf.avgTime;
       console.log(`Batch speedup: ${speedupRatio.toFixed(2)}×`);
-      
+
       expect(speedupRatio).toBeGreaterThanOrEqual(2.0);
     });
 
@@ -112,20 +116,22 @@ describe('Performance Benchmarks', () => {
 
       for (const size of largeBatchSizes) {
         const testData = generateTestData(size);
-        
+
         const perf = await measurePerformance(
           `Batch size ${size}`,
           async () => {
-            return batchCalculator.calculateBatch(testData.map(item => ({
-              tokens: item.tokens,
-              model: item.model
-            })));
+            return batchCalculator.calculateBatch(
+              testData.map(item => ({
+                tokens: item.tokens,
+                model: item.model,
+              }))
+            );
           }
         );
 
         const timePerItem = perf.avgTime / size;
         results.push({ size, timePerItem });
-        
+
         // Verify all items were processed
         expect(perf.result).toHaveLength(size);
       }
@@ -135,28 +141,30 @@ describe('Performance Benchmarks', () => {
       const smallBatchTime = results[0].timePerItem;
       const largeBatchTime = results[results.length - 1].timePerItem;
       const scalingRatio = largeBatchTime / smallBatchTime;
-      
+
       console.log(`Scaling ratio (large/small): ${scalingRatio.toFixed(2)}`);
       expect(scalingRatio).toBeLessThan(2.0); // Should not double per item time
     });
 
     it('should optimize memory usage for large batches', async () => {
       const testData = generateTestData(10000);
-      
+
       // Monitor memory usage during batch processing
       const memoryBefore = process.memoryUsage();
-      
-      const result = await batchCalculator.calculateBatch(testData.map(item => ({
-        tokens: item.tokens,
-        model: item.model
-      })));
-      
+
+      const result = await batchCalculator.calculateBatch(
+        testData.map(item => ({
+          tokens: item.tokens,
+          model: item.model,
+        }))
+      );
+
       const memoryAfter = process.memoryUsage();
       const memoryIncrease = memoryAfter.heapUsed - memoryBefore.heapUsed;
       const memoryPerItem = memoryIncrease / testData.length;
-      
+
       console.log(`Memory per item: ${memoryPerItem.toFixed(0)} bytes`);
-      
+
       // Memory usage should be reasonable (less than 1KB per item)
       expect(memoryPerItem).toBeLessThan(1024);
       expect(result).toHaveLength(testData.length);
@@ -194,7 +202,7 @@ describe('Performance Benchmarks', () => {
           if (!wasmHelper.isInitialized()) {
             await wasmHelper.initialize();
           }
-          
+
           return wasmHelper.calculateEmissionsBatch(
             testData.map(item => item.tokens),
             testData.map(item => 0.0022) // Simplified factor
@@ -210,7 +218,7 @@ describe('Performance Benchmarks', () => {
       // Check for ≥2× speedup
       const speedupRatio = jsPerf.avgTime / wasmPerf.avgTime;
       console.log(`WASM speedup: ${speedupRatio.toFixed(2)}×`);
-      
+
       expect(speedupRatio).toBeGreaterThanOrEqual(2.0);
     });
 
@@ -236,7 +244,7 @@ describe('Performance Benchmarks', () => {
       // Warm start should be significantly faster
       const warmupRatio = coldStartPerf.avgTime / warmStartPerf.avgTime;
       console.log(`WASM warm-up benefit: ${warmupRatio.toFixed(2)}×`);
-      
+
       expect(warmupRatio).toBeGreaterThan(5.0); // Should be much faster when warmed up
       expect(coldStartPerf.avgTime).toBeLessThan(1000); // Cold start should be reasonable (<1s)
     });
@@ -244,10 +252,12 @@ describe('Performance Benchmarks', () => {
     it('should fall back gracefully when WASM is unavailable', async () => {
       // Simulate WASM unavailability
       const wasmHelperBroken = new WasmHelper();
-      
+
       // Mock initialization failure
-      vi.spyOn(wasmHelperBroken, 'initialize').mockRejectedValue(new Error('WASM not supported'));
-      
+      vi.spyOn(wasmHelperBroken, 'initialize').mockRejectedValue(
+        new Error('WASM not supported')
+      );
+
       const fallbackPerf = await measurePerformance(
         'WASM fallback',
         async () => {
@@ -277,23 +287,23 @@ describe('Performance Benchmarks', () => {
         'Streaming processing',
         async () => {
           const results: number[] = [];
-          
+
           for (let i = 0; i < testData.length; i += chunkSize) {
             const chunk = testData.slice(i, i + chunkSize);
             const chunkStart = performance.now();
-            
+
             const chunkResults = await streamingCalculator.processChunk(
               chunk.map(item => ({
                 tokens: item.tokens,
-                model: item.model
+                model: item.model,
               }))
             );
-            
+
             const chunkEnd = performance.now();
             latencies.push(chunkEnd - chunkStart);
             results.push(...chunkResults);
           }
-          
+
           return results;
         }
       );
@@ -302,9 +312,10 @@ describe('Performance Benchmarks', () => {
       expect(streamPerf.result).toHaveLength(testData.length);
 
       // Check latency metrics
-      const avgLatency = latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
+      const avgLatency =
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length;
       const maxLatency = Math.max(...latencies);
-      
+
       console.log(`Average chunk latency: ${avgLatency.toFixed(2)}ms`);
       console.log(`Max chunk latency: ${maxLatency.toFixed(2)}ms`);
 
@@ -323,10 +334,10 @@ describe('Performance Benchmarks', () => {
         async () => {
           const processor = streamingCalculator.createProcessor({
             maxConcurrency: 3,
-            bufferSize: 100
+            bufferSize: 100,
           });
 
-          const processPromise = new Promise<void>((resolve) => {
+          const processPromise = new Promise<void>(resolve => {
             processor.on('result', (result: number) => {
               results.push(result);
               processedCount++;
@@ -340,7 +351,7 @@ describe('Performance Benchmarks', () => {
           for (const item of testData) {
             processor.push({
               tokens: item.tokens,
-              model: item.model
+              model: item.model,
             });
           }
 
@@ -350,7 +361,7 @@ describe('Performance Benchmarks', () => {
       );
 
       expect(backpressureTest.result).toHaveLength(testData.length);
-      
+
       // Should not exceed reasonable time even with backpressure
       expect(backpressureTest.avgTime).toBeLessThan(5000); // Less than 5 seconds
     });
@@ -362,43 +373,37 @@ describe('Performance Benchmarks', () => {
       const cacheKey = (tokens: number, model: string) => `${tokens}-${model}`;
 
       // First run (cache miss)
-      const cacheMissPerf = await measurePerformance(
-        'Cache miss',
-        async () => {
-          const results = [];
-          for (const item of testData) {
-            const key = cacheKey(item.tokens, item.model);
-            let result = cache.get(key);
-            
-            if (result === undefined) {
-              result = calculateEmissionSimple(item.tokens, item.model);
-              cache.set(key, result);
-            }
-            
-            results.push(result);
+      const cacheMissPerf = await measurePerformance('Cache miss', async () => {
+        const results = [];
+        for (const item of testData) {
+          const key = cacheKey(item.tokens, item.model);
+          let result = cache.get(key);
+
+          if (result === undefined) {
+            result = calculateEmissionSimple(item.tokens, item.model);
+            cache.set(key, result);
           }
-          return results;
+
+          results.push(result);
         }
-      );
+        return results;
+      });
 
       // Second run (cache hit)
-      const cacheHitPerf = await measurePerformance(
-        'Cache hit',
-        async () => {
-          const results = [];
-          for (const item of testData) {
-            const key = cacheKey(item.tokens, item.model);
-            const result = cache.get(key);
-            results.push(result!);
-          }
-          return results;
+      const cacheHitPerf = await measurePerformance('Cache hit', async () => {
+        const results = [];
+        for (const item of testData) {
+          const key = cacheKey(item.tokens, item.model);
+          const result = cache.get(key);
+          results.push(result!);
         }
-      );
+        return results;
+      });
 
       // Cache hits should be much faster
       const cacheSpeedup = cacheMissPerf.avgTime / cacheHitPerf.avgTime;
       console.log(`Cache speedup: ${cacheSpeedup.toFixed(2)}×`);
-      
+
       expect(cacheSpeedup).toBeGreaterThanOrEqual(10.0); // Should be at least 10× faster
       expect(cacheHitPerf.result).toEqual(cacheMissPerf.result);
     });
@@ -414,12 +419,12 @@ describe('Performance Benchmarks', () => {
           for (const item of testData) {
             const key = `${item.tokens}-${item.model}`;
             let result = smallCache.get(key);
-            
+
             if (result === undefined) {
               result = calculateEmissionSimple(item.tokens, item.model);
               smallCache.set(key, result);
             }
-            
+
             results.push(result);
           }
           return results;
@@ -456,13 +461,15 @@ describe('Performance Benchmarks', () => {
         async () => {
           const chunkSize = Math.ceil(testData.length / numCores);
           const chunks = [];
-          
+
           for (let i = 0; i < testData.length; i += chunkSize) {
             chunks.push(testData.slice(i, i + chunkSize));
           }
 
-          const promises = chunks.map(async (chunk) => {
-            return chunk.map(item => calculateEmissionSimple(item.tokens, item.model));
+          const promises = chunks.map(async chunk => {
+            return chunk.map(item =>
+              calculateEmissionSimple(item.tokens, item.model)
+            );
           });
 
           const results = await Promise.all(promises);
@@ -472,8 +479,10 @@ describe('Performance Benchmarks', () => {
 
       // Parallel should be faster (though may not scale linearly due to overhead)
       const parallelSpeedup = sequentialPerf.avgTime / parallelPerf.avgTime;
-      console.log(`Parallel speedup: ${parallelSpeedup.toFixed(2)}× (${numCores} cores)`);
-      
+      console.log(
+        `Parallel speedup: ${parallelSpeedup.toFixed(2)}× (${numCores} cores)`
+      );
+
       expect(parallelSpeedup).toBeGreaterThan(1.5); // Should show some improvement
       expect(parallelPerf.result).toHaveLength(testData.length);
     });
@@ -487,17 +496,17 @@ describe('Performance Benchmarks', () => {
       // Process large dataset in chunks to avoid memory issues
       const results = [];
       const chunkSize = 1000;
-      
+
       for (let i = 0; i < largeDataset.length; i += chunkSize) {
         const chunk = largeDataset.slice(i, i + chunkSize);
         const chunkResults = await batchCalculator.calculateBatch(
           chunk.map(item => ({
             tokens: item.tokens,
-            model: item.model
+            model: item.model,
           }))
         );
         results.push(...chunkResults);
-        
+
         // Force garbage collection if available
         if (global.gc) {
           global.gc();
@@ -506,9 +515,11 @@ describe('Performance Benchmarks', () => {
 
       const memoryAfter = process.memoryUsage();
       const memoryIncrease = memoryAfter.heapUsed - memoryBefore.heapUsed;
-      
-      console.log(`Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)} MB`);
-      
+
+      console.log(
+        `Memory increase: ${(memoryIncrease / 1024 / 1024).toFixed(2)} MB`
+      );
+
       expect(results).toHaveLength(largeDataset.length);
       // Memory increase should be reasonable (less than 100MB for 50k items)
       expect(memoryIncrease).toBeLessThan(100 * 1024 * 1024);

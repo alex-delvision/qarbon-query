@@ -73,22 +73,24 @@ document.documentElement.appendChild(script);
 script.remove();
 
 // Listen for messages from the injected script
-window.addEventListener('message', (event) => {
+window.addEventListener('message', event => {
   if (event.data.type === 'QARBON_TRACK') {
     const { platform, size } = event.data;
-    
+
     // Calculate emissions
     const divisor = platform === 'Claude' ? 3.5 : 4;
     const tokens = size / divisor;
     const emissions = (tokens / 1000) * 0.002;
-    
+
     // Store in localStorage
     const data = JSON.parse(localStorage.getItem('qarbon_emissions') || '{}');
     const today = new Date().toDateString();
     data[today] = (data[today] || 0) + emissions;
     localStorage.setItem('qarbon_emissions', JSON.stringify(data));
-    
-    console.log(`💚 ${platform}: ${emissions.toFixed(4)}g CO₂e (${tokens.toFixed(0)} tokens)`);
+
+    console.log(
+      `💚 ${platform}: ${emissions.toFixed(4)}g CO₂e (${tokens.toFixed(0)} tokens)`
+    );
     console.log(`📊 Total today: ${data[today].toFixed(4)}g`);
   }
 });

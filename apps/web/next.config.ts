@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   output: 'export',
@@ -10,11 +10,12 @@ const nextConfig: NextConfig = {
     domains: [],
   },
   // Configure for custom domain
-  assetPrefix: process.env.NODE_ENV === 'production' ? 'https://qarbonquery.ai' : '',
+  assetPrefix:
+    process.env.NODE_ENV === 'production' ? 'https://qarbonquery.ai' : '',
   basePath: '',
   env: {
     SITE_URL: 'https://qarbonquery.ai',
-    NEXT_PUBLIC_SITE_URL: 'https://qarbonquery.ai'
+    NEXT_PUBLIC_SITE_URL: 'https://qarbonquery.ai',
   },
   // Enable experimental features for better performance
   experimental: {

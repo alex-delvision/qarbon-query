@@ -27,20 +27,20 @@ const DEFAULT_SETTINGS: QarbonSettings = {
   thresholds: {
     low: 5,
     medium: 25,
-    high: 50
+    high: 50,
   },
   notifications: {
     realtimeNotifications: true,
-    highEmissionWarnings: true
+    highEmissionWarnings: true,
   },
   dataRetention: {
-    days: 90
+    days: 90,
   },
   privacy: {
-    pauseTracking: false
+    pauseTracking: false,
   },
   version: '1.0.0',
-  lastUpdated: new Date().toISOString()
+  lastUpdated: new Date().toISOString(),
 };
 
 // Settings storage management
@@ -52,7 +52,7 @@ class SettingsManager {
    */
   static async loadSettings(): Promise<QarbonSettings> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(this.STORAGE_KEY, (result) => {
+      chrome.storage.local.get(this.STORAGE_KEY, result => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
           return;
@@ -77,7 +77,7 @@ class SettingsManager {
     return new Promise((resolve, reject) => {
       const settingsToSave = {
         ...settings,
-        lastUpdated: new Date().toISOString()
+        lastUpdated: new Date().toISOString(),
       };
 
       chrome.storage.local.set({ [this.STORAGE_KEY]: settingsToSave }, () => {
@@ -106,17 +106,20 @@ class SettingsManager {
    */
   private static broadcastSettingsChange(settings: QarbonSettings): void {
     // Send message to background script
-    chrome.runtime.sendMessage({
-      type: 'SETTINGS_UPDATED',
-      data: settings
-    }).catch(() => {
-      // Ignore errors if background script isn't ready
-    });
+    chrome.runtime
+      .sendMessage({
+        type: 'SETTINGS_UPDATED',
+        data: settings,
+      })
+      .catch(() => {
+        // Ignore errors if background script isn't ready
+      });
 
     // Trigger storage change event
-    chrome.storage.onChanged.hasListeners() && chrome.storage.local.set({
-      qarbon_settings_timestamp: Date.now()
-    });
+    chrome.storage.onChanged.hasListeners() &&
+      chrome.storage.local.set({
+        qarbon_settings_timestamp: Date.now(),
+      });
   }
 
   /**
@@ -124,7 +127,7 @@ class SettingsManager {
    */
   static async exportAllData(): Promise<string> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(null, (result) => {
+      chrome.storage.local.get(null, result => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
           return;
@@ -135,7 +138,7 @@ class SettingsManager {
           emissions: {} as Record<string, any>,
           queries: result.qarbon_queries || {},
           exportDate: new Date().toISOString(),
-          version: '1.0.0'
+          version: '1.0.0',
         };
 
         // Extract all emission data
@@ -153,7 +156,9 @@ class SettingsManager {
   /**
    * Import data from JSON
    */
-  static async importData(jsonData: string): Promise<{ imported: number; errors: string[] }> {
+  static async importData(
+    jsonData: string
+  ): Promise<{ imported: number; errors: string[] }> {
     return new Promise((resolve, reject) => {
       try {
         const data = JSON.parse(jsonData);
@@ -167,7 +172,7 @@ class SettingsManager {
           itemsToImport[this.STORAGE_KEY] = {
             ...DEFAULT_SETTINGS,
             ...data.settings,
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           };
           importedCount++;
         }
@@ -196,9 +201,9 @@ class SettingsManager {
 
           resolve({ imported: importedCount, errors });
         });
-
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorMessage =
+          error instanceof Error ? error.message : 'Unknown error';
         reject(new Error(`Invalid JSON data: ${errorMessage}`));
       }
     });
@@ -209,14 +214,14 @@ class SettingsManager {
    */
   static async clearAllData(): Promise<number> {
     return new Promise((resolve, reject) => {
-      chrome.storage.local.get(null, (result) => {
+      chrome.storage.local.get(null, result => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
 
-        const keysToRemove = Object.keys(result).filter(key => 
-          key.startsWith('qarbon_') || key === this.STORAGE_KEY
+        const keysToRemove = Object.keys(result).filter(
+          key => key.startsWith('qarbon_') || key === this.STORAGE_KEY
         );
 
         if (keysToRemove.length === 0) {
@@ -254,13 +259,13 @@ class SettingsUIController {
     try {
       // Load current settings
       this.settings = await SettingsManager.loadSettings();
-      
+
       // Populate UI with current settings
       this.populateUI();
-      
+
       // Setup event listeners
       this.setupEventListeners();
-      
+
       this.showStatus('Settings loaded successfully', 'success');
     } catch (error) {
       console.error('Error initializing settings UI:', error);
@@ -278,14 +283,23 @@ class SettingsUIController {
     this.setInputValue('threshold-high', this.settings.thresholds.high);
 
     // Notifications
-    this.setCheckboxValue('realtime-notifications', this.settings.notifications.realtimeNotifications);
-    this.setCheckboxValue('high-emission-warnings', this.settings.notifications.highEmissionWarnings);
+    this.setCheckboxValue(
+      'realtime-notifications',
+      this.settings.notifications.realtimeNotifications
+    );
+    this.setCheckboxValue(
+      'high-emission-warnings',
+      this.settings.notifications.highEmissionWarnings
+    );
 
     // Data retention
     this.setSliderValue('retention-days', this.settings.dataRetention.days);
 
     // Privacy controls
-    this.setCheckboxValue('pause-tracking', this.settings.privacy.pauseTracking);
+    this.setCheckboxValue(
+      'pause-tracking',
+      this.settings.privacy.pauseTracking
+    );
   }
 
   /**
@@ -293,38 +307,38 @@ class SettingsUIController {
    */
   private setupEventListeners(): void {
     // Threshold inputs
-    this.addInputListener('threshold-low', (value) => {
+    this.addInputListener('threshold-low', value => {
       this.settings.thresholds.low = parseFloat(value);
       this.validateThresholds();
     });
 
-    this.addInputListener('threshold-medium', (value) => {
+    this.addInputListener('threshold-medium', value => {
       this.settings.thresholds.medium = parseFloat(value);
       this.validateThresholds();
     });
 
-    this.addInputListener('threshold-high', (value) => {
+    this.addInputListener('threshold-high', value => {
       this.settings.thresholds.high = parseFloat(value);
       this.validateThresholds();
     });
 
     // Notification toggles
-    this.addCheckboxListener('realtime-notifications', (checked) => {
+    this.addCheckboxListener('realtime-notifications', checked => {
       this.settings.notifications.realtimeNotifications = checked;
     });
 
-    this.addCheckboxListener('high-emission-warnings', (checked) => {
+    this.addCheckboxListener('high-emission-warnings', checked => {
       this.settings.notifications.highEmissionWarnings = checked;
     });
 
     // Data retention slider
-    this.addSliderListener('retention-days', (value) => {
+    this.addSliderListener('retention-days', value => {
       this.settings.dataRetention.days = parseInt(value);
       this.updateRetentionDisplay(parseInt(value));
     });
 
     // Privacy controls
-    this.addCheckboxListener('pause-tracking', (checked) => {
+    this.addCheckboxListener('pause-tracking', checked => {
       this.settings.privacy.pauseTracking = checked;
     });
 
@@ -336,9 +350,11 @@ class SettingsUIController {
     this.addButtonListener('clear-all-data-btn', () => this.clearAllData());
 
     // File import
-    const fileInput = document.getElementById('import-file-input') as HTMLInputElement;
+    const fileInput = document.getElementById(
+      'import-file-input'
+    ) as HTMLInputElement;
     if (fileInput) {
-      fileInput.addEventListener('change', (e) => this.handleFileImport(e));
+      fileInput.addEventListener('change', e => this.handleFileImport(e));
     }
   }
 
@@ -347,12 +363,12 @@ class SettingsUIController {
    */
   private validateThresholds(): void {
     const { low, medium, high } = this.settings.thresholds;
-    
+
     if (medium <= low) {
       this.settings.thresholds.medium = low + 1;
       this.setInputValue('threshold-medium', this.settings.thresholds.medium);
     }
-    
+
     if (high <= medium) {
       this.settings.thresholds.high = medium + 1;
       this.setInputValue('threshold-high', this.settings.thresholds.high);
@@ -404,7 +420,7 @@ class SettingsUIController {
     try {
       this.setButtonLoading('export-data-btn', true);
       const data = await SettingsManager.exportAllData();
-      
+
       const blob = new Blob([data], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -412,7 +428,7 @@ class SettingsUIController {
       a.download = `qarbon-data-export-${new Date().toISOString().split('T')[0]}.json`;
       a.click();
       URL.revokeObjectURL(url);
-      
+
       this.showStatus('Data exported successfully!', 'success');
     } catch (error) {
       console.error('Error exporting data:', error);
@@ -426,7 +442,9 @@ class SettingsUIController {
    * Trigger file import dialog
    */
   private triggerImport(): void {
-    const fileInput = document.getElementById('import-file-input') as HTMLInputElement;
+    const fileInput = document.getElementById(
+      'import-file-input'
+    ) as HTMLInputElement;
     if (fileInput) {
       fileInput.click();
     }
@@ -438,27 +456,28 @@ class SettingsUIController {
   private async handleFileImport(event: Event): Promise<void> {
     const target = event.target as HTMLInputElement;
     const file = target.files?.[0];
-    
+
     if (!file) return;
 
     try {
       this.setButtonLoading('import-data-btn', true);
       const text = await file.text();
       const result = await SettingsManager.importData(text);
-      
+
       // Reload settings from storage
       this.settings = await SettingsManager.loadSettings();
       this.populateUI();
-      
+
       let message = `Successfully imported ${result.imported} items`;
       if (result.errors.length > 0) {
         message += ` (${result.errors.length} errors)`;
       }
-      
+
       this.showStatus(message, 'success');
     } catch (error) {
       console.error('Error importing data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       this.showStatus(`Import failed: ${errorMessage}`, 'error');
     } finally {
       this.setButtonLoading('import-data-btn', false);
@@ -470,18 +489,22 @@ class SettingsUIController {
    * Clear all extension data
    */
   private async clearAllData(): Promise<void> {
-    if (!confirm('Clear ALL QarbonQuery data? This will permanently delete all settings, emission data, and cannot be undone.')) {
+    if (
+      !confirm(
+        'Clear ALL QarbonQuery data? This will permanently delete all settings, emission data, and cannot be undone.'
+      )
+    ) {
       return;
     }
 
     try {
       this.setButtonLoading('clear-all-data-btn', true);
       const deletedCount = await SettingsManager.clearAllData();
-      
+
       // Reset to defaults
       this.settings = { ...DEFAULT_SETTINGS };
       this.populateUI();
-      
+
       this.showStatus(`Cleared ${deletedCount} data entries`, 'success');
     } catch (error) {
       console.error('Error clearing data:', error);
@@ -521,28 +544,37 @@ class SettingsUIController {
     }
   }
 
-  private addInputListener(id: string, callback: (value: string) => void): void {
+  private addInputListener(
+    id: string,
+    callback: (value: string) => void
+  ): void {
     const element = document.getElementById(id) as HTMLInputElement;
     if (element) {
-      element.addEventListener('input', (e) => {
+      element.addEventListener('input', e => {
         callback((e.target as HTMLInputElement).value);
       });
     }
   }
 
-  private addCheckboxListener(id: string, callback: (checked: boolean) => void): void {
+  private addCheckboxListener(
+    id: string,
+    callback: (checked: boolean) => void
+  ): void {
     const element = document.getElementById(id) as HTMLInputElement;
     if (element) {
-      element.addEventListener('change', (e) => {
+      element.addEventListener('change', e => {
         callback((e.target as HTMLInputElement).checked);
       });
     }
   }
 
-  private addSliderListener(id: string, callback: (value: string) => void): void {
+  private addSliderListener(
+    id: string,
+    callback: (value: string) => void
+  ): void {
     const element = document.getElementById(id) as HTMLInputElement;
     if (element) {
-      element.addEventListener('input', (e) => {
+      element.addEventListener('input', e => {
         callback((e.target as HTMLInputElement).value);
       });
     }
@@ -566,11 +598,14 @@ class SettingsUIController {
     }
   }
 
-  private showStatus(message: string, type: 'success' | 'error' | 'info'): void {
+  private showStatus(
+    message: string,
+    type: 'success' | 'error' | 'info'
+  ): void {
     if (this.statusMessageElement) {
       this.statusMessageElement.textContent = message;
       this.statusMessageElement.className = `status-message ${type}`;
-      
+
       // Auto-hide after 3 seconds
       setTimeout(() => {
         if (this.statusMessageElement) {

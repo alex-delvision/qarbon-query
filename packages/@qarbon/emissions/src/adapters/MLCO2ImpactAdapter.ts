@@ -1,17 +1,17 @@
 /**
  * ML CO2 Impact Adapter
- * 
+ *
  * Handles data from ML CO2 Impact (https://mlco2.github.io/impact/), a platform for tracking
  * carbon emissions from machine learning experiments and model training.
- * 
+ *
  * @example
  * ```typescript
  * import { MLCO2ImpactAdapter } from './MLCO2ImpactAdapter';
- * 
+ *
  * const adapter = new MLCO2ImpactAdapter();
  * const result = adapter.normalize(mlco2Data);
  * ```
- * 
+ *
  * @example ML CO2 Impact JSON format:
  * ```json
  * {
@@ -63,7 +63,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface MLCO2ImpactData {
@@ -120,7 +126,7 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
       version: '1.0.0',
       description: 'Adapter for ML CO2 Impact emissions tracking data',
       supportedFormats: ['json'],
-      confidence: 0.90
+      confidence: 0.9,
     });
   }
 
@@ -187,21 +193,26 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
     }
 
     // Validate carbon intensity
-    if (input.location?.carbon_intensity && input.location.carbon_intensity < 0) {
+    if (
+      input.location?.carbon_intensity &&
+      input.location.carbon_intensity < 0
+    ) {
       warnings.push('Negative carbon intensity detected');
     }
 
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   normalize(input: MLCO2ImpactData): NormalizedData {
     const validation = this.validate(input);
     if (!validation.isValid) {
-      throw new Error(`Invalid ML CO2 Impact data: ${validation.errors?.join(', ')}`);
+      throw new Error(
+        `Invalid ML CO2 Impact data: ${validation.errors?.join(', ')}`
+      );
     }
 
     return {
@@ -209,75 +220,87 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
       timestamp: new Date(input.timestamp).toISOString(),
       source: 'mlco2impact',
       category: 'ml_training',
-      
+
       // Core emissions data
       emissions: {
         total: input.impact.carbon_emissions,
         unit: 'kg',
-        scope: 'scope2' // Electricity-based emissions
+        scope: 'scope2', // Electricity-based emissions
       },
-      
+
       // Energy consumption data
       energy: {
         total: input.impact.energy_consumption,
         unit: 'kWh',
-        mix: input.impact.energy_mix ? {
-          renewable: input.impact.energy_mix.renewable,
-          fossil: input.impact.energy_mix.fossil
-        } : undefined
+        mix: input.impact.energy_mix
+          ? {
+              renewable: input.impact.energy_mix.renewable,
+              fossil: input.impact.energy_mix.fossil,
+            }
+          : undefined,
       },
-      
+
       // ML-specific context
       ml_context: {
         experiment_id: input.experiment_id,
         model_name: input.model_name,
         duration: input.duration,
-        training: input.training ? {
-          epochs: input.training.epochs,
-          batch_size: input.training.batch_size,
-          learning_rate: input.training.learning_rate,
-          optimizer: input.training.optimizer
-        } : undefined,
-        dataset: input.dataset ? {
-          name: input.dataset.name,
-          size: input.dataset.size,
-          samples: input.dataset.samples
-        } : undefined
+        training: input.training
+          ? {
+              epochs: input.training.epochs,
+              batch_size: input.training.batch_size,
+              learning_rate: input.training.learning_rate,
+              optimizer: input.training.optimizer,
+            }
+          : undefined,
+        dataset: input.dataset
+          ? {
+              name: input.dataset.name,
+              size: input.dataset.size,
+              samples: input.dataset.samples,
+            }
+          : undefined,
       },
-      
+
       // Hardware specifications
       hardware: {
-        gpu: input.hardware.gpu ? {
-          model: input.hardware.gpu.model,
-          count: input.hardware.gpu.count,
-          memory: input.hardware.gpu.memory
-        } : undefined,
-        cpu: input.hardware.cpu ? {
-          model: input.hardware.cpu.model,
-          count: input.hardware.cpu.count
-        } : undefined
+        gpu: input.hardware.gpu
+          ? {
+              model: input.hardware.gpu.model,
+              count: input.hardware.gpu.count,
+              memory: input.hardware.gpu.memory,
+            }
+          : undefined,
+        cpu: input.hardware.cpu
+          ? {
+              model: input.hardware.cpu.model,
+              count: input.hardware.cpu.count,
+            }
+          : undefined,
       },
-      
+
       // Geographic and carbon intensity data
       location: {
         country: input.location.country,
         region: input.location.region,
-        carbon_intensity: input.location.carbon_intensity
+        carbon_intensity: input.location.carbon_intensity,
       },
-      
+
       // Software environment
-      software: input.software ? {
-        framework: input.software.framework,
-        version: input.software.version,
-        cuda_version: input.software.cuda_version
-      } : undefined,
-      
+      software: input.software
+        ? {
+            framework: input.software.framework,
+            version: input.software.version,
+            cuda_version: input.software.cuda_version,
+          }
+        : undefined,
+
       // Metadata
       metadata: {
         adapter: 'MLCO2ImpactAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.90
-      }
+        confidence: 0.9,
+      },
     };
   }
 
@@ -292,8 +315,10 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
         test: (data: any) => {
           // Check for ML CO2 Impact specific fields
           const mlco2Fields = ['experiment_id', 'model_name', 'impact'];
-          return mlco2Fields.every(field => data && typeof data === 'object' && field in data);
-        }
+          return mlco2Fields.every(
+            field => data && typeof data === 'object' && field in data
+          );
+        },
       },
       {
         weight: 0.3,
@@ -302,7 +327,7 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
           if (typeof data !== 'object' || data === null) return false;
           const mlFields = ['training', 'dataset', 'model_name'];
           return mlFields.some(field => field in data);
-        }
+        },
       },
       {
         weight: 0.2,
@@ -312,7 +337,7 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
           if (!data.impact || typeof data.impact !== 'object') return false;
           const impactFields = ['carbon_emissions', 'energy_consumption'];
           return impactFields.every(field => field in data.impact);
-        }
+        },
       },
       {
         weight: 0.1,
@@ -321,8 +346,8 @@ export class MLCO2ImpactAdapter extends BaseAdapter<MLCO2ImpactData> {
           if (typeof data !== 'object' || data === null) return false;
           if (!data.hardware || typeof data.hardware !== 'object') return false;
           return 'gpu' in data.hardware || 'cpu' in data.hardware;
-        }
-      }
+        },
+      },
     ];
   }
 

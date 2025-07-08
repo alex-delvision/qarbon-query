@@ -15,35 +15,36 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   useOptimizedLookups: true,
   useBatchCalculations: true,
   useWebAssembly: typeof WebAssembly !== 'undefined',
-  useWorkerThreads: typeof Worker !== 'undefined' && typeof window === 'undefined',
+  useWorkerThreads:
+    typeof Worker !== 'undefined' && typeof window === 'undefined',
   useStreamingCalculator: true,
   enablePerformanceMonitoring: process.env.NODE_ENV === 'development',
-  enableCaching: true
+  enableCaching: true,
 };
 
 export class FeatureFlagManager {
   private flags: FeatureFlags;
-  
+
   constructor(customFlags: Partial<FeatureFlags> = {}) {
     this.flags = { ...DEFAULT_FEATURE_FLAGS, ...customFlags };
   }
-  
+
   isEnabled(flag: keyof FeatureFlags): boolean {
     return this.flags[flag];
   }
-  
+
   enable(flag: keyof FeatureFlags): void {
     this.flags[flag] = true;
   }
-  
+
   disable(flag: keyof FeatureFlags): void {
     this.flags[flag] = false;
   }
-  
+
   getAll(): FeatureFlags {
     return { ...this.flags };
   }
-  
+
   reset(): void {
     this.flags = { ...DEFAULT_FEATURE_FLAGS };
   }

@@ -9,7 +9,7 @@ try {
 } catch (error) {
   // Fallback mock for development/demo purposes
   calculator = {
-    calculate: () => Promise.resolve({ data: { amount: Math.random() * 10 } })
+    calculate: () => Promise.resolve({ data: { amount: Math.random() * 10 } }),
   };
 }
 
@@ -65,9 +65,9 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
       case 'percentage':
         return `${val.toFixed(1)}%`;
       case 'currency':
-        return new Intl.NumberFormat('en-US', { 
-          style: 'currency', 
-          currency: 'USD' 
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
         }).format(val);
       case 'grams':
         if (val >= 1000000) {
@@ -90,17 +90,17 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
   const animateValue = (from: number, to: number) => {
     setIsAnimating(true);
     const startTime = Date.now();
-    
+
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / animationDuration, 1);
-      
+
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const interpolatedValue = from + (to - from) * easeOutQuart;
-      
+
       setDisplayValue(interpolatedValue);
-      
+
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
       } else {
@@ -108,7 +108,7 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
         setDisplayValue(to);
       }
     };
-    
+
     animate();
   };
 
@@ -116,15 +116,15 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
     const startCounter = () => {
       intervalRef.current = setInterval(() => {
         const emissionIncrement = mockCalculateEmissions();
-        
+
         setCurrentValue(prevValue => {
           const newValue = prevValue + emissionIncrement;
           animateValue(displayValue, newValue);
-          
+
           if (onUpdate) {
             onUpdate(newValue);
           }
-          
+
           return newValue;
         });
       }, interval);
@@ -155,8 +155,13 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
     <div
       className={`
         live-counter-base
-        ${variant === 'large' ? 'live-counter-large' : 
-          variant === 'compact' ? 'live-counter-compact' : 'live-counter-default'}
+        ${
+          variant === 'large'
+            ? 'live-counter-large'
+            : variant === 'compact'
+              ? 'live-counter-compact'
+              : 'live-counter-default'
+        }
         ${isAnimating ? 'live-counter-animating' : ''}
         ${className}
       `}
@@ -164,26 +169,30 @@ export const LiveCounter: React.FC<LiveCounterProps> = ({
       <div
         className={`
           live-counter-value
-          ${color === 'emerald' ? 'live-counter-value-emerald' :
-            color === 'blue' ? 'live-counter-value-blue' :
-            color === 'orange' ? 'live-counter-value-orange' :
-            color === 'red' ? 'live-counter-value-red' : 'live-counter-value-default'}
+          ${
+            color === 'emerald'
+              ? 'live-counter-value-emerald'
+              : color === 'blue'
+                ? 'live-counter-value-blue'
+                : color === 'orange'
+                  ? 'live-counter-value-orange'
+                  : color === 'red'
+                    ? 'live-counter-value-red'
+                    : 'live-counter-value-default'
+          }
         `}
       >
         {formatValue(displayValue)}
       </div>
-      <div className="live-counter-label">
+      <div className='live-counter-label'>
         {label}
-        <span className="live-counter-indicator">●</span>
+        <span className='live-counter-indicator'>●</span>
       </div>
       {description && (
-        <div className="live-counter-description">
-          {description}
-        </div>
+        <div className='live-counter-description'>{description}</div>
       )}
     </div>
   );
 };
-
 
 export default LiveCounter;

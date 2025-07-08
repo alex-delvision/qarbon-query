@@ -1,9 +1,9 @@
 /**
  * QarbonQuery Chrome 138+ API Compatibility Fix
- * 
+ *
  * Chrome 138+ introduced stricter Content Security Policies and changes to
  * extension API behavior. This file provides compatibility fixes for:
- * 
+ *
  * 1. Service Worker messaging patterns
  * 2. Content Script to Background communication
  * 3. Cross-context messaging with proper error handling
@@ -34,10 +34,10 @@ class Chrome138MessagingFix {
    * Chrome 138+ compatible message sending with enhanced error handling
    */
   static async sendMessage138(message, options = {}) {
-    const { 
-      timeout = this.CHROME_138_MESSAGE_TIMEOUT, 
+    const {
+      timeout = this.CHROME_138_MESSAGE_TIMEOUT,
       retries = this.CHROME_138_MAX_RETRIES,
-      usePortFallback = true 
+      usePortFallback = true,
     } = options;
 
     // First attempt: Standard runtime.sendMessage
@@ -51,33 +51,46 @@ class Chrome138MessagingFix {
           new Promise((resolve, reject) => {
             try {
               // Chrome 138+ requires explicit response handling
-              chrome.runtime.sendMessage(message, { includeTlsChannelId: false }, (response) => {
-                if (chrome.runtime.lastError) {
-                  // Handle Chrome 138+ specific errors
-                  const error = chrome.runtime.lastError.message;
-                  if (error.includes('Extension context invalidated') || 
-                      error.includes('Receiving end does not exist')) {
-                    reject(new Error('Chrome 138 context invalidated: ' + error));
+              chrome.runtime.sendMessage(
+                message,
+                { includeTlsChannelId: false },
+                response => {
+                  if (chrome.runtime.lastError) {
+                    // Handle Chrome 138+ specific errors
+                    const error = chrome.runtime.lastError.message;
+                    if (
+                      error.includes('Extension context invalidated') ||
+                      error.includes('Receiving end does not exist')
+                    ) {
+                      reject(
+                        new Error('Chrome 138 context invalidated: ' + error)
+                      );
+                    } else {
+                      reject(new Error(error));
+                    }
                   } else {
-                    reject(new Error(error));
+                    resolve(response);
                   }
-                } else {
-                  resolve(response);
                 }
-              });
+              );
             } catch (error) {
               reject(error);
             }
           }),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Chrome 138 message timeout')), timeout)
-          )
+          new Promise((_, reject) =>
+            setTimeout(
+              () => reject(new Error('Chrome 138 message timeout')),
+              timeout
+            )
+          ),
         ]);
 
         return result;
-
       } catch (error) {
-        console.warn(`Chrome 138 message attempt ${attempt + 1} failed:`, error);
+        console.warn(
+          `Chrome 138 message attempt ${attempt + 1} failed:`,
+          error
+        );
 
         if (attempt === retries) {
           // Final fallback: Try port-based communication for Chrome 138+
@@ -86,7 +99,9 @@ class Chrome138MessagingFix {
               return await this.sendMessageViaPort138(message);
             } catch (portError) {
               console.error('Chrome 138 port fallback also failed:', portError);
-              throw new Error(`All Chrome 138 messaging attempts failed. Last error: ${error.message}`);
+              throw new Error(
+                `All Chrome 138 messaging attempts failed. Last error: ${error.message}`
+              );
             }
           } else {
             throw error;
@@ -109,13 +124,13 @@ class Chrome138MessagingFix {
     return new Promise((resolve, reject) => {
       try {
         const port = chrome.runtime.connect({ name: 'qarbon-chrome138-port' });
-        
+
         const timeoutId = setTimeout(() => {
           port.disconnect();
           reject(new Error('Chrome 138 port message timeout'));
         }, this.CHROME_138_MESSAGE_TIMEOUT);
 
-        port.onMessage.addListener((response) => {
+        port.onMessage.addListener(response => {
           clearTimeout(timeoutId);
           port.disconnect();
           resolve(response);
@@ -124,7 +139,12 @@ class Chrome138MessagingFix {
         port.onDisconnect.addListener(() => {
           clearTimeout(timeoutId);
           if (chrome.runtime.lastError) {
-            reject(new Error('Chrome 138 port disconnected: ' + chrome.runtime.lastError.message));
+            reject(
+              new Error(
+                'Chrome 138 port disconnected: ' +
+                  chrome.runtime.lastError.message
+              )
+            );
           } else {
             reject(new Error('Chrome 138 port disconnected unexpectedly'));
           }
@@ -134,9 +154,8 @@ class Chrome138MessagingFix {
         port.postMessage({
           ...message,
           _chrome138Port: true,
-          _timestamp: Date.now()
+          _timestamp: Date.now(),
         });
-
       } catch (error) {
         reject(new Error('Chrome 138 port creation failed: ' + error.message));
       }
@@ -154,7 +173,7 @@ class Chrome138MessagingFix {
         }
 
         // Chrome 138+ storage with enhanced error handling
-        chrome.storage.local.get(keys, (result) => {
+        chrome.storage.local.get(keys, result => {
           if (chrome.runtime.lastError) {
             const error = chrome.runtime.lastError.message;
             if (error.includes('Extension context invalidated')) {
@@ -167,7 +186,9 @@ class Chrome138MessagingFix {
           }
         });
       } catch (error) {
-        reject(new Error('Chrome 138 storage operation failed: ' + error.message));
+        reject(
+          new Error('Chrome 138 storage operation failed: ' + error.message)
+        );
       }
     });
   }
@@ -198,8 +219,12 @@ class Chrome138MessagingFix {
    */
   static setupChrome138Keepalive() {
     // Prevent service worker from sleeping in Chrome 138+
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onConnect) {
-      chrome.runtime.onConnect.addListener((port) => {
+    if (
+      typeof chrome !== 'undefined' &&
+      chrome.runtime &&
+      chrome.runtime.onConnect
+    ) {
+      chrome.runtime.onConnect.addListener(port => {
         if (port.name === 'qarbon-chrome138-keepalive') {
           port.onDisconnect.addListener(() => {
             console.log('Chrome 138 keepalive port disconnected');
@@ -223,42 +248,50 @@ class Chrome138MessagingFix {
   /**
    * Chrome 138+ content script injection with enhanced CSP handling
    */
-  static async injectScriptChrome138(scriptUrl, targetElementSelector = 'head') {
+  static async injectScriptChrome138(
+    scriptUrl,
+    targetElementSelector = 'head'
+  ) {
     return new Promise((resolve, reject) => {
       try {
         // Create script element with Chrome 138+ CSP compliance
         const script = document.createElement('script');
-        
+
         // Chrome 138+ requires explicit CORS handling for extension resources
         script.src = chrome.runtime.getURL(scriptUrl);
         script.type = 'text/javascript';
         script.crossOrigin = 'anonymous';
-        
+
         // Chrome 138+ enhanced load handling
-        script.onload = function() {
+        script.onload = function () {
           console.log('Chrome 138 script injected successfully:', scriptUrl);
           this.remove();
           resolve();
         };
-        
-        script.onerror = function(error) {
+
+        script.onerror = function (error) {
           console.error('Chrome 138 script injection failed:', error);
           this.remove();
-          reject(new Error('Chrome 138 script injection failed for: ' + scriptUrl));
+          reject(
+            new Error('Chrome 138 script injection failed for: ' + scriptUrl)
+          );
         };
 
         // Chrome 138+ CSP-compliant injection
-        const targetElement = document.querySelector(targetElementSelector) || 
-                            document.head || 
-                            document.documentElement;
-        
+        const targetElement =
+          document.querySelector(targetElementSelector) ||
+          document.head ||
+          document.documentElement;
+
         if (!targetElement) {
-          reject(new Error('Chrome 138 target element not found for injection'));
+          reject(
+            new Error('Chrome 138 target element not found for injection')
+          );
           return;
         }
 
         targetElement.appendChild(script);
-        
+
         // Cleanup timeout for Chrome 138+
         setTimeout(() => {
           if (script.parentNode) {
@@ -266,9 +299,12 @@ class Chrome138MessagingFix {
             reject(new Error('Chrome 138 script injection timeout'));
           }
         }, 10000);
-
       } catch (error) {
-        reject(new Error('Chrome 138 script injection setup failed: ' + error.message));
+        reject(
+          new Error(
+            'Chrome 138 script injection setup failed: ' + error.message
+          )
+        );
       }
     });
   }
@@ -279,16 +315,16 @@ class Chrome138MessagingFix {
   if (typeof window !== 'undefined') {
     // Browser environment
     console.log('🔧 Chrome 138+ compatibility fixes loaded');
-    
+
     // Expose Chrome 138 fixes globally
     window.Chrome138MessagingFix = Chrome138MessagingFix;
-    
+
     // Auto-setup keepalive if in service worker context
     if (typeof importScripts === 'function') {
       Chrome138MessagingFix.setupChrome138Keepalive();
     }
   }
-  
+
   // Export for module environments
   if (typeof module !== 'undefined' && module.exports) {
     module.exports = { Chrome138MessagingFix, isChromeAPI138Compatible };
@@ -301,7 +337,7 @@ class Chrome138EventFix {
    * Chrome 138+ compatible event listeners with proper cleanup
    */
   static addEventListenerChrome138(target, eventType, handler, options = {}) {
-    const enhancedHandler = function(event) {
+    const enhancedHandler = function (event) {
       try {
         return handler.call(this, event);
       } catch (error) {
@@ -312,7 +348,7 @@ class Chrome138EventFix {
     target.addEventListener(eventType, enhancedHandler, {
       passive: true,
       once: false,
-      ...options
+      ...options,
     });
 
     // Return cleanup function for Chrome 138+
@@ -325,7 +361,7 @@ class Chrome138EventFix {
    * Chrome 138+ MutationObserver with enhanced error handling
    */
   static createMutationObserverChrome138(callback, options = {}) {
-    const enhancedCallback = function(mutations, observer) {
+    const enhancedCallback = function (mutations, observer) {
       try {
         return callback.call(this, mutations, observer);
       } catch (error) {

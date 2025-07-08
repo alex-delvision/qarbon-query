@@ -1,17 +1,17 @@
 /**
  * Green Algorithms Adapter
- * 
+ *
  * Handles data from Green Algorithms (http://www.green-algorithms.org/), a calculator
  * for estimating the carbon footprint of computational work.
- * 
+ *
  * @example
  * ```typescript
  * import { GreenAlgorithmsAdapter } from './GreenAlgorithmsAdapter';
- * 
+ *
  * const adapter = new GreenAlgorithmsAdapter();
  * const result = adapter.normalize(greenAlgorithmsData);
  * ```
- * 
+ *
  * @example Green Algorithms JSON format:
  * ```json
  * {
@@ -66,7 +66,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface GreenAlgorithmsData {
@@ -126,7 +132,7 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
       version: '1.0.0',
       description: 'Adapter for Green Algorithms carbon footprint calculations',
       supportedFormats: ['json'],
-      confidence: 0.88
+      confidence: 0.88,
     });
   }
 
@@ -148,7 +154,9 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
       errors.push('Missing required field: computational_work');
     } else {
       if (typeof input.computational_work.runtime_hours !== 'number') {
-        errors.push('Invalid or missing computational_work.runtime_hours field');
+        errors.push(
+          'Invalid or missing computational_work.runtime_hours field'
+        );
       }
       if (typeof input.computational_work.cores_used !== 'number') {
         errors.push('Invalid or missing computational_work.cores_used field');
@@ -184,7 +192,10 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
     if (input.energy_consumption && input.energy_consumption.total_kwh < 0) {
       warnings.push('Negative energy consumption detected');
     }
-    if (input.computational_work && input.computational_work.runtime_hours < 0) {
+    if (
+      input.computational_work &&
+      input.computational_work.runtime_hours < 0
+    ) {
       warnings.push('Negative runtime detected');
     }
 
@@ -217,14 +228,16 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   normalize(input: GreenAlgorithmsData): NormalizedData {
     const validation = this.validate(input);
     if (!validation.isValid) {
-      throw new Error(`Invalid Green Algorithms data: ${validation.errors?.join(', ')}`);
+      throw new Error(
+        `Invalid Green Algorithms data: ${validation.errors?.join(', ')}`
+      );
     }
 
     return {
@@ -232,18 +245,20 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
       timestamp: new Date(input.timestamp).toISOString(),
       source: 'green_algorithms',
       category: 'computation',
-      
+
       // Core emissions data
       emissions: {
         total: input.carbon_footprint.total_co2e_kg,
         unit: 'kg',
         scope: 'scope2', // Electricity-based emissions
-        uncertainty: input.carbon_footprint.uncertainty_range ? {
-          low: input.carbon_footprint.uncertainty_range.low,
-          high: input.carbon_footprint.uncertainty_range.high
-        } : undefined
+        uncertainty: input.carbon_footprint.uncertainty_range
+          ? {
+              low: input.carbon_footprint.uncertainty_range.low,
+              high: input.carbon_footprint.uncertainty_range.high,
+            }
+          : undefined,
       },
-      
+
       // Energy consumption breakdown
       energy: {
         total: input.energy_consumption.total_kwh,
@@ -251,10 +266,10 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
         breakdown: {
           cpu: input.energy_consumption.cpu_kwh,
           memory: input.energy_consumption.memory_kwh,
-          gpu: input.energy_consumption.gpu_kwh || 0
-        }
+          gpu: input.energy_consumption.gpu_kwh || 0,
+        },
       },
-      
+
       // Power consumption breakdown
       power: {
         total: input.power_usage.total_power_watts,
@@ -262,17 +277,17 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
         breakdown: {
           cpu: input.power_usage.cpu_power_watts,
           memory: input.power_usage.memory_power_watts,
-          gpu: input.power_usage.gpu_power_watts || 0
-        }
+          gpu: input.power_usage.gpu_power_watts || 0,
+        },
       },
-      
+
       // Carbon intensity data
       carbon_intensity: {
         value: input.carbon_intensity.value,
         unit: input.carbon_intensity.unit,
-        source: input.carbon_intensity.source
+        source: input.carbon_intensity.source,
       },
-      
+
       // Computational work details
       computation: {
         algorithm_name: input.algorithm_name,
@@ -280,33 +295,37 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
         cores_used: input.computational_work.cores_used,
         memory_gb: input.computational_work.memory_gb,
         gpu_model: input.computational_work.gpu_model,
-        gpu_hours: input.computational_work.gpu_hours
+        gpu_hours: input.computational_work.gpu_hours,
       },
-      
+
       // Geographic data
       location: {
         country: input.location.country,
-        data_center: input.location.data_center
+        data_center: input.location.data_center,
       },
-      
+
       // Methodology and assumptions
-      methodology: input.methodology ? {
-        version: input.methodology.version,
-        reference: input.methodology.reference
-      } : undefined,
-      
-      assumptions: input.assumptions ? {
-        pue: input.assumptions.pue,
-        usage_factor: input.assumptions.usage_factor,
-        pragmatic_scaling: input.assumptions.pragmatic_scaling
-      } : undefined,
-      
+      methodology: input.methodology
+        ? {
+            version: input.methodology.version,
+            reference: input.methodology.reference,
+          }
+        : undefined,
+
+      assumptions: input.assumptions
+        ? {
+            pue: input.assumptions.pue,
+            usage_factor: input.assumptions.usage_factor,
+            pragmatic_scaling: input.assumptions.pragmatic_scaling,
+          }
+        : undefined,
+
       // Metadata
       metadata: {
         adapter: 'GreenAlgorithmsAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.88
-      }
+        confidence: 0.88,
+      },
     };
   }
 
@@ -320,29 +339,42 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
         weight: 0.4,
         test: (data: any) => {
           // Check for Green Algorithms specific fields
-          const greenAlgoFields = ['calculation_id', 'algorithm_name', 'carbon_footprint'];
-          return greenAlgoFields.every(field => data && typeof data === 'object' && field in data);
-        }
+          const greenAlgoFields = [
+            'calculation_id',
+            'algorithm_name',
+            'carbon_footprint',
+          ];
+          return greenAlgoFields.every(
+            field => data && typeof data === 'object' && field in data
+          );
+        },
       },
       {
         weight: 0.3,
         test: (data: any) => {
           // Check for computational work structure
           if (typeof data !== 'object' || data === null) return false;
-          if (!data.computational_work || typeof data.computational_work !== 'object') return false;
+          if (
+            !data.computational_work ||
+            typeof data.computational_work !== 'object'
+          )
+            return false;
           const compFields = ['runtime_hours', 'cores_used', 'memory_gb'];
           return compFields.every(field => field in data.computational_work);
-        }
+        },
       },
       {
         weight: 0.2,
         test: (data: any) => {
           // Check for power usage and energy consumption structure
           if (typeof data !== 'object' || data === null) return false;
-          const hasEnergyConsumption = data.energy_consumption && typeof data.energy_consumption === 'object';
-          const hasPowerUsage = data.power_usage && typeof data.power_usage === 'object';
+          const hasEnergyConsumption =
+            data.energy_consumption &&
+            typeof data.energy_consumption === 'object';
+          const hasPowerUsage =
+            data.power_usage && typeof data.power_usage === 'object';
           return hasEnergyConsumption && hasPowerUsage;
-        }
+        },
       },
       {
         weight: 0.1,
@@ -350,8 +382,8 @@ export class GreenAlgorithmsAdapter extends BaseAdapter<GreenAlgorithmsData> {
           // Check for methodology or assumptions
           if (typeof data !== 'object' || data === null) return false;
           return 'methodology' in data || 'assumptions' in data;
-        }
-      }
+        },
+      },
     ];
   }
 

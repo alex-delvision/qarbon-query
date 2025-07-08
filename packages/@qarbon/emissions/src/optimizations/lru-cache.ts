@@ -34,7 +34,7 @@ export class LRUCache {
   constructor(capacity: number = 1000) {
     this.capacity = capacity;
     this.cache = new Map();
-    
+
     // Create dummy head and tail nodes
     this.head = new CacheNode('', { factor: null, timestamp: 0, ttl: 0 });
     this.tail = new CacheNode('', { factor: null, timestamp: 0, ttl: 0 });
@@ -67,7 +67,7 @@ export class LRUCache {
    */
   private isValidEntry(entry: CacheEntry): boolean {
     const now = Date.now();
-    return (now - entry.timestamp) < entry.ttl;
+    return now - entry.timestamp < entry.ttl;
   }
 
   /**
@@ -88,7 +88,7 @@ export class LRUCache {
   private addToHead(node: CacheNode): void {
     node.prev = this.head;
     node.next = this.head.next;
-    
+
     if (this.head.next) {
       this.head.next.prev = node;
     }
@@ -159,7 +159,7 @@ export class LRUCache {
     } else {
       // Create new entry
       const newNode = new CacheNode(key, entry);
-      
+
       if (this.cache.size >= this.capacity) {
         // Remove least recently used entry
         const tail = this.removeTail();
@@ -167,7 +167,7 @@ export class LRUCache {
           this.cache.delete(tail.key);
         }
       }
-      
+
       this.cache.set(key, newNode);
       this.addToHead(newNode);
     }
@@ -188,13 +188,13 @@ export class LRUCache {
   delete(model: string, region?: string): boolean {
     const key = this.generateKey(model, region);
     const node = this.cache.get(key);
-    
+
     if (node) {
       this.cache.delete(key);
       this.removeNode(node);
       return true;
     }
-    
+
     return false;
   }
 

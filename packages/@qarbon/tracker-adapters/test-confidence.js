@@ -3,13 +3,15 @@
  */
 
 // Import the adapter
-const { AIImpactTrackerAdapter } = require('./dist/adapters/AIImpactTrackerAdapter.js');
+const {
+  AIImpactTrackerAdapter,
+} = require('./dist/adapters/AIImpactTrackerAdapter.js');
 
 function testConfidenceFeature() {
   const adapter = new AIImpactTrackerAdapter();
-  
+
   console.log('Testing AIImpactTrackerAdapter confidence metadata...\n');
-  
+
   // Test 1: Default confidence (±20%)
   console.log('Test 1: Default confidence calculation (±20%)');
   const input1 = {
@@ -18,7 +20,7 @@ function testConfidenceFeature() {
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
   };
-  
+
   try {
     const result1 = adapter.ingest(input1);
     console.log('Input:', JSON.stringify(input1, null, 2));
@@ -29,7 +31,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('✗ Test 1 failed:', error.message);
   }
-  
+
   // Test 2: Existing confidence passed through
   console.log('Test 2: Existing confidence metadata');
   const input2 = {
@@ -37,9 +39,9 @@ function testConfidenceFeature() {
     tokens: { total: 200 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.002,
-    confidence: { low: 0.25, high: 0.75 }
+    confidence: { low: 0.25, high: 0.75 },
   };
-  
+
   try {
     const result2 = adapter.ingest(input2);
     console.log('Input:', JSON.stringify(input2, null, 2));
@@ -49,7 +51,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('✗ Test 2 failed:', error.message);
   }
-  
+
   // Test 3: String confidence values
   console.log('Test 3: String confidence values');
   const input3 = {
@@ -57,19 +59,21 @@ function testConfidenceFeature() {
     tokens: { total: 150 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
-    confidence: { low: '0.1', high: '0.2' }
+    confidence: { low: '0.1', high: '0.2' },
   };
-  
+
   try {
     const result3 = adapter.ingest(input3);
     console.log('Input:', JSON.stringify(input3, null, 2));
     console.log('Result:', JSON.stringify(result3, null, 2));
-    console.log('Expected confidence: low=0.1, high=0.2 (converted from strings)');
+    console.log(
+      'Expected confidence: low=0.1, high=0.2 (converted from strings)'
+    );
     console.log('✓ Test 3 passed\n');
   } catch (error) {
     console.error('✗ Test 3 failed:', error.message);
   }
-  
+
   // Test 4: Invalid confidence validation
   console.log('Test 4: Invalid confidence validation');
   const input4 = {
@@ -77,9 +81,9 @@ function testConfidenceFeature() {
     tokens: { total: 100 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
-    confidence: { low: 0.8, high: 0.2 } // low > high, should fail
+    confidence: { low: 0.8, high: 0.2 }, // low > high, should fail
   };
-  
+
   try {
     const result4 = adapter.ingest(input4);
     console.error('✗ Test 4 failed: Should have thrown an error');
@@ -89,7 +93,7 @@ function testConfidenceFeature() {
     console.log('Actual error:', error.message);
     console.log('✓ Test 4 passed (correctly rejected)\n');
   }
-  
+
   // Test 5: Zero emissions edge case
   console.log('Test 5: Zero emissions with confidence');
   const input5 = {
@@ -98,7 +102,7 @@ function testConfidenceFeature() {
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
   };
-  
+
   try {
     const result5 = adapter.ingest(input5);
     console.log('Input:', JSON.stringify(input5, null, 2));
@@ -108,7 +112,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('✗ Test 5 failed:', error.message);
   }
-  
+
   console.log('All confidence tests completed!');
 }
 

@@ -1,17 +1,17 @@
 /**
  * Eco2AI Adapter
- * 
- * Handles data from Eco2AI (https://github.com/sb-ai-lab/Eco2AI), a Python library for 
+ *
+ * Handles data from Eco2AI (https://github.com/sb-ai-lab/Eco2AI), a Python library for
  * carbon emissions tracking specifically designed for AI experiments and model training.
- * 
+ *
  * @example
  * ```typescript
  * import { Eco2AIAdapter } from './Eco2AIAdapter';
- * 
+ *
  * const adapter = new Eco2AIAdapter();
  * const result = adapter.normalize(eco2aiData);
  * ```
- * 
+ *
  * @example Eco2AI JSON format:
  * ```json
  * {
@@ -56,7 +56,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface Eco2AIData {
@@ -106,7 +112,7 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
       version: '1.0.0',
       description: 'Adapter for Eco2AI emissions tracking data',
       supportedFormats: ['json'],
-      confidence: 0.92
+      confidence: 0.92,
     });
   }
 
@@ -192,7 +198,7 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
@@ -207,84 +213,86 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
       timestamp: new Date(input.start_time).toISOString(),
       source: 'eco2ai',
       category: 'ai_experiment',
-      
+
       // Core emissions data
       emissions: {
         total: input.emissions.co2,
         unit: input.emissions.co2_unit,
-        scope: 'scope2' // Electricity-based emissions
+        scope: 'scope2', // Electricity-based emissions
       },
-      
+
       // Energy and power data
       energy: {
         total: input.emissions.energy,
-        unit: input.emissions.energy_unit
+        unit: input.emissions.energy_unit,
       },
-      
+
       power: {
         average: input.emissions.power,
-        unit: input.emissions.power_unit
+        unit: input.emissions.power_unit,
       },
-      
+
       // Carbon intensity data
       carbon_intensity: {
         value: input.carbon_intensity.value,
         unit: input.carbon_intensity.unit,
-        source: input.carbon_intensity.source
+        source: input.carbon_intensity.source,
       },
-      
+
       // Timing information
       timing: {
         start_time: new Date(input.start_time).toISOString(),
         end_time: new Date(input.end_time).toISOString(),
         duration: input.duration,
-        duration_unit: 'seconds'
+        duration_unit: 'seconds',
       },
-      
+
       // AI/ML context
       ai_context: {
         session_id: input.session_id,
         experiment_id: input.experiment_id,
         project_name: input.user_info?.project_name,
         description: input.user_info?.experiment_description,
-        tags: input.user_info?.tags
+        tags: input.user_info?.tags,
       },
-      
+
       // Hardware specifications
       hardware: {
         cpu: {
           model: input.system.cpu_model,
-          count: input.system.cpu_count
+          count: input.system.cpu_count,
         },
-        gpu: input.system.gpu_model ? {
-          model: input.system.gpu_model,
-          count: input.system.gpu_count || 1
-        } : undefined,
+        gpu: input.system.gpu_model
+          ? {
+              model: input.system.gpu_model,
+              count: input.system.gpu_count || 1,
+            }
+          : undefined,
         ram: {
           size: input.system.ram_size,
-          unit: 'GB'
-        }
+          unit: 'GB',
+        },
       },
-      
+
       // System environment
       system: {
         platform: input.system.platform,
-        python_version: input.system.python_version
+        python_version: input.system.python_version,
       },
-      
+
       // Geographic data
       location: {
         country: input.location.country,
-        region: input.location.region
+        region: input.location.region,
       },
-      
+
       // Metadata
       metadata: {
         adapter: 'Eco2AIAdapter',
         adapter_version: '1.0.0',
         eco2ai_version: input.eco2ai_version,
-        confidence: 0.92
-      }
+        confidence: 0.92,
+      },
     };
   }
 
@@ -298,19 +306,26 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
         weight: 0.4,
         test: (data: any) => {
           // Check for Eco2AI specific fields
-          const eco2aiFields = ['eco2ai_version', 'session_id', 'carbon_intensity'];
-          return eco2aiFields.every(field => data && typeof data === 'object' && field in data);
-        }
+          const eco2aiFields = [
+            'eco2ai_version',
+            'session_id',
+            'carbon_intensity',
+          ];
+          return eco2aiFields.every(
+            field => data && typeof data === 'object' && field in data
+          );
+        },
       },
       {
         weight: 0.3,
         test: (data: any) => {
           // Check for typical Eco2AI emissions structure
           if (typeof data !== 'object' || data === null) return false;
-          if (!data.emissions || typeof data.emissions !== 'object') return false;
+          if (!data.emissions || typeof data.emissions !== 'object')
+            return false;
           const emissionFields = ['co2', 'power', 'energy'];
           return emissionFields.every(field => field in data.emissions);
-        }
+        },
       },
       {
         weight: 0.2,
@@ -320,7 +335,7 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
           if (!data.system || typeof data.system !== 'object') return false;
           const systemFields = ['platform', 'python_version', 'cpu_model'];
           return systemFields.every(field => field in data.system);
-        }
+        },
       },
       {
         weight: 0.1,
@@ -329,8 +344,8 @@ export class Eco2AIAdapter extends BaseAdapter<Eco2AIData> {
           if (typeof data !== 'object' || data === null) return false;
           const timeFields = ['start_time', 'end_time', 'duration'];
           return timeFields.every(field => field in data);
-        }
-      }
+        },
+      },
     ];
   }
 

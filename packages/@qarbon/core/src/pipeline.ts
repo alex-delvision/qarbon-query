@@ -1,18 +1,18 @@
 /**
  * Main pipeline orchestrator for qarbon-query
- * 
+ *
  * Coordinates data flow from input → adapter → normalized data → calculator → result
  */
 
 import { EmissionData, EmissionResult } from '@qarbon/shared';
 import { universalTrackerRegistry } from '@qarbon/tracker-adapters';
 import { calculator } from '@qarbon/emissions';
-import type { 
-  PipelineProcessor, 
-  PipelineOptions, 
-  PipelineConfig, 
+import type {
+  PipelineProcessor,
+  PipelineOptions,
+  PipelineConfig,
   PipelineExecutionResult,
-  PipelineStageResult 
+  PipelineStageResult,
 } from './types';
 
 /**
@@ -32,7 +32,10 @@ export class Pipeline implements PipelineProcessor {
   /**
    * Process input through the complete pipeline
    */
-  async process(input: any, options: PipelineOptions = {}): Promise<PipelineExecutionResult> {
+  async process(
+    input: any,
+    options: PipelineOptions = {}
+  ): Promise<PipelineExecutionResult> {
     const startTime = performance.now();
     this.stageResults = [];
 
@@ -44,25 +47,33 @@ export class Pipeline implements PipelineProcessor {
       const gridEnhancedData = await this.enhanceWithGrid(adaptedData, options);
 
       // Stage 3: Emission Calculation
-      const calculatedData = await this.calculateEmissions(gridEnhancedData, options);
+      const calculatedData = await this.calculateEmissions(
+        gridEnhancedData,
+        options
+      );
 
       // Stage 4: Uncertainty Quantification (if enabled)
-      const uncertaintyData = await this.calculateUncertainty(calculatedData, options);
+      const uncertaintyData = await this.calculateUncertainty(
+        calculatedData,
+        options
+      );
 
       // Stage 5: Optimization Application (if enabled)
-      const optimizedResult = await this.applyOptimizations(uncertaintyData, options);
+      const optimizedResult = await this.applyOptimizations(
+        uncertaintyData,
+        options
+      );
 
       const totalDuration = performance.now() - startTime;
 
       return {
         ...optimizedResult,
         stages: this.stageResults,
-        totalDuration
+        totalDuration,
       };
-
     } catch (error) {
       const totalDuration = performance.now() - startTime;
-      
+
       // Return error result with partial stage information
       return {
         emissions: [],
@@ -71,10 +82,10 @@ export class Pipeline implements PipelineProcessor {
           calculatedAt: new Date().toISOString(),
           methodology: 'qarbon-v1',
           confidence: 0,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         },
         stages: this.stageResults,
-        totalDuration
+        totalDuration,
       };
     }
   }
@@ -96,13 +107,19 @@ export class Pipeline implements PipelineProcessor {
   /**
    * Stage 1: Adapt input to normalized EmissionData format
    */
-  private async adaptInput(input: any, options: PipelineOptions): Promise<EmissionData[]> {
+  private async adaptInput(
+    input: any,
+    options: PipelineOptions
+  ): Promise<EmissionData[]> {
     const stageStart = performance.now();
     let output: EmissionData[];
 
     try {
       // If input is already EmissionData array, use as-is
-      if (Array.isArray(input) && input.every(item => this.isEmissionData(item))) {
+      if (
+        Array.isArray(input) &&
+        input.every(item => this.isEmissionData(item))
+      ) {
         output = input as EmissionData[];
       }
       // If input is single EmissionData object, wrap in array
@@ -125,7 +142,6 @@ export class Pipeline implements PipelineProcessor {
 
       this.recordStage('adaptation', input, output, stageStart);
       return output;
-
     } catch (error) {
       this.recordStage('adaptation', input, null, stageStart, [error as Error]);
       throw error;
@@ -136,7 +152,7 @@ export class Pipeline implements PipelineProcessor {
    * Stage 2: Enhance with grid data (placeholder)
    */
   private async enhanceWithGrid(
-    data: EmissionData[], 
+    data: EmissionData[],
     options: PipelineOptions
   ): Promise<EmissionData[]> {
     const stageStart = performance.now();
@@ -152,14 +168,15 @@ export class Pipeline implements PipelineProcessor {
       const enhancedData = data.map(emission => ({
         ...emission,
         region: options.region || this.config.gridManager.defaultRegion,
-        gridIntensity: 500 // Placeholder: 500g CO2/kWh
+        gridIntensity: 500, // Placeholder: 500g CO2/kWh
       }));
 
       this.recordStage('grid-enhancement', data, enhancedData, stageStart);
       return enhancedData;
-
     } catch (error) {
-      this.recordStage('grid-enhancement', data, data, stageStart, [error as Error]);
+      this.recordStage('grid-enhancement', data, data, stageStart, [
+        error as Error,
+      ]);
       return data; // Fallback to original data
     }
   }
@@ -168,7 +185,7 @@ export class Pipeline implements PipelineProcessor {
    * Stage 3: Calculate emissions using existing calculator
    */
   private async calculateEmissions(
-    data: EmissionData[], 
+    data: EmissionData[],
     options: PipelineOptions
   ): Promise<EmissionResult> {
     const stageStart = performance.now();
@@ -184,13 +201,12 @@ export class Pipeline implements PipelineProcessor {
           ...result.metadata,
           methodology: options.methodology || result.metadata.methodology,
           pipelineVersion: '2.0.0',
-          enhancedPipeline: true
-        }
+          enhancedPipeline: true,
+        },
       };
 
       this.recordStage('calculation', data, enhancedResult, stageStart);
       return enhancedResult;
-
     } catch (error) {
       this.recordStage('calculation', data, null, stageStart, [error as Error]);
       throw error;
@@ -201,7 +217,7 @@ export class Pipeline implements PipelineProcessor {
    * Stage 4: Calculate uncertainty (placeholder)
    */
   private async calculateUncertainty(
-    result: EmissionResult, 
+    result: EmissionResult,
     options: PipelineOptions
   ): Promise<EmissionResult> {
     const stageStart = performance.now();
@@ -219,21 +235,22 @@ export class Pipeline implements PipelineProcessor {
         standardDeviation: 0.1,
         confidenceInterval: {
           lower: 0.9,
-          upper: 1.1
+          upper: 1.1,
         },
-        monteCarloSamples: this.config.uncertainty.monteCarloSamples
+        monteCarloSamples: this.config.uncertainty.monteCarloSamples,
       };
 
       const enhancedResult = {
         ...result,
-        uncertainty: uncertaintyMetrics
+        uncertainty: uncertaintyMetrics,
       };
 
       this.recordStage('uncertainty', result, enhancedResult, stageStart);
       return enhancedResult;
-
     } catch (error) {
-      this.recordStage('uncertainty', result, result, stageStart, [error as Error]);
+      this.recordStage('uncertainty', result, result, stageStart, [
+        error as Error,
+      ]);
       return result; // Fallback to original result
     }
   }
@@ -242,7 +259,7 @@ export class Pipeline implements PipelineProcessor {
    * Stage 5: Apply optimizations (placeholder)
    */
   private async applyOptimizations(
-    result: EmissionResult, 
+    result: EmissionResult,
     options: PipelineOptions
   ): Promise<PipelineExecutionResult> {
     const stageStart = performance.now();
@@ -251,7 +268,7 @@ export class Pipeline implements PipelineProcessor {
       const executionResult: PipelineExecutionResult = {
         ...result,
         stages: [],
-        totalDuration: 0
+        totalDuration: 0,
       };
       this.recordStage('optimization', result, executionResult, stageStart);
       return executionResult;
@@ -265,25 +282,26 @@ export class Pipeline implements PipelineProcessor {
         cacheMisses: 1,
         batchesProcessed: 1,
         memoryUsage: process.memoryUsage().heapUsed,
-        performanceGain: 0.15
+        performanceGain: 0.15,
       };
 
       const optimizedResult: PipelineExecutionResult = {
         ...result,
         stages: [],
         totalDuration: 0,
-        optimizations: optimizationMetrics
+        optimizations: optimizationMetrics,
       };
 
       this.recordStage('optimization', result, optimizedResult, stageStart);
       return optimizedResult;
-
     } catch (error) {
-      this.recordStage('optimization', result, result, stageStart, [error as Error]);
+      this.recordStage('optimization', result, result, stageStart, [
+        error as Error,
+      ]);
       const fallbackResult: PipelineExecutionResult = {
         ...result,
         stages: [],
-        totalDuration: 0
+        totalDuration: 0,
       };
       return fallbackResult;
     }
@@ -293,16 +311,21 @@ export class Pipeline implements PipelineProcessor {
    * Helper methods
    */
   private isEmissionData(obj: any): boolean {
-    return obj && 
-           typeof obj.id === 'string' &&
-           typeof obj.timestamp === 'string' &&
-           typeof obj.source === 'string' &&
-           typeof obj.amount === 'number' &&
-           typeof obj.unit === 'string' &&
-           typeof obj.category === 'string';
+    return (
+      obj &&
+      typeof obj.id === 'string' &&
+      typeof obj.timestamp === 'string' &&
+      typeof obj.source === 'string' &&
+      typeof obj.amount === 'number' &&
+      typeof obj.unit === 'string' &&
+      typeof obj.category === 'string'
+    );
   }
 
-  private normalizeToEmissionDataArray(data: any, options: PipelineOptions): EmissionData[] {
+  private normalizeToEmissionDataArray(
+    data: any,
+    options: PipelineOptions
+  ): EmissionData[] {
     // Simple normalization - this would be enhanced based on adapter output
     if (Array.isArray(data)) {
       return data.map(item => this.normalizeToEmissionData(item, options));
@@ -310,7 +333,10 @@ export class Pipeline implements PipelineProcessor {
     return [this.normalizeToEmissionData(data, options)];
   }
 
-  private normalizeToEmissionData(data: any, options: PipelineOptions): EmissionData {
+  private normalizeToEmissionData(
+    data: any,
+    options: PipelineOptions
+  ): EmissionData {
     return {
       id: data.id || `generated_${Date.now()}_${Math.random()}`,
       timestamp: data.timestamp || new Date().toISOString(),
@@ -318,15 +344,15 @@ export class Pipeline implements PipelineProcessor {
       amount: data.amount || data.emissions || 0,
       unit: data.unit || 'g',
       category: options.category || data.category || 'other',
-      confidence: data.confidence
+      confidence: data.confidence,
     };
   }
 
   private recordStage(
-    stage: string, 
-    input: any, 
-    output: any, 
-    startTime: number, 
+    stage: string,
+    input: any,
+    output: any,
+    startTime: number,
     errors?: Error[]
   ): void {
     this.stageResults.push({
@@ -336,8 +362,8 @@ export class Pipeline implements PipelineProcessor {
       duration: performance.now() - startTime,
       errors,
       metadata: {
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 
@@ -346,13 +372,13 @@ export class Pipeline implements PipelineProcessor {
       adapters: [
         { name: 'json', enabled: true, priority: 1 },
         { name: 'csv', enabled: true, priority: 2 },
-        { name: 'xml', enabled: true, priority: 3 }
+        { name: 'xml', enabled: true, priority: 3 },
       ],
       gridManager: {
         enabled: false,
         defaultRegion: 'US',
         updateInterval: 3600000, // 1 hour
-        sources: ['eGRID', 'ENTSO-E']
+        sources: ['eGRID', 'ENTSO-E'],
       },
       optimizations: {
         enabled: false,
@@ -360,19 +386,19 @@ export class Pipeline implements PipelineProcessor {
         batchProcessing: true,
         memoryOptimization: true,
         maxCacheSize: 1000,
-        batchSize: 100
+        batchSize: 100,
       },
       uncertainty: {
         enabled: false,
         confidenceLevel: 0.95,
         monteCarloSamples: 1000,
-        propagateErrors: true
+        propagateErrors: true,
       },
       compatibility: {
         legacySupport: true,
         strictMode: false,
-        deprecationWarnings: true
-      }
+        deprecationWarnings: true,
+      },
     };
   }
 }

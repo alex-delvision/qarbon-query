@@ -13,16 +13,16 @@ export default defineConfig({
         'src/**/*.test.ts',
         'src/**/*.spec.ts',
         'src/**/example.ts',
-        'src/**/test-example.ts'
+        'src/**/test-example.ts',
       ],
       thresholds: {
         global: {
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
     setupFiles: ['./vitest.setup.ts'],
     testTimeout: 30000,
@@ -32,10 +32,10 @@ export default defineConfig({
       enabled: process.env.BROWSER_TEST === 'true',
       name: 'chromium',
       provider: 'playwright',
-      headless: true
-    }
+      headless: true,
+    },
   },
   esbuild: {
-    target: 'node18'
-  }
+    target: 'node18',
+  },
 });

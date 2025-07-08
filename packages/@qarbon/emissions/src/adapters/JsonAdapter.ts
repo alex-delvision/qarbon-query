@@ -1,13 +1,13 @@
 /**
  * JSON Adapter
- * 
+ *
  * Handles JSON data with configurable property mapping for emissions and energy data.
  * Supports nested property paths and flexible field mapping.
- * 
+ *
  * @example
  * ```typescript
  * import { JsonAdapter } from './JsonAdapter';
- * 
+ *
  * const adapter = new JsonAdapter({
  *   propertyMapping: {
  *     timestamp: 'data.timestamp',
@@ -18,7 +18,7 @@
  * });
  * const result = adapter.normalize(jsonData);
  * ```
- * 
+ *
  * @example JSON input format:
  * ```json
  * {
@@ -43,7 +43,7 @@
  *   }
  * }
  * ```
- * 
+ *
  * @example Alternative flat JSON format:
  * ```json
  * {
@@ -58,7 +58,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface JsonPropertyMapping {
@@ -96,16 +102,16 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
       version: '1.0.0',
       description: 'Adapter for JSON data with configurable property mapping',
       supportedFormats: ['json'],
-      confidence: 0.65
+      confidence: 0.65,
     });
-    
+
     this.config = {
       emissionsUnit: 'kg',
       energyUnit: 'kWh',
       powerUnit: 'W',
       durationUnit: 'hours',
       propertyMapping: {},
-      ...config
+      ...config,
     };
   }
 
@@ -121,7 +127,10 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
 
     // Validate configuration
     const config = { ...this.config, ...input.config };
-    if (!config.propertyMapping || Object.keys(config.propertyMapping).length === 0) {
+    if (
+      !config.propertyMapping ||
+      Object.keys(config.propertyMapping).length === 0
+    ) {
       errors.push('Property mapping configuration is required');
     }
 
@@ -130,7 +139,9 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     if (config.arrayPath) {
       dataToValidate = this.getNestedValue(input.data, config.arrayPath);
       if (!Array.isArray(dataToValidate)) {
-        errors.push(`Array path '${config.arrayPath}' does not point to an array`);
+        errors.push(
+          `Array path '${config.arrayPath}' does not point to an array`
+        );
         return { isValid: false, errors };
       }
       if (dataToValidate.length === 0) {
@@ -149,7 +160,9 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     });
 
     if (missingProperties.length > 0) {
-      warnings.push(`Mapped properties not found in data: ${missingProperties.join(', ')}`);
+      warnings.push(
+        `Mapped properties not found in data: ${missingProperties.join(', ')}`
+      );
     }
 
     // Check for required mappings
@@ -157,7 +170,8 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
       warnings.push('No timestamp property mapping specified');
     }
 
-    const hasEmissionsOrEnergy = config.propertyMapping.emissions || config.propertyMapping.energy;
+    const hasEmissionsOrEnergy =
+      config.propertyMapping.emissions || config.propertyMapping.energy;
     if (!hasEmissionsOrEnergy) {
       warnings.push('No emissions or energy property mapping specified');
     }
@@ -165,7 +179,7 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
@@ -181,7 +195,7 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     if (config.arrayPath) {
       const arrayData = this.getNestedValue(input.data, config.arrayPath);
       if (Array.isArray(arrayData)) {
-        const normalizedRows = arrayData.map((item, index) => 
+        const normalizedRows = arrayData.map((item, index) =>
           this.normalizeObject(item, config, index)
         );
 
@@ -197,7 +211,11 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     return this.normalizeObject(input.data, config, 0);
   }
 
-  private normalizeObject(data: any, config: JsonAdapterConfig, index: number): NormalizedData {
+  private normalizeObject(
+    data: any,
+    config: JsonAdapterConfig,
+    index: number
+  ): NormalizedData {
     // Extract mapped values
     const getValue = (field: string): any => {
       const path = config.propertyMapping[field];
@@ -239,7 +257,11 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
 
     if (!energyValue && powerValue && durationValue) {
       // Calculate energy from power and duration
-      calculatedEnergy = this.calculateEnergy(powerValue, durationValue, config.durationUnit);
+      calculatedEnergy = this.calculateEnergy(
+        powerValue,
+        durationValue,
+        config.durationUnit
+      );
     }
 
     return {
@@ -247,55 +269,72 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
       timestamp: timestamp.toISOString(),
       source: sourceValue,
       category: 'json_import',
-      
+
       // Core emissions data
-      emissions: emissionsValue ? {
-        total: emissionsValue,
-        unit: config.emissionsUnit || 'kg',
-        scope: 'scope2' // Default assumption
-      } : undefined,
-      
+      emissions: emissionsValue
+        ? {
+            total: emissionsValue,
+            unit: config.emissionsUnit || 'kg',
+            scope: 'scope2', // Default assumption
+          }
+        : undefined,
+
       // Energy data
-      energy: (energyValue || calculatedEnergy) ? {
-        total: energyValue || calculatedEnergy!,
-        unit: config.energyUnit || 'kWh',
-        estimated: !energyValue && calculatedEnergy !== undefined
-      } : undefined,
-      
+      energy:
+        energyValue || calculatedEnergy
+          ? {
+              total: energyValue || calculatedEnergy!,
+              unit: config.energyUnit || 'kWh',
+              estimated: !energyValue && calculatedEnergy !== undefined,
+            }
+          : undefined,
+
       // Power data
-      power: powerValue ? {
-        average: powerValue,
-        unit: config.powerUnit || 'W'
-      } : undefined,
-      
+      power: powerValue
+        ? {
+            average: powerValue,
+            unit: config.powerUnit || 'W',
+          }
+        : undefined,
+
       // Duration data
-      duration: durationValue ? {
-        value: durationValue,
-        unit: config.durationUnit || 'hours'
-      } : undefined,
-      
+      duration: durationValue
+        ? {
+            value: durationValue,
+            unit: config.durationUnit || 'hours',
+          }
+        : undefined,
+
       // Device and location
       device: {
-        id: deviceIdValue
+        id: deviceIdValue,
       },
-      
-      location: locationValue ? {
-        name: typeof locationValue === 'string' ? locationValue : JSON.stringify(locationValue)
-      } : undefined,
-      
+
+      location: locationValue
+        ? {
+            name:
+              typeof locationValue === 'string'
+                ? locationValue
+                : JSON.stringify(locationValue),
+          }
+        : undefined,
+
       // Raw data for reference
       raw_data: data,
-      
+
       // Additional properties not in mapping
-      additional_properties: this.extractAdditionalProperties(data, config.propertyMapping),
-      
+      additional_properties: this.extractAdditionalProperties(
+        data,
+        config.propertyMapping
+      ),
+
       // Metadata
       metadata: {
         adapter: 'JsonAdapter',
         adapter_version: '1.0.0',
         object_index: index,
-        confidence: 0.65
-      }
+        confidence: 0.65,
+      },
     };
   }
 
@@ -322,36 +361,45 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
       timestamp: new Date().toISOString(),
       source: 'json_import',
       category: 'json_aggregate',
-      
-      emissions: totalEmissions > 0 ? {
-        total: totalEmissions,
-        unit: 'kg',
-        scope: 'scope2'
-      } : undefined,
-      
-      energy: totalEnergy > 0 ? {
-        total: totalEnergy,
-        unit: 'kWh'
-      } : undefined,
-      
-      power: avgPower > 0 ? {
-        average: avgPower,
-        unit: 'W'
-      } : undefined,
-      
+
+      emissions:
+        totalEmissions > 0
+          ? {
+              total: totalEmissions,
+              unit: 'kg',
+              scope: 'scope2',
+            }
+          : undefined,
+
+      energy:
+        totalEnergy > 0
+          ? {
+              total: totalEnergy,
+              unit: 'kWh',
+            }
+          : undefined,
+
+      power:
+        avgPower > 0
+          ? {
+              average: avgPower,
+              unit: 'W',
+            }
+          : undefined,
+
       aggregation: {
         object_count: objects.length,
         date_range: {
           start: objects[0].timestamp,
-          end: objects[objects.length - 1].timestamp
-        }
+          end: objects[objects.length - 1].timestamp,
+        },
       },
-      
+
       metadata: {
         adapter: 'JsonAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.65
-      }
+        confidence: 0.65,
+      },
     };
   }
 
@@ -367,15 +415,19 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
           // Check for JSON structure with data and config
           if (typeof data !== 'object' || data === null) return false;
           return 'data' in data && 'config' in data;
-        }
+        },
       },
       {
         weight: 0.3,
         test: (data: any) => {
           // Check for config with property mapping
           if (typeof data !== 'object' || data === null) return false;
-          return data.config && data.config.propertyMapping && typeof data.config.propertyMapping === 'object';
-        }
+          return (
+            data.config &&
+            data.config.propertyMapping &&
+            typeof data.config.propertyMapping === 'object'
+          );
+        },
       },
       {
         weight: 0.2,
@@ -384,7 +436,7 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
           if (typeof data !== 'object' || data === null) return false;
           if (!data.data || typeof data.data !== 'object') return false;
           return Object.keys(data.data).length > 0;
-        }
+        },
       },
       {
         weight: 0.1,
@@ -393,9 +445,11 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
           if (typeof data !== 'object' || data === null) return false;
           if (!data.data || typeof data.data !== 'object') return false;
           const commonFields = ['timestamp', 'emissions', 'energy', 'power'];
-          return commonFields.some(field => this.hasNestedProperty(data.data, field));
-        }
-      }
+          return commonFields.some(field =>
+            this.hasNestedProperty(data.data, field)
+          );
+        },
+      },
     ];
   }
 
@@ -407,10 +461,10 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
 
   private hasNestedProperty(obj: any, field: string): boolean {
     if (typeof obj !== 'object' || obj === null) return false;
-    
+
     // Check direct property
     if (field in obj) return true;
-    
+
     // Check nested properties
     return Object.values(obj).some(value => {
       if (typeof value === 'object' && value !== null) {
@@ -420,18 +474,25 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     });
   }
 
-  private extractAdditionalProperties(data: any, mapping: JsonPropertyMapping): { [key: string]: any } {
+  private extractAdditionalProperties(
+    data: any,
+    mapping: JsonPropertyMapping
+  ): { [key: string]: any } {
     const mappedPaths = new Set(Object.values(mapping).filter(Boolean));
     const additional: { [key: string]: any } = {};
-    
+
     const extractRecursive = (obj: any, prefix: string = '') => {
       if (typeof obj !== 'object' || obj === null) return;
-      
+
       Object.entries(obj).forEach(([key, value]) => {
         const path = prefix ? `${prefix}.${key}` : key;
-        
+
         if (!mappedPaths.has(path)) {
-          if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          if (
+            typeof value === 'object' &&
+            value !== null &&
+            !Array.isArray(value)
+          ) {
             extractRecursive(value, path);
           } else {
             additional[path] = value;
@@ -439,7 +500,7 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
         }
       });
     };
-    
+
     extractRecursive(data);
     return additional;
   }
@@ -467,7 +528,11 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
     return null;
   }
 
-  private calculateEnergy(power: number, duration: number, durationUnit?: string): number {
+  private calculateEnergy(
+    power: number,
+    duration: number,
+    durationUnit?: string
+  ): number {
     // Convert duration to hours
     let durationHours = duration;
     switch (durationUnit?.toLowerCase()) {
@@ -482,7 +547,7 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
         durationHours = duration;
         break;
     }
-    
+
     // Calculate energy in kWh
     return (power * durationHours) / 1000;
   }
@@ -490,10 +555,13 @@ export class JsonAdapter extends BaseAdapter<JsonData> {
   /**
    * Create a JsonAdapter with specific property mapping
    */
-  static withMapping(mapping: JsonPropertyMapping, options?: Partial<JsonAdapterConfig>): JsonAdapter {
+  static withMapping(
+    mapping: JsonPropertyMapping,
+    options?: Partial<JsonAdapterConfig>
+  ): JsonAdapter {
     return new JsonAdapter({
       propertyMapping: mapping,
-      ...options
+      ...options,
     });
   }
 }

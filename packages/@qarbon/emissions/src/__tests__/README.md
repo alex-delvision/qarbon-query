@@ -1,6 +1,7 @@
 # Comprehensive Test Suite
 
-This directory contains a comprehensive test suite for the `@qarbon/emissions` package, covering all modules with extensive validation, performance benchmarks, and uncertainty quantification tests.
+This directory contains a comprehensive test suite for the `@qarbon/emissions` package, covering all
+modules with extensive validation, performance benchmarks, and uncertainty quantification tests.
 
 ## Test Structure
 
@@ -32,6 +33,7 @@ src/__tests__/
 **Purpose**: Validate adapter functionality with real sample files
 
 **Coverage**:
+
 - ✅ `validate()` method validation with real data
 - ✅ `normalize()` output format consistency
 - ✅ Error handling and data quality warnings
@@ -40,11 +42,13 @@ src/__tests__/
 - ✅ Registry management
 
 **Test Data**: Real sample files in `__fixtures__/` directory
+
 - CodeCarbon JSON output
 - CSV emissions data with various formats
 - JSON emissions data structures
 
 **Key Assertions**:
+
 ```typescript
 // Validation
 expect(result.isValid).toBe(true);
@@ -61,6 +65,7 @@ expect(result).toHaveProperty('energy');
 **Purpose**: Validate emission factors against published values with ±10% tolerance
 
 **Coverage**:
+
 - ✅ AI model factors (GPT-3.5, GPT-4, Claude-2) vs research papers
 - ✅ Grid intensity factors vs EPA eGRID/EEA data
 - ✅ PUE values vs cloud provider specifications
@@ -68,6 +73,7 @@ expect(result).toHaveProperty('energy');
 - ✅ Unit conversion accuracy
 
 **Key Tolerance Tests**:
+
 ```typescript
 // ±10% tolerance for published values
 expectFactorTolerance(actual, published); // Uses global helper
@@ -78,6 +84,7 @@ expectFactorTolerance(factor.co2PerToken, 0.0022); // Published value
 ```
 
 **Data Sources**:
+
 - OpenAI research papers
 - EPA eGRID 2021 data
 - European Environment Agency data
@@ -88,6 +95,7 @@ expectFactorTolerance(factor.co2PerToken, 0.0022); // Published value
 **Purpose**: Test grid intensity manager with mocked API calls and fallback logic
 
 **Coverage**:
+
 - ✅ Waterfall fetching (ElectricityMap → WattTime → Daily → Monthly → Annual)
 - ✅ API error handling and graceful degradation
 - ✅ Caching mechanism with TTL validation
@@ -96,6 +104,7 @@ expectFactorTolerance(factor.co2PerToken, 0.0022); // Published value
 - ✅ Concurrent request handling
 
 **Mock Strategy**:
+
 ```typescript
 // Mock external APIs
 global.fetch = vi.fn();
@@ -104,7 +113,9 @@ global.fetch = vi.fn();
 (global.fetch as Mock)
   .mockRejectedValueOnce(new Error('ElectricityMap API error'))
   .mockRejectedValueOnce(new Error('WattTime API error'))
-  .mockResolvedValueOnce({ /* daily average data */ });
+  .mockResolvedValueOnce({
+    /* daily average data */
+  });
 ```
 
 ### 4. Performance Benchmarks (`optimizations/`)
@@ -112,6 +123,7 @@ global.fetch = vi.fn();
 **Purpose**: Validate batch processing and WASM performance with ≥2× speedup requirements
 
 **Coverage**:
+
 - ✅ Batch vs individual calculations (≥2× speedup)
 - ✅ WASM vs JavaScript calculations (≥2× speedup)
 - ✅ Streaming data processing latency
@@ -120,6 +132,7 @@ global.fetch = vi.fn();
 - ✅ Parallel processing utilization
 
 **Performance Assertions**:
+
 ```typescript
 // Speedup validation
 const speedupRatio = baselineTime / optimizedTime;
@@ -131,6 +144,7 @@ expect(memoryPerItem).toBeLessThan(1024); // < 1KB per item
 ```
 
 **Benchmark Results Tracking**:
+
 - Performance trends tracked in CI
 - Regression detection
 - Cross-platform performance validation
@@ -140,6 +154,7 @@ expect(memoryPerItem).toBeLessThan(1024); // < 1KB per item
 **Purpose**: Verify Monte Carlo simulation convergence and statistical validity
 
 **Coverage**:
+
 - ✅ Sample size convergence to theoretical values
 - ✅ Distribution convergence (uniform, normal)
 - ✅ Confidence interval stability
@@ -148,6 +163,7 @@ expect(memoryPerItem).toBeLessThan(1024); // < 1KB per item
 - ✅ Emissions-specific convergence scenarios
 
 **Convergence Validation**:
+
 ```typescript
 // Mean convergence
 const error = Math.abs(result.mean - theoreticalMean);
@@ -171,15 +187,15 @@ export default defineConfig({
           branches: 80,
           functions: 80,
           lines: 80,
-          statements: 80
-        }
-      }
+          statements: 80,
+        },
+      },
     },
     browser: {
       enabled: process.env.BROWSER_TEST === 'true',
-      name: 'chromium'
-    }
-  }
+      name: 'chromium',
+    },
+  },
 });
 ```
 
@@ -241,12 +257,14 @@ The CI pipeline runs on Node.js 18 and 20 with the following jobs:
 ## Coverage Requirements
 
 All modules must maintain ≥80% coverage across:
+
 - **Lines**: 80%
 - **Functions**: 80%
 - **Branches**: 80%
 - **Statements**: 80%
 
 Coverage reports are generated in multiple formats:
+
 - Terminal output for quick feedback
 - HTML reports for detailed analysis
 - LCOV format for CI integration
@@ -256,6 +274,7 @@ Coverage reports are generated in multiple formats:
 ### Fixtures Strategy
 
 Real sample files are used to ensure adapter compatibility:
+
 - **CodeCarbon**: Actual ML training output
 - **CSV**: Multiple format variations
 - **JSON**: Various schema structures
@@ -263,6 +282,7 @@ Real sample files are used to ensure adapter compatibility:
 ### Data Sources
 
 Factor validation uses authoritative sources:
+
 - **AI Factors**: OpenAI research, Anthropic studies
 - **Grid Intensity**: EPA eGRID, EEA official data
 - **PUE Values**: Cloud provider sustainability reports
@@ -272,6 +292,7 @@ Factor validation uses authoritative sources:
 ### Required Speedups
 
 All optimizations must demonstrate measurable performance improvements:
+
 - **Batch Processing**: ≥2× faster than individual calculations
 - **WASM**: ≥2× faster than JavaScript equivalents
 - **Caching**: ≥10× faster for cache hits
@@ -336,4 +357,6 @@ const result = await measurePerformance(
 expect(baselineTime / optimizedTime).toBeGreaterThanOrEqual(2.0);
 ```
 
-This comprehensive test suite ensures reliability, performance, and accuracy across all emissions calculation modules while maintaining compatibility with real-world data sources and meeting stringent performance requirements.
+This comprehensive test suite ensures reliability, performance, and accuracy across all emissions
+calculation modules while maintaining compatibility with real-world data sources and meeting
+stringent performance requirements.

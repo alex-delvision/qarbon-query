@@ -128,7 +128,10 @@ export interface UncertaintyMetrics {
  * Pipeline processor interface
  */
 export interface PipelineProcessor {
-  process(input: any, options?: PipelineOptions): Promise<PipelineExecutionResult>;
+  process(
+    input: any,
+    options?: PipelineOptions
+  ): Promise<PipelineExecutionResult>;
   configure(config: Partial<PipelineConfig>): void;
   getStageResults(): PipelineStageResult[];
 }

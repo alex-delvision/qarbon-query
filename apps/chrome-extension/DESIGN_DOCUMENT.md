@@ -2,7 +2,9 @@
 
 ## Executive Summary
 
-This document provides a comprehensive audit and design specification for the QarbonQuery Chrome Extension v1.1.0, which tracks real-time carbon emissions from AI service usage. The extension currently supports OpenAI, Anthropic, Google Gemini, AWS Bedrock, and web-based AI interfaces.
+This document provides a comprehensive audit and design specification for the QarbonQuery Chrome
+Extension v1.1.0, which tracks real-time carbon emissions from AI service usage. The extension
+currently supports OpenAI, Anthropic, Google Gemini, AWS Bedrock, and web-based AI interfaces.
 
 ## Current Architecture Analysis
 
@@ -20,17 +22,20 @@ QarbonQuery Chrome Extension
 ### File Structure Audit
 
 **Core Scripts:**
+
 - `background.ts` - Service worker for API interception and storage management
 - `content.ts` - Content script for prompt capture and API monitoring
 - `popup.ts` - Popup interface logic and real-time updates
 - `tokenExtractors.ts` - Multi-provider token parsing utilities
 
 **Configuration:**
+
 - `manifest.json` - Extension permissions and configuration
 - `dnr_rules.json` - Declarative net request rules for API interception
 - `popup.html` - Popup UI structure with embedded CSS
 
 **Supporting Files:**
+
 - Test fixtures for OpenAI, Anthropic, Google, and Bedrock APIs
 - Build and packaging scripts
 - Type definitions and configurations
@@ -93,7 +98,7 @@ qarbon_prompts_{YYYY-MM-DD}: PromptEntry[] = [
 
 // Aggregated data (placeholders for future use)
 qarbon_aggregates_daily_{YYYY-MM-DD}: DailyAggregate
-qarbon_aggregates_week_{YYYY-WNN}: WeeklyAggregate  
+qarbon_aggregates_week_{YYYY-WNN}: WeeklyAggregate
 qarbon_aggregates_month_{YYYY-MNN}: MonthlyAggregate
 ```
 
@@ -111,11 +116,11 @@ qarbon_settings: {
   dataRetentionDays: number,
   installedAt: number,
   version: string,
-  
+
   // NEW: Enhanced notification settings
   notificationSettings: {
     dailyThreshold: number,        // Alert when daily emissions exceed (grams)
-    weeklyThreshold: number,       // Alert when weekly emissions exceed 
+    weeklyThreshold: number,       // Alert when weekly emissions exceed
     showRealTimeAlerts: boolean,   // Show immediate emission alerts
     quietHours: {
       enabled: boolean,
@@ -123,7 +128,7 @@ qarbon_settings: {
       end: string                  // "08:00"
     }
   },
-  
+
   // NEW: Display preferences
   displayPreferences: {
     theme: 'light' | 'dark' | 'auto',
@@ -132,14 +137,14 @@ qarbon_settings: {
     animationsEnabled: boolean,
     compactMode: boolean
   },
-  
+
   // NEW: Privacy settings
   privacySettings: {
     collectPromptText: boolean,    // Whether to store prompt content
     shareAnonymousData: boolean,   // Opt-in for anonymous usage analytics
     dataExportFormat: 'json' | 'csv'
   },
-  
+
   // NEW: Goal tracking
   goalSettings: {
     enabled: boolean,
@@ -167,7 +172,7 @@ qarbon_aggregates_week_{YYYY-WNN}: {
   version: string
 }
 
-// NEW: Monthly aggregated data  
+// NEW: Monthly aggregated data
 qarbon_aggregates_month_{YYYY-MNN}: {
   period: 'month',
   startDate: string,
@@ -223,7 +228,7 @@ qarbon_onboarding: {
 Background Service Worker
 ├── API Interceptor
 │   ├── OpenAI Handler
-│   ├── Anthropic Handler  
+│   ├── Anthropic Handler
 │   ├── Google Gemini Handler
 │   └── AWS Bedrock Handler
 ├── Token Extraction Engine
@@ -366,6 +371,7 @@ Onboarding Flow:
 ### Popup Interface Wireframes
 
 #### 1. Main Dashboard (Current State Enhanced)
+
 ```
 ┌─────────────────────────────────┐
 │ 🌱 QarbonQuery        [⚙️] [📊] │
@@ -390,6 +396,7 @@ Onboarding Flow:
 ```
 
 #### 2. Analytics Dashboard (New)
+
 ```
 ┌─────────────────────────────────┐
 │ 📊 Analytics     [◀] [Today▼]  │
@@ -418,6 +425,7 @@ Onboarding Flow:
 ```
 
 #### 3. Settings Panel (Enhanced)
+
 ```
 ┌─────────────────────────────────┐
 │ ⚙️ Settings           [◀] [✓]  │
@@ -451,6 +459,7 @@ Onboarding Flow:
 ```
 
 #### 4. Onboarding Flow (New)
+
 ```
 ┌─────────────────────────────────┐
 │ Welcome to QarbonQuery! (1/4)   │
@@ -493,6 +502,7 @@ Onboarding Flow:
 ### Chart Component Wireframes
 
 #### 1. Line Chart (Weekly Trends)
+
 ```
 ┌─────────────────────────────────┐
 │ Weekly Emissions Trend          │
@@ -514,6 +524,7 @@ Onboarding Flow:
 ```
 
 #### 2. Provider Breakdown (Donut Chart)
+
 ```
 ┌─────────────────────────────────┐
 │ Provider Breakdown              │
@@ -541,24 +552,28 @@ Onboarding Flow:
 ## Implementation Roadmap
 
 ### Phase 1: Enhanced Storage & Analytics (Week 1-2)
+
 - Implement weekly/monthly aggregation storage
 - Add goal tracking and achievement system
 - Create analytics insights generation
 - Enhance settings schema with new preferences
 
 ### Phase 2: UI/UX Improvements (Week 3-4)
+
 - Redesign popup with tabbed interface
 - Implement chart components (Chart.js or similar)
 - Add real-time visual feedback
 - Create settings panel with advanced options
 
 ### Phase 3: Onboarding & Features (Week 5-6)
+
 - Build progressive onboarding flow
 - Implement goal setting and notifications
 - Add data export functionality
 - Create achievement and insight system
 
 ### Phase 4: Polish & Optimization (Week 7-8)
+
 - Performance optimization
 - Enhanced error handling
 - Accessibility improvements
@@ -567,24 +582,28 @@ Onboarding Flow:
 ## Technical Considerations
 
 ### Performance Optimization
+
 - Implement data pagination for large datasets
 - Use background alarms for expensive aggregation operations
 - Cache frequently accessed data in memory
 - Lazy load chart components
 
 ### Privacy & Security
+
 - Implement optional prompt text storage with user consent
 - Add data anonymization for analytics
 - Provide clear data retention controls
 - Support data export and deletion
 
 ### Compatibility
+
 - Maintain backward compatibility with existing storage schema
 - Implement migration system for schema updates
 - Support multiple browser APIs as available
 - Graceful degradation for missing features
 
 ### Testing Strategy
+
 - Unit tests for token extraction and calculations
 - Integration tests for storage operations
 - UI testing for popup components
@@ -592,4 +611,8 @@ Onboarding Flow:
 
 ## Conclusion
 
-This design specification provides a comprehensive roadmap for enhancing the QarbonQuery Chrome Extension with improved analytics, user experience, and goal tracking capabilities while maintaining the robust foundation of the current system. The phased implementation approach ensures minimal disruption to existing functionality while delivering meaningful improvements to user engagement and carbon awareness.
+This design specification provides a comprehensive roadmap for enhancing the QarbonQuery Chrome
+Extension with improved analytics, user experience, and goal tracking capabilities while maintaining
+the robust foundation of the current system. The phased implementation approach ensures minimal
+disruption to existing functionality while delivering meaningful improvements to user engagement and
+carbon awareness.

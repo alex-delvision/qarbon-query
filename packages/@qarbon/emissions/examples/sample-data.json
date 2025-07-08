@@ -21,7 +21,7 @@
       }
     },
     {
-      "id": "measurement_002", 
+      "id": "measurement_002",
       "timestamp": "2023-07-15T12:30:00Z",
       "metrics": {
         "carbon": {

@@ -14,21 +14,21 @@ console.log('🌐 Validating DNR Rules for Chrome Manifest V3 Compliance...\n');
 
 // Valid resource types according to Chrome declarativeNetRequest API
 const VALID_RESOURCE_TYPES = [
-  "main_frame",
-  "sub_frame", 
-  "stylesheet",
-  "script",
-  "image",
-  "font",
-  "object",
-  "xmlhttprequest",
-  "ping",
-  "csp_report",
-  "media",
-  "websocket",
-  "webtransport",
-  "webbundle",
-  "other"
+  'main_frame',
+  'sub_frame',
+  'stylesheet',
+  'script',
+  'image',
+  'font',
+  'object',
+  'xmlhttprequest',
+  'ping',
+  'csp_report',
+  'media',
+  'websocket',
+  'webtransport',
+  'webbundle',
+  'other',
 ];
 
 let passed = 0;
@@ -116,9 +116,18 @@ if (rules) {
 
     if (rule.action) {
       check(`Rule ${ruleNum} action type is valid`, () => {
-        const validActionTypes = ['block', 'redirect', 'allow', 'upgradeScheme', 'modifyHeaders'];
+        const validActionTypes = [
+          'block',
+          'redirect',
+          'allow',
+          'upgradeScheme',
+          'modifyHeaders',
+        ];
         if (!validActionTypes.includes(rule.action.type)) {
-          return { success: false, error: `Invalid action type: ${rule.action.type}` };
+          return {
+            success: false,
+            error: `Invalid action type: ${rule.action.type}`,
+          };
         }
         return { success: true };
       });
@@ -127,7 +136,10 @@ if (rules) {
     if (rule.condition) {
       check(`Rule ${ruleNum} has urlFilter or initiatorDomains`, () => {
         if (!rule.condition.urlFilter && !rule.condition.initiatorDomains) {
-          return { success: false, error: 'Must have urlFilter or initiatorDomains' };
+          return {
+            success: false,
+            error: 'Must have urlFilter or initiatorDomains',
+          };
         }
         return { success: true };
       });
@@ -137,11 +149,11 @@ if (rules) {
           const invalidTypes = rule.condition.resourceTypes.filter(
             type => !VALID_RESOURCE_TYPES.includes(type)
           );
-          
+
           if (invalidTypes.length > 0) {
-            return { 
-              success: false, 
-              error: `Invalid resource types: ${invalidTypes.join(', ')}. Valid types: ${VALID_RESOURCE_TYPES.join(', ')}` 
+            return {
+              success: false,
+              error: `Invalid resource types: ${invalidTypes.join(', ')}. Valid types: ${VALID_RESOURCE_TYPES.join(', ')}`,
             };
           }
           return { success: true };
@@ -149,9 +161,10 @@ if (rules) {
 
         check(`Rule ${ruleNum} does not use "fetch" resource type`, () => {
           if (rule.condition.resourceTypes.includes('fetch')) {
-            return { 
-              success: false, 
-              error: '"fetch" is not a valid resource type. Use "xmlhttprequest" for API calls' 
+            return {
+              success: false,
+              error:
+                '"fetch" is not a valid resource type. Use "xmlhttprequest" for API calls',
             };
           }
           return { success: true };
@@ -164,7 +177,7 @@ if (rules) {
   check('No duplicate rule IDs', () => {
     const ids = rules.map(rule => rule.id);
     const uniqueIds = [...new Set(ids)];
-    
+
     if (ids.length !== uniqueIds.length) {
       return { success: false, error: 'Duplicate rule IDs found' };
     }
@@ -173,11 +186,16 @@ if (rules) {
 
   // Check rule priorities
   check('Rule priorities are reasonable', () => {
-    const priorities = rules.map(rule => rule.priority).filter(p => p !== undefined);
+    const priorities = rules
+      .map(rule => rule.priority)
+      .filter(p => p !== undefined);
     const maxPriority = Math.max(...priorities);
-    
+
     if (maxPriority > 100) {
-      return { success: false, error: 'Very high rule priorities may cause issues' };
+      return {
+        success: false,
+        error: 'Very high rule priorities may cause issues',
+      };
     }
     return { success: true };
   });
@@ -188,15 +206,17 @@ if (rules) {
     'api.anthropic.com',
     'generativelanguage.googleapis.com',
     'bedrock',
-    'claude.ai'
+    'claude.ai',
   ];
 
   expectedProviders.forEach(provider => {
     check(`Has rule for ${provider}`, () => {
-      const hasRule = rules.some(rule => 
-        rule.condition.urlFilter && rule.condition.urlFilter.includes(provider)
+      const hasRule = rules.some(
+        rule =>
+          rule.condition.urlFilter &&
+          rule.condition.urlFilter.includes(provider)
       );
-      
+
       if (!hasRule) {
         return { success: false, error: `No rule found for ${provider}` };
       }

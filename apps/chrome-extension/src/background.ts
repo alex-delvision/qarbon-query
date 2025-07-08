@@ -17,10 +17,10 @@ const aiCalculator = {
       amount: baseEmission,
       confidence: {
         low: baseEmission * 0.8,
-        high: baseEmission * 1.2
-      }
+        high: baseEmission * 1.2,
+      },
     };
-  }
+  },
 };
 
 // Extension configuration
@@ -62,15 +62,18 @@ const AI_PROVIDER_PATTERNS = [
   '*://chat.openai.com/backend-api/conversation',
   '*://claude.ai/api/organizations/*/chat_conversations/*/completion',
   '*://bard.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*',
-  '*://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*'
+  '*://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*',
 ];
 
 // Store pending prompts keyed by tabId to reconcile prompt text with token data when API stats arrive
-const pendingPrompts = new Map<number, {
-  promptText: string;
-  timestamp: number;
-  url: string;
-}>();
+const pendingPrompts = new Map<
+  number,
+  {
+    promptText: string;
+    timestamp: number;
+    url: string;
+  }
+>();
 
 // Store API request data for correlation (reserved for future use)
 // const apiRequestData = new Map<string, {
@@ -99,7 +102,8 @@ function identifyProvider(url: string): string | null {
   if (url.includes('googleapis.com')) return 'gemini';
   if (url.includes('amazonaws.com')) return 'bedrock';
   if (url.includes('claude.ai')) return 'claude';
-  if (url.includes('bard.google.com') || url.includes('gemini.google.com')) return 'bard';
+  if (url.includes('bard.google.com') || url.includes('gemini.google.com'))
+    return 'bard';
   return null;
 }
 
@@ -107,8 +111,8 @@ function identifyProvider(url: string): string | null {
  * Provider-specific token extraction logic
  */
 async function extractTokens(
-  provider: string, 
-  url: string, 
+  provider: string,
+  url: string,
   responseBody: string
 ): Promise<{
   model: string;
@@ -117,30 +121,54 @@ async function extractTokens(
   energyPerToken: number;
   emissions?: number;
 } | null> {
-  
   const timestamp = Date.now();
   const energyPerToken = 0.001; // Default energy per token (placeholder)
-  
+
   try {
     switch (provider) {
       case 'openai':
-        return extractOpenAITokens(url, responseBody, timestamp, energyPerToken);
-      
+        return extractOpenAITokens(
+          url,
+          responseBody,
+          timestamp,
+          energyPerToken
+        );
+
       case 'anthropic':
-        return extractAnthropicTokens(url, responseBody, timestamp, energyPerToken);
-      
+        return extractAnthropicTokens(
+          url,
+          responseBody,
+          timestamp,
+          energyPerToken
+        );
+
       case 'gemini':
-        return extractGeminiTokens(url, responseBody, timestamp, energyPerToken);
-      
+        return extractGeminiTokens(
+          url,
+          responseBody,
+          timestamp,
+          energyPerToken
+        );
+
       case 'bedrock':
-        return extractBedrockTokens(url, responseBody, timestamp, energyPerToken);
-      
+        return extractBedrockTokens(
+          url,
+          responseBody,
+          timestamp,
+          energyPerToken
+        );
+
       case 'claude':
-        return extractClaudeWebTokens(url, responseBody, timestamp, energyPerToken);
-      
+        return extractClaudeWebTokens(
+          url,
+          responseBody,
+          timestamp,
+          energyPerToken
+        );
+
       case 'bard':
         return extractBardTokens(url, responseBody, timestamp, energyPerToken);
-      
+
       default:
         logger.error('Unknown provider:', provider);
         return null;
@@ -167,7 +195,7 @@ function extractOpenAITokens(
         model: 'unknown',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -179,17 +207,17 @@ function extractOpenAITokens(
       // Handle streaming response as string
       jsonData = responseBody;
     }
-    
+
     const parsed = parseTokens(jsonData, 'openai');
     return {
       model: parsed.model,
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing OpenAI response:', error);
@@ -197,7 +225,7 @@ function extractOpenAITokens(
       model: 'unknown',
       tokens: { total: 0, prompt: 0, completion: 0 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -217,7 +245,7 @@ function extractAnthropicTokens(
         model: 'unknown',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -229,17 +257,17 @@ function extractAnthropicTokens(
       // Handle streaming response as string
       jsonData = responseBody;
     }
-    
+
     const parsed = parseTokens(jsonData, 'anthropic');
     return {
       model: parsed.model,
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing Anthropic response:', error);
@@ -247,7 +275,7 @@ function extractAnthropicTokens(
       model: 'unknown',
       tokens: { total: 0, prompt: 0, completion: 0 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -267,7 +295,7 @@ function extractGeminiTokens(
         model: 'unknown',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -279,17 +307,17 @@ function extractGeminiTokens(
       // Handle streaming response as string
       jsonData = responseBody;
     }
-    
+
     const parsed = parseTokens(jsonData, 'google');
     return {
       model: parsed.model,
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing Google response:', error);
@@ -297,7 +325,7 @@ function extractGeminiTokens(
       model: 'unknown',
       tokens: { total: 0, prompt: 0, completion: 0 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -317,7 +345,7 @@ function extractBedrockTokens(
         model: 'unknown',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -329,17 +357,17 @@ function extractBedrockTokens(
       // Handle streaming response as string
       jsonData = responseBody;
     }
-    
+
     const parsed = parseTokens(jsonData, 'bedrock');
     return {
       model: parsed.model,
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing Bedrock response:', error);
@@ -347,7 +375,7 @@ function extractBedrockTokens(
       model: 'unknown',
       tokens: { total: 0, prompt: 0, completion: 0 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -367,7 +395,7 @@ function extractClaudeWebTokens(
         model: 'claude-web',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -379,10 +407,10 @@ function extractClaudeWebTokens(
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing Claude web response:', error);
@@ -391,7 +419,7 @@ function extractClaudeWebTokens(
       model: 'claude-web',
       tokens: { total: 95, prompt: 50, completion: 45 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -411,7 +439,7 @@ function extractBardTokens(
         model: 'bard-web',
         tokens: { total: 0, prompt: 0, completion: 0 },
         timestamp,
-        energyPerToken
+        energyPerToken,
       };
     }
 
@@ -422,10 +450,10 @@ function extractBardTokens(
       tokens: {
         total: parsed.tokens.total,
         prompt: parsed.tokens.prompt,
-        completion: parsed.tokens.completion
+        completion: parsed.tokens.completion,
       },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   } catch (error) {
     logger.error('Error parsing Bard response:', error);
@@ -434,7 +462,7 @@ function extractBardTokens(
       model: 'bard-web',
       tokens: { total: 85, prompt: 40, completion: 45 },
       timestamp,
-      energyPerToken
+      energyPerToken,
     };
   }
 }
@@ -447,74 +475,86 @@ async function storeEmissionData(data: any): Promise<void> {
     try {
       const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
       const storageKey = `qarbon_emissions_${today}`;
-      
+
       // Get existing QarbonQuery data
-      chrome.storage.local.get([storageKey, 'qarbon_settings', 'qarbon_queries'], (result: Record<string, any>) => {
-        if (chrome.runtime.lastError) {
-          logger.error('Storage get error:', chrome.runtime.lastError.message);
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-        
-        // Prepare emission data with proper structure
-        const emissionEntry = {
-          id: crypto.randomUUID(),
-          timestamp: data.timestamp || Date.now(),
-          provider: data.provider || 'unknown',
-          model: data.model || 'unknown',
-          tokens: data.tokens || { total: 0, prompt: 0, completion: 0 },
-          emissions: data.emissions || 0,
-          confidence: data.confidence || { low: 0, high: 0 },
-          url: data.url || '',
-          sessionId: data.sessionId || 'default'
-        };
-        
-        // Get existing emissions for today
-        const existingEmissions = result[storageKey] || [];
-        existingEmissions.push(emissionEntry);
-        
-        // Update queries count
-        const queriesData = result['qarbon_queries'] || { total: 0, daily: {} };
-        queriesData.total = (queriesData.total || 0) + 1;
-        if (!queriesData.daily) {
-          queriesData.daily = {};
-        }
-        // Ensure daily is properly typed as a record
-        const dailyQueries = queriesData.daily as Record<string, number>;
-        if (today) {
-          dailyQueries[today] = (dailyQueries[today] || 0) + 1;
-        }
-        queriesData.daily = dailyQueries;
-        
-        // Prepare update data
-        const updateData: Record<string, any> = {
-          [storageKey]: existingEmissions,
-          'qarbon_queries': queriesData,
-          'qarbon_last_updated': Date.now()
-        };
-        
-        // Initialize settings if not exists
-        if (!result['qarbon_settings']) {
-          updateData['qarbon_settings'] = {
-            trackingEnabled: true,
-            displayUnits: 'kg',
-            notifications: true,
-            dataRetentionDays: 30
-          };
-        }
-        
-        chrome.storage.local.set(updateData, () => {
+      chrome.storage.local.get(
+        [storageKey, 'qarbon_settings', 'qarbon_queries'],
+        (result: Record<string, any>) => {
           if (chrome.runtime.lastError) {
-            logger.error('Storage set error:', chrome.runtime.lastError.message);
+            logger.error(
+              'Storage get error:',
+              chrome.runtime.lastError.message
+            );
             reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            // Invalidate cache after writing new emission data
-            invalidateStorageCache(Object.keys(updateData));
-            logger.log('Successfully stored emission data:', emissionEntry);
-            resolve();
+            return;
           }
-        });
-      });
+
+          // Prepare emission data with proper structure
+          const emissionEntry = {
+            id: crypto.randomUUID(),
+            timestamp: data.timestamp || Date.now(),
+            provider: data.provider || 'unknown',
+            model: data.model || 'unknown',
+            tokens: data.tokens || { total: 0, prompt: 0, completion: 0 },
+            emissions: data.emissions || 0,
+            confidence: data.confidence || { low: 0, high: 0 },
+            url: data.url || '',
+            sessionId: data.sessionId || 'default',
+          };
+
+          // Get existing emissions for today
+          const existingEmissions = result[storageKey] || [];
+          existingEmissions.push(emissionEntry);
+
+          // Update queries count
+          const queriesData = result['qarbon_queries'] || {
+            total: 0,
+            daily: {},
+          };
+          queriesData.total = (queriesData.total || 0) + 1;
+          if (!queriesData.daily) {
+            queriesData.daily = {};
+          }
+          // Ensure daily is properly typed as a record
+          const dailyQueries = queriesData.daily as Record<string, number>;
+          if (today) {
+            dailyQueries[today] = (dailyQueries[today] || 0) + 1;
+          }
+          queriesData.daily = dailyQueries;
+
+          // Prepare update data
+          const updateData: Record<string, any> = {
+            [storageKey]: existingEmissions,
+            qarbon_queries: queriesData,
+            qarbon_last_updated: Date.now(),
+          };
+
+          // Initialize settings if not exists
+          if (!result['qarbon_settings']) {
+            updateData['qarbon_settings'] = {
+              trackingEnabled: true,
+              displayUnits: 'kg',
+              notifications: true,
+              dataRetentionDays: 30,
+            };
+          }
+
+          chrome.storage.local.set(updateData, () => {
+            if (chrome.runtime.lastError) {
+              logger.error(
+                'Storage set error:',
+                chrome.runtime.lastError.message
+              );
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              // Invalidate cache after writing new emission data
+              invalidateStorageCache(Object.keys(updateData));
+              logger.log('Successfully stored emission data:', emissionEntry);
+              resolve();
+            }
+          });
+        }
+      );
     } catch (error) {
       logger.error('Error in storeEmissionData:', error);
       reject(error);
@@ -537,12 +577,12 @@ async function emitTokenMessage(data: any): Promise<void> {
         emissions: data.emissions || 0,
         confidence: data.confidence || { low: 0, high: 0 },
         timestamp: data.timestamp || Date.now(),
-        energy: data.energy || 0
-      }
+        energy: data.energy || 0,
+      },
     };
 
     // Emit to all contexts (popup, content scripts, etc.)
-    chrome.runtime.sendMessage(message).catch((error) => {
+    chrome.runtime.sendMessage(message).catch(error => {
       // Silently handle case where no receivers exist
       logger.log('No message receivers available:', error?.message);
     });
@@ -570,21 +610,22 @@ async function emitTokenMessage(data: any): Promise<void> {
 //   };
 // }, 24 * 60 * 60 * 1000); // 24 hours
 
-
 // Storage cleanup and maintenance
 async function initializeStorage(): Promise<void> {
   try {
     // Get all current storage data
-    const allData = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get(null, (result) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    
+    const allData = await new Promise<Record<string, any>>(
+      (resolve, reject) => {
+        chrome.storage.local.get(null, result => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(result);
+          }
+        });
+      }
+    );
+
     // Initialize default settings if not present
     if (!allData['qarbon_settings']) {
       const defaultSettings = {
@@ -593,11 +634,11 @@ async function initializeStorage(): Promise<void> {
         notifications: true,
         dataRetentionDays: 30,
         installedAt: Date.now(),
-        version: extensionConfig.version
+        version: extensionConfig.version,
       };
-      
+
       await new Promise<void>((resolve, reject) => {
-        chrome.storage.local.set({ 'qarbon_settings': defaultSettings }, () => {
+        chrome.storage.local.set({ qarbon_settings: defaultSettings }, () => {
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {
@@ -607,16 +648,15 @@ async function initializeStorage(): Promise<void> {
         });
       });
     }
-    
+
     // Migration logic: walk through existing keys and inject default confidence when missing
     await migrateStorageData(allData);
-    
+
     // Initialize aggregated data placeholders for future alarms
     await initializeAggregatedPlaceholders();
-    
+
     // Clean up old data based on retention policy
     await cleanupOldData();
-    
   } catch (error) {
     logger.error('Error initializing storage:', error);
   }
@@ -629,39 +669,46 @@ async function migrateStorageData(allData: Record<string, any>): Promise<void> {
   try {
     const updateData: Record<string, any> = {};
     let migratedCount = 0;
-    
+
     // Walk through all storage keys
     for (const [key, value] of Object.entries(allData)) {
       // Process date-based emission keys (qarbon_emissions_YYYY-MM-DD)
       if (key.startsWith('qarbon_emissions_') && Array.isArray(value)) {
         const migratedEntries = value.map((entry: any) => {
           // Check if confidence is missing or incomplete
-          if (!entry.confidence || typeof entry.confidence !== 'object' || 
-              entry.confidence.low === undefined || entry.confidence.high === undefined) {
-            
+          if (
+            !entry.confidence ||
+            typeof entry.confidence !== 'object' ||
+            entry.confidence.low === undefined ||
+            entry.confidence.high === undefined
+          ) {
             // Provide default confidence based on emissions value or use fallback
             const defaultConfidence = {
               low: entry.emissions ? Math.max(0, entry.emissions * 0.8) : 0,
-              high: entry.emissions ? entry.emissions * 1.2 : 0
+              high: entry.emissions ? entry.emissions * 1.2 : 0,
             };
-            
+
             migratedCount++;
             return {
               ...entry,
-              confidence: defaultConfidence
+              confidence: defaultConfidence,
             };
           }
           return entry;
         });
-        
+
         // Only update if migrations were made
-        if (migratedEntries.some((entry: any, index: number) => 
-            entry.confidence !== value[index]?.confidence)) {
+        if (
+          migratedEntries.some(
+            (entry: any, index: number) =>
+              entry.confidence !== value[index]?.confidence
+          )
+        ) {
           updateData[key] = migratedEntries;
         }
       }
     }
-    
+
     // Apply migrations if any were made
     if (Object.keys(updateData).length > 0) {
       await new Promise<void>((resolve, reject) => {
@@ -669,13 +716,14 @@ async function migrateStorageData(allData: Record<string, any>): Promise<void> {
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {
-            logger.log(`Successfully migrated ${migratedCount} emission entries with confidence data`);
+            logger.log(
+              `Successfully migrated ${migratedCount} emission entries with confidence data`
+            );
             resolve();
           }
         });
       });
     }
-    
   } catch (error) {
     logger.error('Error during storage migration:', error);
   }
@@ -685,30 +733,33 @@ async function migrateStorageData(allData: Record<string, any>): Promise<void> {
  * Storage cache with TTL and invalidation
  */
 class StorageCache {
-  private cache = new Map<string, { data: any; timestamp: number; ttl: number }>();
+  private cache = new Map<
+    string,
+    { data: any; timestamp: number; ttl: number }
+  >();
   private readonly DEFAULT_TTL = 5 * 60 * 1000; // 5 minutes
-  
+
   set(key: string, data: any, ttlMs: number = this.DEFAULT_TTL): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttlMs
+      ttl: ttlMs,
     });
   }
-  
+
   get(key: string): any | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
-    
+
     const isExpired = Date.now() - entry.timestamp > entry.ttl;
     if (isExpired) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return entry.data;
   }
-  
+
   invalidate(keyPattern: string): void {
     const regex = new RegExp(keyPattern);
     for (const key of this.cache.keys()) {
@@ -717,11 +768,11 @@ class StorageCache {
       }
     }
   }
-  
+
   clear(): void {
     this.cache.clear();
   }
-  
+
   size(): number {
     return this.cache.size;
   }
@@ -733,20 +784,22 @@ const storageCache = new StorageCache();
 /**
  * Memoized storage getter with cache invalidation
  */
-async function getCachedStorageData(keys: string | string[]): Promise<Record<string, any>> {
+async function getCachedStorageData(
+  keys: string | string[]
+): Promise<Record<string, any>> {
   const keyArray = Array.isArray(keys) ? keys : [keys];
   const cacheKey = keyArray.sort().join(',');
-  
+
   // Check cache first
   const cached = storageCache.get(cacheKey);
   if (cached) {
     logger.log(`Cache hit for keys: ${cacheKey}`);
     return cached;
   }
-  
+
   // Fetch from storage
   const data = await new Promise<Record<string, any>>((resolve, reject) => {
-    chrome.storage.local.get(keyArray, (result) => {
+    chrome.storage.local.get(keyArray, result => {
       if (chrome.runtime.lastError) {
         reject(new Error(chrome.runtime.lastError.message));
       } else {
@@ -754,11 +807,13 @@ async function getCachedStorageData(keys: string | string[]): Promise<Record<str
       }
     });
   });
-  
+
   // Cache the result with 2-minute TTL for aggregate data
-  const ttl = keyArray.some(k => k.includes('aggregate')) ? 2 * 60 * 1000 : 30 * 1000;
+  const ttl = keyArray.some(k => k.includes('aggregate'))
+    ? 2 * 60 * 1000
+    : 30 * 1000;
   storageCache.set(cacheKey, data, ttl);
-  
+
   logger.log(`Cache miss, fetched from storage: ${cacheKey}`);
   return data;
 }
@@ -770,14 +825,14 @@ function invalidateStorageCache(updatedKeys: string[]): void {
   // Invalidate exact matches and pattern matches
   updatedKeys.forEach(key => {
     storageCache.invalidate(key);
-    
+
     // Also invalidate related aggregation keys
     if (key.startsWith('qarbon_emissions_')) {
       const date = key.split('_').pop();
       if (date) {
         // Invalidate daily aggregates
         storageCache.invalidate(`qarbon_aggregates_daily_${date}`);
-        
+
         // Invalidate weekly/monthly aggregates that might include this date
         const dateObj = new Date(date);
         const weekKey = getWeekKey(dateObj);
@@ -787,7 +842,7 @@ function invalidateStorageCache(updatedKeys: string[]): void {
       }
     }
   });
-  
+
   logger.log(`Invalidated cache for keys: ${updatedKeys.join(', ')}`);
 }
 
@@ -799,7 +854,7 @@ async function initializeAggregatedPlaceholders(): Promise<void> {
     const today = new Date();
     const currentWeek = getWeekKey(today);
     const currentMonth = getMonthKey(today);
-    
+
     const aggregateKeys = {
       // Weekly aggregate for popup charts
       [`qarbon_aggregates_week_${currentWeek}`]: {
@@ -812,7 +867,7 @@ async function initializeAggregatedPlaceholders(): Promise<void> {
         providerBreakdown: {},
         modelBreakdown: {},
         lastUpdated: Date.now(),
-        version: extensionConfig.version
+        version: extensionConfig.version,
       },
       // Monthly aggregate for popup charts
       [`qarbon_aggregates_month_${currentMonth}`]: {
@@ -825,26 +880,26 @@ async function initializeAggregatedPlaceholders(): Promise<void> {
         providerBreakdown: {},
         modelBreakdown: {},
         lastUpdated: Date.now(),
-        version: extensionConfig.version
+        version: extensionConfig.version,
       },
       // Dedicated popup chart data keys
-      'qarbon_popup_chart_week': {
+      qarbon_popup_chart_week: {
         labels: [],
         emissions: [],
         queries: [],
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       },
-      'qarbon_popup_chart_month': {
+      qarbon_popup_chart_month: {
         labels: [],
         emissions: [],
         queries: [],
-        lastUpdated: Date.now()
-      }
+        lastUpdated: Date.now(),
+      },
     };
-    
+
     // Check if placeholders already exist
     const existingData = await getCachedStorageData(Object.keys(aggregateKeys));
-    
+
     // Only create placeholders that don't exist
     const newPlaceholders: Record<string, any> = {};
     for (const [key, value] of Object.entries(aggregateKeys)) {
@@ -852,7 +907,7 @@ async function initializeAggregatedPlaceholders(): Promise<void> {
         newPlaceholders[key] = value;
       }
     }
-    
+
     if (Object.keys(newPlaceholders).length > 0) {
       await new Promise<void>((resolve, reject) => {
         chrome.storage.local.set(newPlaceholders, () => {
@@ -861,13 +916,14 @@ async function initializeAggregatedPlaceholders(): Promise<void> {
           } else {
             // Invalidate cache after write
             invalidateStorageCache(Object.keys(newPlaceholders));
-            logger.log(`Initialized ${Object.keys(newPlaceholders).length} aggregate placeholders`);
+            logger.log(
+              `Initialized ${Object.keys(newPlaceholders).length} aggregate placeholders`
+            );
             resolve();
           }
         });
       });
     }
-    
   } catch (error) {
     logger.error('Error initializing aggregate placeholders:', error);
   }
@@ -932,28 +988,33 @@ function getNextMonthStart(): number {
 async function cleanupOldData(): Promise<void> {
   try {
     // Get all storage data
-    const allData = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get(null, (result) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    
+    const allData = await new Promise<Record<string, any>>(
+      (resolve, reject) => {
+        chrome.storage.local.get(null, result => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(result);
+          }
+        });
+      }
+    );
+
     // Get retention policy
     const settings = allData['qarbon_settings'] || { dataRetentionDays: 30 };
     const retentionDays = settings.dataRetentionDays || 30;
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
     const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-    
+
     // Find keys to remove
     const keysToRemove: string[] = [];
-    
+
     Object.keys(allData).forEach(key => {
-      if (key.startsWith('qarbon_emissions_') || key.startsWith('qarbon_prompts_')) {
+      if (
+        key.startsWith('qarbon_emissions_') ||
+        key.startsWith('qarbon_prompts_')
+      ) {
         const dateStr = key.split('_').pop();
         if (dateStr && cutoffDateStr && dateStr < cutoffDateStr) {
           keysToRemove.push(key);
@@ -967,7 +1028,7 @@ async function cleanupOldData(): Promise<void> {
         }
       }
     });
-    
+
     // Remove old data
     if (keysToRemove.length > 0) {
       await new Promise<void>((resolve, reject) => {
@@ -981,7 +1042,6 @@ async function cleanupOldData(): Promise<void> {
         });
       });
     }
-    
   } catch (error) {
     logger.error('Error cleaning up old data:', error);
   }
@@ -995,53 +1055,55 @@ async function aggregateDailyEmissions(): Promise<void> {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     const emissionsKey = `qarbon_emissions_${today}`;
     const aggregateKey = `qarbon_aggregates_daily_${today}`;
-    
+
     // Get today's emissions data
-    const todayData = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get([emissionsKey], (result) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    
+    const todayData = await new Promise<Record<string, any>>(
+      (resolve, reject) => {
+        chrome.storage.local.get([emissionsKey], result => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(result);
+          }
+        });
+      }
+    );
+
     const emissions = todayData[emissionsKey] || [];
-    
+
     if (emissions.length === 0) {
       logger.log('No emissions data found for today, skipping aggregation');
       return;
     }
-    
+
     // Calculate totals
     let totalEmissions = 0;
     let totalTokens = 0;
     let totalQueries = emissions.length;
     let confidenceLow = 0;
     let confidenceHigh = 0;
-    
+
     const providerCounts: Record<string, number> = {};
     const modelCounts: Record<string, number> = {};
-    
+
     emissions.forEach((entry: any) => {
       totalEmissions += entry.emissions || 0;
       totalTokens += entry.tokens?.total || 0;
-      
+
       // Aggregate confidence ranges
       if (entry.confidence) {
         confidenceLow += entry.confidence.low || 0;
         confidenceHigh += entry.confidence.high || 0;
       }
-      
+
       // Count providers and models
       const provider = entry.provider || 'unknown';
       const model = entry.model || 'unknown';
-      
+
       providerCounts[provider] = (providerCounts[provider] || 0) + 1;
       modelCounts[model] = (modelCounts[model] || 0) + 1;
     });
-    
+
     // Create aggregate entry
     const aggregateData = {
       date: today,
@@ -1050,26 +1112,28 @@ async function aggregateDailyEmissions(): Promise<void> {
       totalQueries,
       confidence: {
         low: confidenceLow,
-        high: confidenceHigh
+        high: confidenceHigh,
       },
       providerBreakdown: providerCounts,
       modelBreakdown: modelCounts,
       aggregatedAt: Date.now(),
-      version: extensionConfig.version
+      version: extensionConfig.version,
     };
-    
+
     // Store aggregate data
     await new Promise<void>((resolve, reject) => {
       chrome.storage.local.set({ [aggregateKey]: aggregateData }, () => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
         } else {
-          logger.log(`Successfully aggregated daily emissions for ${today}:`, aggregateData);
+          logger.log(
+            `Successfully aggregated daily emissions for ${today}:`,
+            aggregateData
+          );
           resolve();
         }
       });
     });
-    
   } catch (error) {
     logger.error('Error aggregating daily emissions:', error);
   }
@@ -1084,59 +1148,69 @@ async function aggregateWeeklyEmissions(): Promise<void> {
     const currentWeek = getWeekKey(today);
     const weekStart = getWeekStart(new Date(today));
     const weekEnd = getWeekEnd(new Date(today));
-    
+
     // Generate list of dates in the current week
     const weekDates: string[] = [];
-    for (let d = new Date(weekStart); d <= weekEnd; d.setDate(d.getDate() + 1)) {
+    for (
+      let d = new Date(weekStart);
+      d <= weekEnd;
+      d.setDate(d.getDate() + 1)
+    ) {
       const dateStr = d.toISOString().split('T')[0];
       if (dateStr) {
         weekDates.push(dateStr);
       }
     }
-    
+
     // Get emission data for all days in the week
     const emissionKeys = weekDates.map(date => `qarbon_emissions_${date}`);
     const weekData = await getCachedStorageData(emissionKeys);
-    
+
     // Aggregate data across all days
     let totalEmissions = 0;
     let totalTokens = 0;
     let totalQueries = 0;
     let confidenceLow = 0;
     let confidenceHigh = 0;
-    
-    const providerBreakdown: Record<string, { emissions: number; queries: number }> = {};
-    const modelBreakdown: Record<string, { emissions: number; queries: number }> = {};
-    
+
+    const providerBreakdown: Record<
+      string,
+      { emissions: number; queries: number }
+    > = {};
+    const modelBreakdown: Record<
+      string,
+      { emissions: number; queries: number }
+    > = {};
+
     emissionKeys.forEach(key => {
       const dayEmissions = weekData[key] || [];
       dayEmissions.forEach((entry: any) => {
         totalEmissions += entry.emissions || 0;
         totalTokens += entry.tokens?.total || 0;
         totalQueries += 1;
-        
+
         if (entry.confidence) {
           confidenceLow += entry.confidence.low || 0;
           confidenceHigh += entry.confidence.high || 0;
         }
-        
+
         const provider = entry.provider || 'unknown';
         const model = entry.model || 'unknown';
-        
+
         if (!providerBreakdown[provider]) {
           providerBreakdown[provider] = { emissions: 0, queries: 0 };
         }
         if (!modelBreakdown[model]) {
           modelBreakdown[model] = { emissions: 0, queries: 0 };
         }
-        
+
         providerBreakdown[provider].emissions += entry.emissions || 0;
         providerBreakdown[provider].queries += 1;
         modelBreakdown[model].emissions += entry.emissions || 0;
         modelBreakdown[model].queries += 1;
       });
     });
-    
+
     // Create weekly aggregate
     const weeklyAggregate = {
       period: 'week',
@@ -1149,11 +1223,11 @@ async function aggregateWeeklyEmissions(): Promise<void> {
       providerBreakdown,
       modelBreakdown,
       lastUpdated: Date.now(),
-      version: extensionConfig.version
+      version: extensionConfig.version,
     };
-    
+
     const aggregateKey = `qarbon_aggregates_week_${currentWeek}`;
-    
+
     await new Promise<void>((resolve, reject) => {
       chrome.storage.local.set({ [aggregateKey]: weeklyAggregate }, () => {
         if (chrome.runtime.lastError) {
@@ -1161,12 +1235,14 @@ async function aggregateWeeklyEmissions(): Promise<void> {
         } else {
           // Invalidate cache
           invalidateStorageCache([aggregateKey]);
-          logger.log(`Successfully aggregated weekly emissions for ${currentWeek}:`, weeklyAggregate);
+          logger.log(
+            `Successfully aggregated weekly emissions for ${currentWeek}:`,
+            weeklyAggregate
+          );
           resolve();
         }
       });
     });
-    
   } catch (error) {
     logger.error('Error aggregating weekly emissions:', error);
   }
@@ -1181,59 +1257,69 @@ async function aggregateMonthlyEmissions(): Promise<void> {
     const currentMonth = getMonthKey(today);
     const monthStart = getMonthStart(today);
     const monthEnd = getMonthEnd(today);
-    
+
     // Generate list of dates in the current month
     const monthDates: string[] = [];
-    for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+    for (
+      let d = new Date(monthStart);
+      d <= monthEnd;
+      d.setDate(d.getDate() + 1)
+    ) {
       const dateStr = d.toISOString().split('T')[0];
       if (dateStr) {
         monthDates.push(dateStr);
       }
     }
-    
+
     // Get emission data for all days in the month
     const emissionKeys = monthDates.map(date => `qarbon_emissions_${date}`);
     const monthData = await getCachedStorageData(emissionKeys);
-    
+
     // Aggregate data across all days
     let totalEmissions = 0;
     let totalTokens = 0;
     let totalQueries = 0;
     let confidenceLow = 0;
     let confidenceHigh = 0;
-    
-    const providerBreakdown: Record<string, { emissions: number; queries: number }> = {};
-    const modelBreakdown: Record<string, { emissions: number; queries: number }> = {};
-    
+
+    const providerBreakdown: Record<
+      string,
+      { emissions: number; queries: number }
+    > = {};
+    const modelBreakdown: Record<
+      string,
+      { emissions: number; queries: number }
+    > = {};
+
     emissionKeys.forEach(key => {
       const dayEmissions = monthData[key] || [];
       dayEmissions.forEach((entry: any) => {
         totalEmissions += entry.emissions || 0;
         totalTokens += entry.tokens?.total || 0;
         totalQueries += 1;
-        
+
         if (entry.confidence) {
           confidenceLow += entry.confidence.low || 0;
           confidenceHigh += entry.confidence.high || 0;
         }
-        
+
         const provider = entry.provider || 'unknown';
         const model = entry.model || 'unknown';
-        
+
         if (!providerBreakdown[provider]) {
           providerBreakdown[provider] = { emissions: 0, queries: 0 };
         }
         if (!modelBreakdown[model]) {
           modelBreakdown[model] = { emissions: 0, queries: 0 };
         }
-        
+
         providerBreakdown[provider].emissions += entry.emissions || 0;
         providerBreakdown[provider].queries += 1;
         modelBreakdown[model].emissions += entry.emissions || 0;
         modelBreakdown[model].queries += 1;
       });
     });
-    
+
     // Create monthly aggregate
     const monthlyAggregate = {
       period: 'month',
@@ -1246,11 +1332,11 @@ async function aggregateMonthlyEmissions(): Promise<void> {
       providerBreakdown,
       modelBreakdown,
       lastUpdated: Date.now(),
-      version: extensionConfig.version
+      version: extensionConfig.version,
     };
-    
+
     const aggregateKey = `qarbon_aggregates_month_${currentMonth}`;
-    
+
     await new Promise<void>((resolve, reject) => {
       chrome.storage.local.set({ [aggregateKey]: monthlyAggregate }, () => {
         if (chrome.runtime.lastError) {
@@ -1258,12 +1344,14 @@ async function aggregateMonthlyEmissions(): Promise<void> {
         } else {
           // Invalidate cache
           invalidateStorageCache([aggregateKey]);
-          logger.log(`Successfully aggregated monthly emissions for ${currentMonth}:`, monthlyAggregate);
+          logger.log(
+            `Successfully aggregated monthly emissions for ${currentMonth}:`,
+            monthlyAggregate
+          );
           resolve();
         }
       });
     });
-    
   } catch (error) {
     logger.error('Error aggregating monthly emissions:', error);
   }
@@ -1278,7 +1366,7 @@ async function updatePopupChartData(): Promise<void> {
     const weekLabels: string[] = [];
     const weekEmissions: number[] = [];
     const weekQueries: number[] = [];
-    
+
     // Get last 7 days
     const today = new Date();
     const weekDates: string[] = [];
@@ -1291,28 +1379,28 @@ async function updatePopupChartData(): Promise<void> {
         weekLabels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
       }
     }
-    
+
     const weekKeys = weekDates.map(date => `qarbon_emissions_${date}`);
     const weekData = await getCachedStorageData(weekKeys);
-    
+
     weekDates.forEach(date => {
       const dayEmissions = weekData[`qarbon_emissions_${date}`] || [];
       let dayTotal = 0;
       let dayQueries = dayEmissions.length;
-      
+
       dayEmissions.forEach((entry: any) => {
         dayTotal += entry.emissions || 0;
       });
-      
+
       weekEmissions.push(dayTotal);
       weekQueries.push(dayQueries);
     });
-    
+
     // Update monthly chart data
     const monthLabels: string[] = [];
     const monthEmissions: number[] = [];
     const monthQueries: number[] = [];
-    
+
     // Get last 30 days
     const monthDates: string[] = [];
     for (let i = 29; i >= 0; i--) {
@@ -1324,39 +1412,39 @@ async function updatePopupChartData(): Promise<void> {
         monthLabels.push(date.toLocaleDateString('en-US', { day: 'numeric' }));
       }
     }
-    
+
     const monthKeys = monthDates.map(date => `qarbon_emissions_${date}`);
     const monthData = await getCachedStorageData(monthKeys);
-    
+
     monthDates.forEach(date => {
       const dayEmissions = monthData[`qarbon_emissions_${date}`] || [];
       let dayTotal = 0;
       let dayQueries = dayEmissions.length;
-      
+
       dayEmissions.forEach((entry: any) => {
         dayTotal += entry.emissions || 0;
       });
-      
+
       monthEmissions.push(dayTotal);
       monthQueries.push(dayQueries);
     });
-    
+
     // Store optimized chart data
     const chartData = {
-      'qarbon_popup_chart_week': {
+      qarbon_popup_chart_week: {
         labels: weekLabels,
         emissions: weekEmissions,
         queries: weekQueries,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
       },
-      'qarbon_popup_chart_month': {
+      qarbon_popup_chart_month: {
         labels: monthLabels,
         emissions: monthEmissions,
         queries: monthQueries,
-        lastUpdated: Date.now()
-      }
+        lastUpdated: Date.now(),
+      },
     };
-    
+
     await new Promise<void>((resolve, reject) => {
       chrome.storage.local.set(chartData, () => {
         if (chrome.runtime.lastError) {
@@ -1369,7 +1457,6 @@ async function updatePopupChartData(): Promise<void> {
         }
       });
     });
-    
   } catch (error) {
     logger.error('Error updating popup chart data:', error);
   }
@@ -1382,34 +1469,39 @@ async function syncDataToCloud(): Promise<void> {
   try {
     // Stub implementation - placeholder for future cloud backup
     logger.log('Cloud sync triggered (stub implementation)');
-    
+
     // Get recent data to sync (last 7 days)
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - 7);
     const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
-    
-    const allData = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get(null, (result) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-        } else {
-          resolve(result);
-        }
-      });
-    });
-    
+
+    const allData = await new Promise<Record<string, any>>(
+      (resolve, reject) => {
+        chrome.storage.local.get(null, result => {
+          if (chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+          } else {
+            resolve(result);
+          }
+        });
+      }
+    );
+
     const syncData: Record<string, any> = {};
-    
+
     // Collect recent emissions and aggregates
     Object.keys(allData).forEach(key => {
-      if (key.startsWith('qarbon_emissions_') || key.startsWith('qarbon_aggregates_daily_')) {
+      if (
+        key.startsWith('qarbon_emissions_') ||
+        key.startsWith('qarbon_aggregates_daily_')
+      ) {
         const dateStr = key.split('_').pop();
         if (dateStr && cutoffDateStr && dateStr >= cutoffDateStr) {
           syncData[key] = allData[key];
         }
       }
     });
-    
+
     // Include settings and metadata
     if (allData['qarbon_settings']) {
       syncData['qarbon_settings'] = allData['qarbon_settings'];
@@ -1417,14 +1509,16 @@ async function syncDataToCloud(): Promise<void> {
     if (allData['qarbon_queries']) {
       syncData['qarbon_queries'] = allData['qarbon_queries'];
     }
-    
+
     // Future implementation would send syncData to cloud service
     // For now, just log the data that would be synced
-    logger.log(`Cloud sync prepared ${Object.keys(syncData).length} data entries for sync`);
-    
+    logger.log(
+      `Cloud sync prepared ${Object.keys(syncData).length} data entries for sync`
+    );
+
     // Store last sync timestamp
     await new Promise<void>((resolve, reject) => {
-      chrome.storage.local.set({ 'qarbon_last_sync': Date.now() }, () => {
+      chrome.storage.local.set({ qarbon_last_sync: Date.now() }, () => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
         } else {
@@ -1432,7 +1526,6 @@ async function syncDataToCloud(): Promise<void> {
         }
       });
     });
-    
   } catch (error) {
     logger.error('Error in cloud sync:', error);
   }
@@ -1448,22 +1541,25 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
         pendingPrompts.set(sender.tab.id, {
           promptText: msg.promptText || '',
           timestamp: Date.now(),
-          url: sender.tab.url || ''
+          url: sender.tab.url || '',
         });
-        
-        logger.log(`Stored prompt for tab ${sender.tab.id}:`, msg.promptText?.substring(0, 100) + '...');
+
+        logger.log(
+          `Stored prompt for tab ${sender.tab.id}:`,
+          msg.promptText?.substring(0, 100) + '...'
+        );
       }
     } catch (error) {
       logger.error('Error handling PROMPT_CAPTURE message:', error);
     }
     return; // No response needed
   }
-  
+
   // Handle API response data from content script
   if (msg.type === 'API_RESPONSE_CAPTURED') {
     try {
       const { url, responseBody } = msg;
-      
+
       // Check if this is an AI API request
       if (!isAIAPIRequest(url)) {
         return;
@@ -1477,39 +1573,44 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
 
       // Extract tokens from response
       const tokenData = await extractTokens(provider, url, responseBody);
-      
+
       if (!tokenData) {
         logger.error('Failed to extract token data for provider:', provider);
         return;
       }
 
       // Calculate emissions
-      const emissionEntry = aiCalculator.calculateTokenEmissions(tokenData.tokens.total, tokenData.model);
+      const emissionEntry = aiCalculator.calculateTokenEmissions(
+        tokenData.tokens.total,
+        tokenData.model
+      );
 
       // Merge emission entry into existing data
       const normalizedData = {
         ...tokenData,
         emissions: emissionEntry.amount,
-        confidence: emissionEntry.confidence
+        confidence: emissionEntry.confidence,
       };
 
       // Store in chrome.storage.local under date keys
       await storeEmissionData(normalizedData);
-      
+
       // Emit message for popup or dev logging
       await emitTokenMessage(normalizedData);
-      
-      logger.log('Successfully processed and stored API response data for:', provider);
-      
+
+      logger.log(
+        'Successfully processed and stored API response data for:',
+        provider
+      );
     } catch (error) {
       logger.error('Error processing API response:', error);
     }
     return; // No response needed
   }
-  
+
   // Handle storage operations from popup
   if (msg.type === 'GET_STORAGE_DATA') {
-    chrome.storage.local.get(null, (result) => {
+    chrome.storage.local.get(null, result => {
       if (chrome.runtime.lastError) {
         sendResponse({ error: chrome.runtime.lastError.message });
       } else {
@@ -1518,17 +1619,19 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     });
     return true; // Keep message channel open for async response
   }
-  
+
   if (msg.type === 'CLEAR_STORAGE_DATA') {
     const keysToKeep = ['qarbon_settings']; // Keep settings
-    chrome.storage.local.get(null, (result) => {
+    chrome.storage.local.get(null, result => {
       if (chrome.runtime.lastError) {
         sendResponse({ error: chrome.runtime.lastError.message });
         return;
       }
-      
-      const keysToRemove = Object.keys(result).filter(key => !keysToKeep.includes(key));
-      
+
+      const keysToRemove = Object.keys(result).filter(
+        key => !keysToKeep.includes(key)
+      );
+
       if (keysToRemove.length > 0) {
         chrome.storage.local.remove(keysToRemove, () => {
           if (chrome.runtime.lastError) {
@@ -1543,20 +1646,20 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
     });
     return true; // Keep message channel open for async response
   }
-  
+
   // For unknown message types, return false to indicate no response
   return false;
 });
 
 // Handle extension install event
-chrome.runtime.onInstalled.addListener((details) => {
+chrome.runtime.onInstalled.addListener(details => {
   if (details.reason === 'install') {
     // Check if user has already been onboarded
-    chrome.storage.local.get(['qarbon_onboarded'], (result) => {
+    chrome.storage.local.get(['qarbon_onboarded'], result => {
       if (!result.qarbon_onboarded) {
         // Open onboarding tab
         chrome.tabs.create({
-          url: chrome.runtime.getURL('onboarding.html')
+          url: chrome.runtime.getURL('onboarding.html'),
         });
         logger.log('Opening onboarding for new install');
       }
@@ -1564,17 +1667,31 @@ chrome.runtime.onInstalled.addListener((details) => {
   } else if (details.reason === 'update') {
     logger.log('Extension updated to version:', extensionConfig.version);
   }
-  
+
   // Inject content script into any existing AI tabs on install/update
   chrome.tabs.query({}, tabs => {
     tabs.forEach(tab => {
-      if (tab.url && ['claude.ai', 'chatgpt.com', 'chat.openai.com', 'gemini.google.com', 'bard.google.com'].some(site => tab.url.includes(site))) {
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['content.js']
-        }).then(() => {
-          console.log(`Content script injected into existing tab: ${tab.url}`);
-        }).catch(() => {});
+      if (
+        tab.url &&
+        [
+          'claude.ai',
+          'chatgpt.com',
+          'chat.openai.com',
+          'gemini.google.com',
+          'bard.google.com',
+        ].some(site => tab.url.includes(site))
+      ) {
+        chrome.scripting
+          .executeScript({
+            target: { tabId: tab.id },
+            files: ['content.js'],
+          })
+          .then(() => {
+            console.log(
+              `Content script injected into existing tab: ${tab.url}`
+            );
+          })
+          .catch(() => {});
       }
     });
   });
@@ -1584,26 +1701,44 @@ chrome.runtime.onInstalled.addListener((details) => {
 initializeStorage();
 
 // Schedule periodic cleanup (once per day)
-chrome.alarms.create('qarbon-cleanup', { delayInMinutes: 60, periodInMinutes: 24 * 60 });
+chrome.alarms.create('qarbon-cleanup', {
+  delayInMinutes: 60,
+  periodInMinutes: 24 * 60,
+});
 
 // Schedule daily aggregation alarm
-chrome.alarms.create('qarbon-daily-aggregate', { when: Date.now() + 5 * 60 * 1000, periodInMinutes: 1440 });
+chrome.alarms.create('qarbon-daily-aggregate', {
+  when: Date.now() + 5 * 60 * 1000,
+  periodInMinutes: 1440,
+});
 
 // Schedule weekly aggregation alarm (every Sunday at midnight)
 const weeklyAlarmTime = getNextSunday();
-chrome.alarms.create('qarbon-weekly-aggregate', { when: weeklyAlarmTime, periodInMinutes: 7 * 1440 });
+chrome.alarms.create('qarbon-weekly-aggregate', {
+  when: weeklyAlarmTime,
+  periodInMinutes: 7 * 1440,
+});
 
 // Schedule monthly aggregation alarm (first day of each month)
 const monthlyAlarmTime = getNextMonthStart();
-chrome.alarms.create('qarbon-monthly-aggregate', { when: monthlyAlarmTime, periodInMinutes: 30 * 1440 });
+chrome.alarms.create('qarbon-monthly-aggregate', {
+  when: monthlyAlarmTime,
+  periodInMinutes: 30 * 1440,
+});
 
 // Schedule popup chart update alarm (every 15 minutes)
-chrome.alarms.create('qarbon-chart-update', { delayInMinutes: 15, periodInMinutes: 15 });
+chrome.alarms.create('qarbon-chart-update', {
+  delayInMinutes: 15,
+  periodInMinutes: 15,
+});
 
 // Schedule sync alarm stub for future cloud backup
-chrome.alarms.create('qarbon-sync', { delayInMinutes: 30, periodInMinutes: 60 });
+chrome.alarms.create('qarbon-sync', {
+  delayInMinutes: 30,
+  periodInMinutes: 60,
+});
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === 'qarbon-cleanup') {
     cleanupOldData();
   } else if (alarm.name === 'qarbon-daily-aggregate') {
@@ -1621,22 +1756,25 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 // Badge color mapping based on emission levels
 const BADGE_COLORS = {
-  green: '#4CAF50',   // Low emissions (0-5g)
-  yellow: '#FFC107',  // Medium emissions (5-15g)
-  orange: '#FF9800',  // High emissions (15-30g)
-  red: '#F44336'      // Very high emissions (30g+)
+  green: '#4CAF50', // Low emissions (0-5g)
+  yellow: '#FFC107', // Medium emissions (5-15g)
+  orange: '#FF9800', // High emissions (15-30g)
+  red: '#F44336', // Very high emissions (30g+)
 };
 
 /**
  * Calculate today's total emissions from storage
  */
-async function calculateTodayEmissions(): Promise<{ total: number; color: string }> {
+async function calculateTodayEmissions(): Promise<{
+  total: number;
+  color: string;
+}> {
   try {
     const today = new Date().toISOString().split('T')[0];
     const storageKey = `qarbon_emissions_${today}`;
-    
+
     const result = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get([storageKey], (result) => {
+      chrome.storage.local.get([storageKey], result => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
         } else {
@@ -1644,18 +1782,18 @@ async function calculateTodayEmissions(): Promise<{ total: number; color: string
         }
       });
     });
-    
+
     const emissions = result[storageKey] || [];
     let total = 0;
-    
+
     emissions.forEach((entry: any) => {
       total += entry.emissions || 0;
     });
-    
+
     // Convert to grams and determine color
     const totalGrams = total * 1000; // Convert kg to grams
     let color: string;
-    
+
     if (totalGrams < 5) {
       color = BADGE_COLORS.green;
     } else if (totalGrams < 15) {
@@ -1665,7 +1803,7 @@ async function calculateTodayEmissions(): Promise<{ total: number; color: string
     } else {
       color = BADGE_COLORS.red;
     }
-    
+
     return { total: totalGrams, color };
   } catch (error) {
     logger.error('Error calculating today emissions:', error);
@@ -1679,7 +1817,7 @@ async function calculateTodayEmissions(): Promise<{ total: number; color: string
 async function updateBadge(): Promise<void> {
   try {
     const { total, color } = await calculateTodayEmissions();
-    
+
     // Format badge text
     let badgeText = '';
     if (total > 0) {
@@ -1691,11 +1829,11 @@ async function updateBadge(): Promise<void> {
         badgeText = `${Math.round(total / 1000)}kg`;
       }
     }
-    
+
     // Update badge
     await chrome.action.setBadgeText({ text: badgeText });
     await chrome.action.setBadgeBackgroundColor({ color });
-    
+
     logger.log(`Badge updated: ${badgeText} (${color})`);
   } catch (error) {
     logger.error('Error updating badge:', error);
@@ -1705,7 +1843,7 @@ async function updateBadge(): Promise<void> {
 /**
  * Handle Chrome action click to open popup
  */
-chrome.action.onClicked.addListener(async (_tab) => {
+chrome.action.onClicked.addListener(async _tab => {
   try {
     // Open popup programmatically
     await chrome.action.openPopup();
@@ -1713,7 +1851,7 @@ chrome.action.onClicked.addListener(async (_tab) => {
   } catch (error) {
     // Fallback: If popup fails to open, log the error
     logger.error('Failed to open popup:', error);
-    
+
     // Alternative: Create a new tab or window if needed
     // chrome.tabs.create({ url: chrome.runtime.getURL('popup.html') });
   }
@@ -1724,11 +1862,11 @@ chrome.action.onClicked.addListener(async (_tab) => {
  */
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== 'local') return;
-  
+
   // Check if any emission data changed
   const today = new Date().toISOString().split('T')[0];
   const todayKey = `qarbon_emissions_${today}`;
-  
+
   if (changes[todayKey]) {
     logger.log('Emission data changed, updating badge');
     updateBadge();
@@ -1748,21 +1886,29 @@ chrome.runtime.onMessage.addListener((message, _sender, _sendResponse) => {
 // Auto-inject content script on all AI sites
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
-    const aiSites = ['claude.ai', 'chatgpt.com', 'chat.openai.com', 'gemini.google.com', 'bard.google.com'];
-    
+    const aiSites = [
+      'claude.ai',
+      'chatgpt.com',
+      'chat.openai.com',
+      'gemini.google.com',
+      'bard.google.com',
+    ];
+
     if (aiSites.some(site => tab.url.includes(site))) {
-      chrome.scripting.executeScript({
-        target: { tabId },
-        files: ['content.js']
-      }).then(() => {
-        console.log(`Content script injected into ${tab.url}`);
-      }).catch(err => {
-        console.error('Failed to inject content script:', err);
-      });
+      chrome.scripting
+        .executeScript({
+          target: { tabId },
+          files: ['content.js'],
+        })
+        .then(() => {
+          console.log(`Content script injected into ${tab.url}`);
+        })
+        .catch(err => {
+          console.error('Failed to inject content script:', err);
+        });
     }
   }
 });
-
 
 // Initialize badge on startup
 updateBadge();

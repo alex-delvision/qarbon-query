@@ -3,9 +3,16 @@
  * Minimal bundle focused on AI emissions calculations
  */
 
-import { getOptimizedAIFactor, calculateBatchAI, getRegionMultiplier } from './optimized/factors';
+import {
+  getOptimizedAIFactor,
+  calculateBatchAI,
+  getRegionMultiplier,
+} from './optimized/factors';
 import { featureFlags } from './optimized/feature-flags';
-import { performanceTracker, measurePerformance } from './optimized/performance';
+import {
+  performanceTracker,
+  measurePerformance,
+} from './optimized/performance';
 
 import { getAIFactor, AI_FACTORS } from './factors';
 
@@ -47,9 +54,8 @@ export class AIEmissionsCalculator {
       throw new Error(`Unknown AI model: ${model}`);
     }
 
-    const amount = tokens > 0 
-      ? tokens * factor.co2PerToken
-      : factor.co2PerQuery || 0;
+    const amount =
+      tokens > 0 ? tokens * factor.co2PerToken : factor.co2PerQuery || 0;
 
     return {
       id: `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -59,7 +65,7 @@ export class AIEmissionsCalculator {
       unit: 'g',
       category: 'ai',
       confidence: factor.confidence,
-      model
+      model,
     };
   }
 
@@ -86,24 +92,34 @@ export class AIEmissionsCalculator {
       unit: 'g',
       category: 'ai',
       confidence: factor.confidence,
-      model
+      model,
     };
   }
 
   /**
    * Batch calculate emissions for multiple models/inputs
    */
-  calculateBatch(inputs: Array<{
-    tokens?: number;
-    queries?: number;
-    model: string;
-    options?: AICalculationOptions;
-  }>): AIEmissionData[] {
+  calculateBatch(
+    inputs: Array<{
+      tokens?: number;
+      queries?: number;
+      model: string;
+      options?: AICalculationOptions;
+    }>
+  ): AIEmissionData[] {
     return inputs.map(input => {
       if (input.tokens !== undefined) {
-        return this.calculateTokenEmissions(input.tokens, input.model, input.options);
+        return this.calculateTokenEmissions(
+          input.tokens,
+          input.model,
+          input.options
+        );
       } else if (input.queries !== undefined) {
-        return this.calculateQueryEmissions(input.queries, input.model, input.options);
+        return this.calculateQueryEmissions(
+          input.queries,
+          input.model,
+          input.options
+        );
       } else {
         throw new Error('Must specify either tokens or queries');
       }
@@ -160,7 +176,7 @@ export class AIEmissionsCalculator {
   getCacheStats() {
     return {
       size: this.factorCache.size,
-      keys: Array.from(this.factorCache.keys())
+      keys: Array.from(this.factorCache.keys()),
     };
   }
 }

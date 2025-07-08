@@ -1,6 +1,6 @@
 /**
  * AI Emissions Tracking Example
- * 
+ *
  * This example demonstrates how to track and calculate carbon emissions
  * from AI model usage, including uncertainty quantification and batch processing.
  */
@@ -15,7 +15,7 @@ const aiUsageData = [
     tokens: 1500,
     session_id: 'session_001',
     user: 'developer_1',
-    timestamp: '2023-07-15T10:30:00Z'
+    timestamp: '2023-07-15T10:30:00Z',
   },
   {
     model: 'gpt-3.5-turbo',
@@ -23,7 +23,7 @@ const aiUsageData = [
     tokens: 800,
     session_id: 'session_002',
     user: 'writer_1',
-    timestamp: '2023-07-15T10:35:00Z'
+    timestamp: '2023-07-15T10:35:00Z',
   },
   {
     model: 'claude-2',
@@ -31,7 +31,7 @@ const aiUsageData = [
     tokens: 2200,
     session_id: 'session_003',
     user: 'analyst_1',
-    timestamp: '2023-07-15T10:40:00Z'
+    timestamp: '2023-07-15T10:40:00Z',
   },
   {
     model: 'gpt-4',
@@ -39,7 +39,7 @@ const aiUsageData = [
     tokens: 3000,
     session_id: 'session_004',
     user: 'data_scientist_1',
-    timestamp: '2023-07-15T10:45:00Z'
+    timestamp: '2023-07-15T10:45:00Z',
   },
   {
     model: 'text-davinci-003',
@@ -47,8 +47,8 @@ const aiUsageData = [
     tokens: 1200,
     session_id: 'session_005',
     user: 'content_creator_1',
-    timestamp: '2023-07-15T10:50:00Z'
-  }
+    timestamp: '2023-07-15T10:50:00Z',
+  },
 ];
 
 async function demonstrateAIEmissionsTracking() {
@@ -57,7 +57,7 @@ async function demonstrateAIEmissionsTracking() {
 
   const calculator = new EmissionsCalculator({
     enableOptimizations: true,
-    enableUncertainty: true
+    enableUncertainty: true,
   });
 
   // Example 1: Single AI inference calculation
@@ -71,28 +71,34 @@ async function demonstrateAIEmissionsTracking() {
     console.log(`  Tokens: ${singleInference.tokens}`);
     console.log(`  User: ${singleInference.user}\n`);
 
-    const result = await calculator.calculate({
-      type: 'ai',
-      tokens: singleInference.tokens,
-      model: singleInference.model
-    }, {
-      includeUncertainty: true,
-      uncertaintyOptions: {
-        method: 'montecarlo',
-        iterations: 5000,
-        confidenceLevel: 95
+    const result = await calculator.calculate(
+      {
+        type: 'ai',
+        tokens: singleInference.tokens,
+        model: singleInference.model,
+      },
+      {
+        includeUncertainty: true,
+        uncertaintyOptions: {
+          method: 'montecarlo',
+          iterations: 5000,
+          confidenceLevel: 95,
+        },
       }
-    });
+    );
 
     console.log(`📊 Results:`);
     console.log(`  Emissions: ${result.data.amount} ${result.data.unit} CO2`);
     if (result.data.uncertainty) {
-      console.log(`  Uncertainty (95% CI): ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`);
-      console.log(`  Mean: ${result.data.uncertainty.mean} ${result.data.unit}`);
+      console.log(
+        `  Uncertainty (95% CI): ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`
+      );
+      console.log(
+        `  Mean: ${result.data.uncertainty.mean} ${result.data.unit}`
+      );
     }
     console.log(`  Processing time: ${result.processingTime.toFixed(2)}ms`);
     console.log(`  Source: ${result.source}\n`);
-
   } catch (error) {
     console.error('❌ Single inference calculation error:', error.message);
   }
@@ -107,28 +113,33 @@ async function demonstrateAIEmissionsTracking() {
     const batchInputs = aiUsageData.map(usage => ({
       type: 'ai',
       tokens: usage.tokens,
-      model: usage.model
+      model: usage.model,
     }));
 
     const batchStartTime = performance.now();
     const batchResults = await calculator.calculate(batchInputs, {
       batchSize: 10,
-      includeUncertainty: false // Disable for faster batch processing
+      includeUncertainty: false, // Disable for faster batch processing
     });
     const batchEndTime = performance.now();
 
-    console.log(`✅ Batch processing completed in ${(batchEndTime - batchStartTime).toFixed(2)}ms`);
-    console.log(`   Average time per calculation: ${((batchEndTime - batchStartTime) / batchInputs.length).toFixed(2)}ms\n`);
+    console.log(
+      `✅ Batch processing completed in ${(batchEndTime - batchStartTime).toFixed(2)}ms`
+    );
+    console.log(
+      `   Average time per calculation: ${((batchEndTime - batchStartTime) / batchInputs.length).toFixed(2)}ms\n`
+    );
 
     // Process results
     batchResults.forEach((result, index) => {
       const usage = aiUsageData[index];
       console.log(`📊 ${usage.model} (${usage.task}):`);
-      console.log(`   Tokens: ${usage.tokens} → ${result.data.amount} ${result.data.unit} CO2`);
+      console.log(
+        `   Tokens: ${usage.tokens} → ${result.data.amount} ${result.data.unit} CO2`
+      );
     });
 
     console.log('');
-
   } catch (error) {
     console.error('❌ Batch processing error:', error.message);
   }
@@ -142,62 +153,82 @@ async function demonstrateAIEmissionsTracking() {
       { model: 'gpt-4', tokens: 1000 },
       { model: 'gpt-3.5-turbo', tokens: 1000 },
       { model: 'claude-2', tokens: 1000 },
-      { model: 'text-davinci-003', tokens: 1000 }
+      { model: 'text-davinci-003', tokens: 1000 },
     ];
 
-    console.log('Comparing emissions for 1000 tokens across different models:\n');
+    console.log(
+      'Comparing emissions for 1000 tokens across different models:\n'
+    );
 
     const comparisonResults = [];
     for (const comparison of modelComparisonData) {
       try {
-        const result = await calculator.calculate({
-          type: 'ai',
-          tokens: comparison.tokens,
-          model: comparison.model
-        }, {
-          includeUncertainty: true,
-          uncertaintyOptions: {
-            method: 'montecarlo',
-            iterations: 3000,
-            confidenceLevel: 95
+        const result = await calculator.calculate(
+          {
+            type: 'ai',
+            tokens: comparison.tokens,
+            model: comparison.model,
+          },
+          {
+            includeUncertainty: true,
+            uncertaintyOptions: {
+              method: 'montecarlo',
+              iterations: 3000,
+              confidenceLevel: 95,
+            },
           }
-        });
+        );
 
         comparisonResults.push({
           model: comparison.model,
           tokens: comparison.tokens,
           emissions: result.data.amount,
           unit: result.data.unit,
-          uncertainty: result.data.uncertainty
+          uncertainty: result.data.uncertainty,
         });
 
         console.log(`🎯 ${comparison.model}:`);
-        console.log(`   Emissions: ${result.data.amount} ${result.data.unit} CO2`);
+        console.log(
+          `   Emissions: ${result.data.amount} ${result.data.unit} CO2`
+        );
         if (result.data.uncertainty) {
-          console.log(`   Range: ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`);
-          const confidenceWidth = result.data.uncertainty.high - result.data.uncertainty.low;
-          console.log(`   Confidence width: ${confidenceWidth.toFixed(3)} ${result.data.unit}`);
+          console.log(
+            `   Range: ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`
+          );
+          const confidenceWidth =
+            result.data.uncertainty.high - result.data.uncertainty.low;
+          console.log(
+            `   Confidence width: ${confidenceWidth.toFixed(3)} ${result.data.unit}`
+          );
         }
         console.log('');
-
       } catch (error) {
-        console.error(`❌ Error calculating for ${comparison.model}:`, error.message);
+        console.error(
+          `❌ Error calculating for ${comparison.model}:`,
+          error.message
+        );
       }
     }
 
     // Find most/least efficient models
     if (comparisonResults.length > 0) {
-      const sortedByEmissions = comparisonResults.sort((a, b) => a.emissions - b.emissions);
+      const sortedByEmissions = comparisonResults.sort(
+        (a, b) => a.emissions - b.emissions
+      );
       console.log('🏆 Model Efficiency Ranking (per 1000 tokens):');
       sortedByEmissions.forEach((result, index) => {
-        const efficiency = index === 0 ? '🥇 Most efficient' : 
-                          index === sortedByEmissions.length - 1 ? '🥉 Least efficient' : 
-                          `#${index + 1}`;
-        console.log(`   ${efficiency}: ${result.model} (${result.emissions} ${result.unit})`);
+        const efficiency =
+          index === 0
+            ? '🥇 Most efficient'
+            : index === sortedByEmissions.length - 1
+              ? '🥉 Least efficient'
+              : `#${index + 1}`;
+        console.log(
+          `   ${efficiency}: ${result.model} (${result.emissions} ${result.unit})`
+        );
       });
       console.log('');
     }
-
   } catch (error) {
     console.error('❌ Model comparison error:', error.message);
   }
@@ -216,14 +247,18 @@ async function demonstrateAIEmissionsTracking() {
       const result = await calculator.calculate({
         type: 'ai',
         tokens: usage.tokens,
-        model: usage.model
+        model: usage.model,
       });
 
       const emissions = result.data.amount;
 
       // Track by user
       if (!userEmissions[usage.user]) {
-        userEmissions[usage.user] = { totalEmissions: 0, totalTokens: 0, sessions: 0 };
+        userEmissions[usage.user] = {
+          totalEmissions: 0,
+          totalTokens: 0,
+          sessions: 0,
+        };
       }
       userEmissions[usage.user].totalEmissions += emissions;
       userEmissions[usage.user].totalTokens += usage.tokens;
@@ -231,7 +266,11 @@ async function demonstrateAIEmissionsTracking() {
 
       // Track by task
       if (!taskEmissions[usage.task]) {
-        taskEmissions[usage.task] = { totalEmissions: 0, totalTokens: 0, count: 0 };
+        taskEmissions[usage.task] = {
+          totalEmissions: 0,
+          totalTokens: 0,
+          count: 0,
+        };
       }
       taskEmissions[usage.task].totalEmissions += emissions;
       taskEmissions[usage.task].totalTokens += usage.tokens;
@@ -239,7 +278,11 @@ async function demonstrateAIEmissionsTracking() {
 
       // Track by model
       if (!modelEmissions[usage.model]) {
-        modelEmissions[usage.model] = { totalEmissions: 0, totalTokens: 0, count: 0 };
+        modelEmissions[usage.model] = {
+          totalEmissions: 0,
+          totalTokens: 0,
+          count: 0,
+        };
       }
       modelEmissions[usage.model].totalEmissions += emissions;
       modelEmissions[usage.model].totalTokens += usage.tokens;
@@ -249,35 +292,54 @@ async function demonstrateAIEmissionsTracking() {
     // Generate reports
     console.log('👥 Emissions by User:');
     Object.entries(userEmissions).forEach(([user, data]) => {
-      const avgEmissionsPerToken = (data.totalEmissions / data.totalTokens).toFixed(6);
-      console.log(`   ${user}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.totalTokens} tokens, ${data.sessions} sessions)`);
+      const avgEmissionsPerToken = (
+        data.totalEmissions / data.totalTokens
+      ).toFixed(6);
+      console.log(
+        `   ${user}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.totalTokens} tokens, ${data.sessions} sessions)`
+      );
       console.log(`     Average: ${avgEmissionsPerToken}g CO2/token`);
     });
 
     console.log('\n📋 Emissions by Task Type:');
     Object.entries(taskEmissions).forEach(([task, data]) => {
       const avgEmissionsPerTask = (data.totalEmissions / data.count).toFixed(3);
-      console.log(`   ${task}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.count} tasks)`);
+      console.log(
+        `   ${task}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.count} tasks)`
+      );
       console.log(`     Average per task: ${avgEmissionsPerTask}g CO2`);
     });
 
     console.log('\n🤖 Emissions by Model:');
     Object.entries(modelEmissions).forEach(([model, data]) => {
-      const avgEmissionsPerToken = (data.totalEmissions / data.totalTokens).toFixed(6);
-      console.log(`   ${model}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.count} uses)`);
+      const avgEmissionsPerToken = (
+        data.totalEmissions / data.totalTokens
+      ).toFixed(6);
+      console.log(
+        `   ${model}: ${data.totalEmissions.toFixed(3)}g CO2 (${data.count} uses)`
+      );
       console.log(`     Efficiency: ${avgEmissionsPerToken}g CO2/token`);
     });
 
     // Calculate total organizational footprint
-    const totalEmissions = Object.values(userEmissions).reduce((sum, user) => sum + user.totalEmissions, 0);
-    const totalTokens = Object.values(userEmissions).reduce((sum, user) => sum + user.totalTokens, 0);
+    const totalEmissions = Object.values(userEmissions).reduce(
+      (sum, user) => sum + user.totalEmissions,
+      0
+    );
+    const totalTokens = Object.values(userEmissions).reduce(
+      (sum, user) => sum + user.totalTokens,
+      0
+    );
 
     console.log('\n🌍 Total Organizational AI Footprint:');
     console.log(`   Total Emissions: ${totalEmissions.toFixed(3)}g CO2`);
     console.log(`   Total Tokens: ${totalTokens.toLocaleString()}`);
-    console.log(`   Average Efficiency: ${(totalEmissions / totalTokens).toFixed(6)}g CO2/token`);
-    console.log(`   Equivalent to: ${(totalEmissions / 1000000).toFixed(6)} kg CO2`);
-
+    console.log(
+      `   Average Efficiency: ${(totalEmissions / totalTokens).toFixed(6)}g CO2/token`
+    );
+    console.log(
+      `   Equivalent to: ${(totalEmissions / 1000000).toFixed(6)} kg CO2`
+    );
   } catch (error) {
     console.error('❌ Usage tracking error:', error.message);
   }
@@ -310,18 +372,19 @@ async function simulateRealTimeAIMonitoring(calculator) {
       const result = await calculator.calculate({
         type: 'ai',
         tokens,
-        model
+        model,
       });
       const endTime = performance.now();
 
       console.log(`🔍 Real-time inference ${i + 1}:`);
       console.log(`   User: ${user} | Task: ${task} | Model: ${model}`);
-      console.log(`   Tokens: ${tokens} → ${result.data.amount} ${result.data.unit} CO2`);
+      console.log(
+        `   Tokens: ${tokens} → ${result.data.amount} ${result.data.unit} CO2`
+      );
       console.log(`   Processing: ${(endTime - startTime).toFixed(2)}ms`);
 
       // Simulate processing delay
       await new Promise(resolve => setTimeout(resolve, 100));
-
     } catch (error) {
       console.error(`❌ Real-time inference ${i + 1} failed:`, error.message);
     }
@@ -331,13 +394,21 @@ async function simulateRealTimeAIMonitoring(calculator) {
 }
 
 // Utility function to calculate emissions for a specific model and token count
-async function calculateModelEmissions(calculator, model, tokens, options = {}) {
+async function calculateModelEmissions(
+  calculator,
+  model,
+  tokens,
+  options = {}
+) {
   try {
-    const result = await calculator.calculate({
-      type: 'ai',
-      tokens,
-      model
-    }, options);
+    const result = await calculator.calculate(
+      {
+        type: 'ai',
+        tokens,
+        model,
+      },
+      options
+    );
 
     return {
       success: true,
@@ -346,21 +417,24 @@ async function calculateModelEmissions(calculator, model, tokens, options = {}) 
       emissions: result.data.amount,
       unit: result.data.unit,
       uncertainty: result.data.uncertainty,
-      processingTime: result.processingTime
+      processingTime: result.processingTime,
     };
   } catch (error) {
     return {
       success: false,
       model,
       tokens,
-      error: error.message
+      error: error.message,
     };
   }
 }
 
 // Utility function to estimate monthly AI emissions based on usage patterns
 function estimateMonthlyAIEmissions(dailyUsageData) {
-  const dailyTotal = dailyUsageData.reduce((sum, usage) => sum + usage.emissions, 0);
+  const dailyTotal = dailyUsageData.reduce(
+    (sum, usage) => sum + usage.emissions,
+    0
+  );
   const weeklyTotal = dailyTotal * 7;
   const monthlyTotal = dailyTotal * 30;
   const yearlyTotal = dailyTotal * 365;
@@ -370,7 +444,7 @@ function estimateMonthlyAIEmissions(dailyUsageData) {
     weekly: weeklyTotal,
     monthly: monthlyTotal,
     yearly: yearlyTotal,
-    unit: dailyUsageData[0]?.unit || 'g'
+    unit: dailyUsageData[0]?.unit || 'g',
   };
 }
 
@@ -389,7 +463,7 @@ async function demonstrateUtilityFunctions() {
   const sampleDailyData = [
     { emissions: 50.2, unit: 'g' },
     { emissions: 75.8, unit: 'g' },
-    { emissions: 30.1, unit: 'g' }
+    { emissions: 30.1, unit: 'g' },
   ];
   const monthlyEstimate = estimateMonthlyAIEmissions(sampleDailyData);
   console.log('📅 Monthly emission estimate:', monthlyEstimate);
@@ -402,9 +476,9 @@ if (require.main === module) {
     .catch(console.error);
 }
 
-module.exports = { 
+module.exports = {
   demonstrateAIEmissionsTracking,
   calculateModelEmissions,
   estimateMonthlyAIEmissions,
-  simulateRealTimeAIMonitoring
+  simulateRealTimeAIMonitoring,
 };

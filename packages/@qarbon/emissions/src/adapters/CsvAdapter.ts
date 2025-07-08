@@ -1,13 +1,13 @@
 /**
  * CSV Adapter
- * 
+ *
  * Handles CSV data with configurable column mapping for emissions and energy data.
  * Supports flexible field mapping and data type conversion.
- * 
+ *
  * @example
  * ```typescript
  * import { CsvAdapter } from './CsvAdapter';
- * 
+ *
  * const adapter = new CsvAdapter({
  *   columnMapping: {
  *     timestamp: 'date',
@@ -18,14 +18,14 @@
  * });
  * const result = adapter.normalize(csvData);
  * ```
- * 
+ *
  * @example CSV input format:
  * ```csv
  * date,co2_kg,energy_kwh,power_w,duration_h,source,location
  * 2023-07-15T10:30:00Z,0.125,0.25,125,2,ml_training,datacenter_1
  * 2023-07-15T12:30:00Z,0.089,0.18,90,2,web_server,datacenter_1
  * ```
- * 
+ *
  * @example Alternative CSV format:
  * ```csv
  * timestamp,carbon_emissions,total_energy,average_power,device_id,facility
@@ -34,7 +34,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface CsvColumnMapping {
@@ -75,9 +81,9 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
       version: '1.0.0',
       description: 'Adapter for CSV data with configurable column mapping',
       supportedFormats: ['csv'],
-      confidence: 0.70
+      confidence: 0.7,
     });
-    
+
     this.config = {
       delimiter: ',',
       hasHeader: true,
@@ -87,7 +93,7 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
       durationUnit: 'hours',
       skipRows: 0,
       columnMapping: {},
-      ...config
+      ...config,
     };
   }
 
@@ -108,7 +114,10 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
 
     // Validate configuration
     const config = { ...this.config, ...input.config };
-    if (!config.columnMapping || Object.keys(config.columnMapping).length === 0) {
+    if (
+      !config.columnMapping ||
+      Object.keys(config.columnMapping).length === 0
+    ) {
       errors.push('Column mapping configuration is required');
     }
 
@@ -132,9 +141,11 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
           missingColumns.push(`${field} -> ${column}`);
         }
       });
-      
+
       if (missingColumns.length > 0) {
-        warnings.push(`Mapped columns not found in headers: ${missingColumns.join(', ')}`);
+        warnings.push(
+          `Mapped columns not found in headers: ${missingColumns.join(', ')}`
+        );
       }
     }
 
@@ -142,9 +153,13 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
     const dataRows = config.hasHeader ? input.rows.slice(1) : input.rows;
     if (dataRows.length > 0) {
       const expectedColumnCount = dataRows[0].length;
-      const inconsistentRows = dataRows.findIndex(row => row.length !== expectedColumnCount);
+      const inconsistentRows = dataRows.findIndex(
+        row => row.length !== expectedColumnCount
+      );
       if (inconsistentRows !== -1) {
-        warnings.push(`Inconsistent column count in row ${inconsistentRows + (config.hasHeader ? 2 : 1)}`);
+        warnings.push(
+          `Inconsistent column count in row ${inconsistentRows + (config.hasHeader ? 2 : 1)}`
+        );
       }
     }
 
@@ -153,7 +168,8 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
       warnings.push('No timestamp column mapping specified');
     }
 
-    const hasEmissionsOrEnergy = config.columnMapping.emissions || config.columnMapping.energy;
+    const hasEmissionsOrEnergy =
+      config.columnMapping.emissions || config.columnMapping.energy;
     if (!hasEmissionsOrEnergy) {
       warnings.push('No emissions or energy column mapping specified');
     }
@@ -161,7 +177,7 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
@@ -172,11 +188,11 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
     }
 
     const config = { ...this.config, ...input.config };
-    
+
     // Determine headers
     let headers: string[] = [];
     let dataStartIndex = config.skipRows || 0;
-    
+
     if (config.hasHeader) {
       headers = input.headers || input.rows[dataStartIndex];
       dataStartIndex += 1;
@@ -205,9 +221,14 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
     return this.aggregateRows(normalizedRows);
   }
 
-  private normalizeRow(row: string[], headers: string[], config: CsvAdapterConfig, rowIndex: number): NormalizedData {
+  private normalizeRow(
+    row: string[],
+    headers: string[],
+    config: CsvAdapterConfig,
+    rowIndex: number
+  ): NormalizedData {
     const data: { [key: string]: any } = {};
-    
+
     // Map row data using headers or positional mapping
     if (headers.length > 0) {
       headers.forEach((header, index) => {
@@ -266,7 +287,11 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
 
     if (!energyValue && powerValue && durationValue) {
       // Calculate energy from power and duration
-      calculatedEnergy = this.calculateEnergy(powerValue, durationValue, config.durationUnit);
+      calculatedEnergy = this.calculateEnergy(
+        powerValue,
+        durationValue,
+        config.durationUnit
+      );
     }
 
     return {
@@ -274,54 +299,65 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
       timestamp: timestamp.toISOString(),
       source: sourceValue,
       category: 'csv_import',
-      
+
       // Core emissions data
-      emissions: emissionsValue ? {
-        total: emissionsValue,
-        unit: config.emissionsUnit || 'kg',
-        scope: 'scope2' // Default assumption
-      } : undefined,
-      
+      emissions: emissionsValue
+        ? {
+            total: emissionsValue,
+            unit: config.emissionsUnit || 'kg',
+            scope: 'scope2', // Default assumption
+          }
+        : undefined,
+
       // Energy data
-      energy: (energyValue || calculatedEnergy) ? {
-        total: energyValue || calculatedEnergy!,
-        unit: config.energyUnit || 'kWh',
-        estimated: !energyValue && calculatedEnergy !== undefined
-      } : undefined,
-      
+      energy:
+        energyValue || calculatedEnergy
+          ? {
+              total: energyValue || calculatedEnergy!,
+              unit: config.energyUnit || 'kWh',
+              estimated: !energyValue && calculatedEnergy !== undefined,
+            }
+          : undefined,
+
       // Power data
-      power: powerValue ? {
-        average: powerValue,
-        unit: config.powerUnit || 'W'
-      } : undefined,
-      
+      power: powerValue
+        ? {
+            average: powerValue,
+            unit: config.powerUnit || 'W',
+          }
+        : undefined,
+
       // Duration data
-      duration: durationValue ? {
-        value: durationValue,
-        unit: config.durationUnit || 'hours'
-      } : undefined,
-      
+      duration: durationValue
+        ? {
+            value: durationValue,
+            unit: config.durationUnit || 'hours',
+          }
+        : undefined,
+
       // Device and location
       device: {
-        id: deviceIdValue
+        id: deviceIdValue,
       },
-      
-      location: locationValue ? {
-        name: locationValue
-      } : undefined,
-      
+
+      location: locationValue
+        ? {
+            name: locationValue,
+          }
+        : undefined,
+
       // Raw data for reference
       raw_data: Object.fromEntries(
         headers.map((header, index) => [header, row[index]])
       ),
-      
+
       // Metadata
       metadata: {
         adapter: 'CsvAdapter',
         adapter_version: '1.0.0',
         row_index: rowIndex,
-        confidence: 0.70
-      }
+        confidence: 0.7,
+      },
     };
   }
 
@@ -348,36 +384,45 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
       timestamp: new Date().toISOString(),
       source: 'csv_import',
       category: 'csv_aggregate',
-      
-      emissions: totalEmissions > 0 ? {
-        total: totalEmissions,
-        unit: 'kg',
-        scope: 'scope2'
-      } : undefined,
-      
-      energy: totalEnergy > 0 ? {
-        total: totalEnergy,
-        unit: 'kWh'
-      } : undefined,
-      
-      power: avgPower > 0 ? {
-        average: avgPower,
-        unit: 'W'
-      } : undefined,
-      
+
+      emissions:
+        totalEmissions > 0
+          ? {
+              total: totalEmissions,
+              unit: 'kg',
+              scope: 'scope2',
+            }
+          : undefined,
+
+      energy:
+        totalEnergy > 0
+          ? {
+              total: totalEnergy,
+              unit: 'kWh',
+            }
+          : undefined,
+
+      power:
+        avgPower > 0
+          ? {
+              average: avgPower,
+              unit: 'W',
+            }
+          : undefined,
+
       aggregation: {
         row_count: rows.length,
         date_range: {
           start: rows[0].timestamp,
-          end: rows[rows.length - 1].timestamp
-        }
+          end: rows[rows.length - 1].timestamp,
+        },
       },
-      
+
       metadata: {
         adapter: 'CsvAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.70
-      }
+        confidence: 0.7,
+      },
     };
   }
 
@@ -393,15 +438,18 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
           // Check for CSV structure
           if (typeof data !== 'object' || data === null) return false;
           return Array.isArray(data.rows) && data.rows.length > 0;
-        }
+        },
       },
       {
         weight: 0.3,
         test: (data: any) => {
           // Check for headers or configuration
           if (typeof data !== 'object' || data === null) return false;
-          return Array.isArray(data.headers) || (data.config && typeof data.config === 'object');
-        }
+          return (
+            Array.isArray(data.headers) ||
+            (data.config && typeof data.config === 'object')
+          );
+        },
       },
       {
         weight: 0.2,
@@ -410,16 +458,20 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
           if (typeof data !== 'object' || data === null) return false;
           if (!Array.isArray(data.rows) || data.rows.length === 0) return false;
           return Array.isArray(data.rows[0]);
-        }
+        },
       },
       {
         weight: 0.1,
         test: (data: any) => {
           // Check for column mapping configuration
           if (typeof data !== 'object' || data === null) return false;
-          return data.config && data.config.columnMapping && typeof data.config.columnMapping === 'object';
-        }
-      }
+          return (
+            data.config &&
+            data.config.columnMapping &&
+            typeof data.config.columnMapping === 'object'
+          );
+        },
+      },
     ];
   }
 
@@ -441,7 +493,11 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
     }
   }
 
-  private calculateEnergy(power: number, duration: number, durationUnit?: string): number {
+  private calculateEnergy(
+    power: number,
+    duration: number,
+    durationUnit?: string
+  ): number {
     // Convert duration to hours
     let durationHours = duration;
     switch (durationUnit?.toLowerCase()) {
@@ -456,7 +512,7 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
         durationHours = duration;
         break;
     }
-    
+
     // Calculate energy in kWh
     return (power * durationHours) / 1000;
   }
@@ -464,10 +520,13 @@ export class CsvAdapter extends BaseAdapter<CsvData> {
   /**
    * Create a CsvAdapter with specific column mapping
    */
-  static withMapping(mapping: CsvColumnMapping, options?: Partial<CsvAdapterConfig>): CsvAdapter {
+  static withMapping(
+    mapping: CsvColumnMapping,
+    options?: Partial<CsvAdapterConfig>
+  ): CsvAdapter {
     return new CsvAdapter({
       columnMapping: mapping,
-      ...options
+      ...options,
     });
   }
 }

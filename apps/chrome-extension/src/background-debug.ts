@@ -13,7 +13,7 @@ const deprecatedAPIBase64 = [
   'Y2hyb21lLndlYlJlcXVlc3Q=',
   'Y2hyb21lLndlYlJlcXVlc3RCbG9ja2luZw==',
   'Y2hyb21lLmJyb3dzZXJBY3Rpb24=',
-  'Y2hyb21lLmV4dGVuc2lvbi5nZXRCYWNrZ3JvdW5kUGFnZQ=='
+  'Y2hyb21lLmV4dGVuc2lvbi5nZXRCYWNrZ3JvdW5kUGFnZQ==',
 ];
 
 const deprecatedAPIs = deprecatedAPIBase64.map(encoded => atob(encoded));
@@ -36,7 +36,7 @@ const v3APIs = [
   'chrome.declarativeNetRequest',
   'chrome.storage',
   'chrome.runtime',
-  'chrome.alarms'
+  'chrome.alarms',
 ];
 
 v3APIs.forEach(api => {
@@ -56,19 +56,19 @@ v3APIs.forEach(api => {
 export const extensionConfig = {
   name: 'QarbonQuery Chrome Extension',
   version: '0.1.0',
-  debug: true
+  debug: true,
 };
 
 // Enhanced logging class
 class DebugLogger {
   private logHistory: string[] = [];
-  
+
   log(message: string, ...args: any[]) {
     const timestamp = new Date().toISOString();
     const logEntry = `[${timestamp}] ${message}`;
     console.log(logEntry, ...args);
     this.logHistory.push(logEntry);
-    
+
     // Keep only last 100 logs
     if (this.logHistory.length > 100) {
       this.logHistory = this.logHistory.slice(-100);
@@ -81,7 +81,7 @@ class DebugLogger {
     console.error(logEntry, error);
     this.logHistory.push(logEntry);
   }
-  
+
   getLogs() {
     return this.logHistory;
   }
@@ -95,7 +95,7 @@ let debugInfo = {
   startup: Date.now(),
   apiCalls: 0,
   errors: 0,
-  storageOperations: 0
+  storageOperations: 0,
 };
 
 // Simplified AIImpactTrackerAdapter for local use
@@ -106,7 +106,9 @@ class AIImpactTrackerAdapter {
       ...data,
       timestamp: data.timestamp || Date.now(),
       provider: data.provider || 'unknown',
-      emissions: data.emissions || (data.tokens?.total || 0) * (data.energyPerToken || 0.001)
+      emissions:
+        data.emissions ||
+        (data.tokens?.total || 0) * (data.energyPerToken || 0.001),
     };
   }
 }
@@ -114,11 +116,14 @@ class AIImpactTrackerAdapter {
 const adapter = new AIImpactTrackerAdapter();
 
 // Store pending prompts
-const pendingPrompts = new Map<number, {
-  promptText: string;
-  timestamp: number;
-  url: string;
-}>();
+const pendingPrompts = new Map<
+  number,
+  {
+    promptText: string;
+    timestamp: number;
+    url: string;
+  }
+>();
 
 logger.log('📝 Pending prompts map initialized');
 
@@ -131,7 +136,7 @@ const AI_PROVIDER_PATTERNS = [
   '*://chat.openai.com/backend-api/conversation',
   '*://claude.ai/api/organizations/*/chat_conversations/*/completion',
   '*://bard.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*',
-  '*://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*'
+  '*://gemini.google.com/_/BardChatUi/data/assistant.lamda.BardFrontendService/*',
 ];
 
 logger.log('🌐 AI provider patterns loaded:', AI_PROVIDER_PATTERNS.length);
@@ -142,25 +147,26 @@ function isAIAPIRequest(url: string): boolean {
     const regex = new RegExp(pattern.replace(/\*/g, '.*'));
     return regex.test(url);
   });
-  
+
   if (matches) {
     logger.log('🎯 AI API request detected:', url);
   }
-  
+
   return matches;
 }
 
 // Identify AI provider from URL
 function identifyProvider(url: string): string | null {
   let provider: string | null = null;
-  
+
   if (url.includes('openai.com')) provider = 'openai';
   else if (url.includes('anthropic.com')) provider = 'anthropic';
   else if (url.includes('googleapis.com')) provider = 'gemini';
   else if (url.includes('amazonaws.com')) provider = 'bedrock';
   else if (url.includes('claude.ai')) provider = 'claude';
-  else if (url.includes('bard.google.com') || url.includes('gemini.google.com')) provider = 'bard';
-  
+  else if (url.includes('bard.google.com') || url.includes('gemini.google.com'))
+    provider = 'bard';
+
   logger.log('🏷️ Provider identified:', provider, 'for URL:', url);
   return provider;
 }
@@ -172,80 +178,95 @@ async function storeEmissionData(data: any): Promise<void> {
       debugInfo.storageOperations++;
       const today = new Date().toISOString().split('T')[0];
       const storageKey = `qarbon_emissions_${today}`;
-      
+
       logger.log('💾 Storing emission data with key:', storageKey);
       logger.log('📊 Data to store:', data);
-      
-      chrome.storage.local.get([storageKey, 'qarbon_settings', 'qarbon_queries'], (result: Record<string, any>) => {
-        if (chrome.runtime.lastError) {
-          debugInfo.errors++;
-          logger.error('Storage get error:', chrome.runtime.lastError.message);
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-        
-        logger.log('📚 Current storage result:', Object.keys(result));
-        
-        // Prepare emission data
-        const emissionEntry = {
-          id: crypto.randomUUID(),
-          timestamp: data.timestamp || Date.now(),
-          provider: data.provider || 'unknown',
-          model: data.model || 'unknown',
-          tokens: data.tokens || { total: 0, prompt: 0, completion: 0 },
-          emissions: data.emissions || 0,
-          energyPerToken: data.energyPerToken || 0.001,
-          url: data.url || '',
-          sessionId: data.sessionId || 'default'
-        };
-        
-        // Get existing emissions
-        const existingEmissions = result[storageKey] || [];
-        existingEmissions.push(emissionEntry);
-        
-        // Update queries count
-        const queriesData = result['qarbon_queries'] || { total: 0, daily: {} };
-        queriesData.total = (queriesData.total || 0) + 1;
-        if (!queriesData.daily) queriesData.daily = {};
-        
-        const dailyQueries = queriesData.daily as Record<string, number>;
-        if (today) {
-          dailyQueries[today] = (dailyQueries[today] || 0) + 1;
-        }
-        queriesData.daily = dailyQueries;
-        
-        // Prepare update data
-        const updateData: Record<string, any> = {
-          [storageKey]: existingEmissions,
-          'qarbon_queries': queriesData,
-          'qarbon_last_updated': Date.now(),
-          'qarbon_debug_info': debugInfo
-        };
-        
-        // Initialize settings if not exists
-        if (!result['qarbon_settings']) {
-          updateData['qarbon_settings'] = {
-            trackingEnabled: true,
-            displayUnits: 'kg',
-            notifications: true,
-            dataRetentionDays: 30,
-            debug: true
-          };
-        }
-        
-        logger.log('💾 Updating storage with:', Object.keys(updateData));
-        
-        chrome.storage.local.set(updateData, () => {
+
+      chrome.storage.local.get(
+        [storageKey, 'qarbon_settings', 'qarbon_queries'],
+        (result: Record<string, any>) => {
           if (chrome.runtime.lastError) {
             debugInfo.errors++;
-            logger.error('Storage set error:', chrome.runtime.lastError.message);
+            logger.error(
+              'Storage get error:',
+              chrome.runtime.lastError.message
+            );
             reject(new Error(chrome.runtime.lastError.message));
-          } else {
-            logger.log('✅ Successfully stored emission data:', emissionEntry.id);
-            resolve();
+            return;
           }
-        });
-      });
+
+          logger.log('📚 Current storage result:', Object.keys(result));
+
+          // Prepare emission data
+          const emissionEntry = {
+            id: crypto.randomUUID(),
+            timestamp: data.timestamp || Date.now(),
+            provider: data.provider || 'unknown',
+            model: data.model || 'unknown',
+            tokens: data.tokens || { total: 0, prompt: 0, completion: 0 },
+            emissions: data.emissions || 0,
+            energyPerToken: data.energyPerToken || 0.001,
+            url: data.url || '',
+            sessionId: data.sessionId || 'default',
+          };
+
+          // Get existing emissions
+          const existingEmissions = result[storageKey] || [];
+          existingEmissions.push(emissionEntry);
+
+          // Update queries count
+          const queriesData = result['qarbon_queries'] || {
+            total: 0,
+            daily: {},
+          };
+          queriesData.total = (queriesData.total || 0) + 1;
+          if (!queriesData.daily) queriesData.daily = {};
+
+          const dailyQueries = queriesData.daily as Record<string, number>;
+          if (today) {
+            dailyQueries[today] = (dailyQueries[today] || 0) + 1;
+          }
+          queriesData.daily = dailyQueries;
+
+          // Prepare update data
+          const updateData: Record<string, any> = {
+            [storageKey]: existingEmissions,
+            qarbon_queries: queriesData,
+            qarbon_last_updated: Date.now(),
+            qarbon_debug_info: debugInfo,
+          };
+
+          // Initialize settings if not exists
+          if (!result['qarbon_settings']) {
+            updateData['qarbon_settings'] = {
+              trackingEnabled: true,
+              displayUnits: 'kg',
+              notifications: true,
+              dataRetentionDays: 30,
+              debug: true,
+            };
+          }
+
+          logger.log('💾 Updating storage with:', Object.keys(updateData));
+
+          chrome.storage.local.set(updateData, () => {
+            if (chrome.runtime.lastError) {
+              debugInfo.errors++;
+              logger.error(
+                'Storage set error:',
+                chrome.runtime.lastError.message
+              );
+              reject(new Error(chrome.runtime.lastError.message));
+            } else {
+              logger.log(
+                '✅ Successfully stored emission data:',
+                emissionEntry.id
+              );
+              resolve();
+            }
+          });
+        }
+      );
     } catch (error) {
       debugInfo.errors++;
       logger.error('Error in storeEmissionData:', error);
@@ -258,9 +279,9 @@ async function storeEmissionData(data: any): Promise<void> {
 async function initializeStorage(): Promise<void> {
   try {
     logger.log('🔧 Initializing storage...');
-    
+
     const result = await new Promise<Record<string, any>>((resolve, reject) => {
-      chrome.storage.local.get(['qarbon_settings'], (result) => {
+      chrome.storage.local.get(['qarbon_settings'], result => {
         if (chrome.runtime.lastError) {
           reject(new Error(chrome.runtime.lastError.message));
         } else {
@@ -268,7 +289,7 @@ async function initializeStorage(): Promise<void> {
         }
       });
     });
-    
+
     if (!result['qarbon_settings']) {
       const defaultSettings = {
         trackingEnabled: true,
@@ -277,11 +298,11 @@ async function initializeStorage(): Promise<void> {
         dataRetentionDays: 30,
         installedAt: Date.now(),
         version: extensionConfig.version,
-        debug: true
+        debug: true,
       };
-      
+
       await new Promise<void>((resolve, reject) => {
-        chrome.storage.local.set({ 'qarbon_settings': defaultSettings }, () => {
+        chrome.storage.local.set({ qarbon_settings: defaultSettings }, () => {
           if (chrome.runtime.lastError) {
             reject(new Error(chrome.runtime.lastError.message));
           } else {
@@ -291,7 +312,7 @@ async function initializeStorage(): Promise<void> {
         });
       });
     }
-    
+
     logger.log('✅ Storage initialization complete');
   } catch (error) {
     debugInfo.errors++;
@@ -303,19 +324,24 @@ async function initializeStorage(): Promise<void> {
 chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
   try {
     debugInfo.apiCalls++;
-    logger.log('📨 Message received:', msg.type, 'from:', sender.tab?.url || 'popup');
-    
+    logger.log(
+      '📨 Message received:',
+      msg.type,
+      'from:',
+      sender.tab?.url || 'popup'
+    );
+
     // Handle debug info request
     if (msg.type === 'GET_DEBUG_INFO') {
       sendResponse({
         debugInfo,
         logs: logger.getLogs(),
         pendingPrompts: Array.from(pendingPrompts.entries()),
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
       return true;
     }
-    
+
     // Handle prompt capture
     if (msg.type === 'PROMPT_CAPTURE') {
       try {
@@ -323,10 +349,13 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
           pendingPrompts.set(sender.tab.id, {
             promptText: msg.text || msg.promptText || '',
             timestamp: Date.now(),
-            url: sender.tab.url || ''
+            url: sender.tab.url || '',
           });
-          
-          logger.log(`📝 Stored prompt for tab ${sender.tab.id}:`, msg.text?.substring(0, 50) + '...');
+
+          logger.log(
+            `📝 Stored prompt for tab ${sender.tab.id}:`,
+            msg.text?.substring(0, 50) + '...'
+          );
         }
       } catch (error) {
         debugInfo.errors++;
@@ -334,50 +363,49 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
       }
       return;
     }
-    
+
     // Handle API response capture
     if (msg.type === 'API_RESPONSE_CAPTURED') {
       try {
         const { url } = msg;
-        
+
         if (!isAIAPIRequest(url)) {
           logger.log('⚠️ Not an AI API request:', url);
           return;
         }
-        
+
         const provider = identifyProvider(url);
         if (!provider) {
           logger.error('❌ Unknown provider for URL:', url);
           return;
         }
-        
+
         // Mock token extraction for debugging
         const tokenData = {
           model: provider + '-debug',
           tokens: { total: 100, prompt: 50, completion: 50 },
           timestamp: Date.now(),
           energyPerToken: 0.001,
-          provider: provider
+          provider: provider,
         };
-        
+
         logger.log('🔍 Extracted token data:', tokenData);
-        
+
         // Store data using adapter
         const normalizedData = adapter.ingest(tokenData);
         await storeEmissionData(normalizedData);
-        
+
         logger.log('✅ Successfully processed API response for:', provider);
-        
       } catch (error) {
         debugInfo.errors++;
         logger.error('Error processing API response:', error);
       }
       return;
     }
-    
+
     // Handle storage operations
     if (msg.type === 'GET_STORAGE_DATA') {
-      chrome.storage.local.get(null, (result) => {
+      chrome.storage.local.get(null, result => {
         if (chrome.runtime.lastError) {
           sendResponse({ error: chrome.runtime.lastError.message });
         } else {
@@ -386,23 +414,28 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
       });
       return true;
     }
-    
+
     if (msg.type === 'CLEAR_STORAGE_DATA') {
       const keysToKeep = ['qarbon_settings'];
-      chrome.storage.local.get(null, (result) => {
+      chrome.storage.local.get(null, result => {
         if (chrome.runtime.lastError) {
           sendResponse({ error: chrome.runtime.lastError.message });
           return;
         }
-        
-        const keysToRemove = Object.keys(result).filter(key => !keysToKeep.includes(key));
-        
+
+        const keysToRemove = Object.keys(result).filter(
+          key => !keysToKeep.includes(key)
+        );
+
         if (keysToRemove.length > 0) {
           chrome.storage.local.remove(keysToRemove, () => {
             if (chrome.runtime.lastError) {
               sendResponse({ error: chrome.runtime.lastError.message });
             } else {
-              sendResponse({ success: true, removedCount: keysToRemove.length });
+              sendResponse({
+                success: true,
+                removedCount: keysToRemove.length,
+              });
             }
           });
         } else {
@@ -411,10 +444,9 @@ chrome.runtime.onMessage.addListener(async (msg, sender, sendResponse) => {
       });
       return true;
     }
-    
+
     logger.log('⚠️ Unknown message type:', msg.type);
     return false;
-    
   } catch (error) {
     debugInfo.errors++;
     logger.error('Error in message handler:', error);
@@ -428,14 +460,19 @@ logger.log('🚀 Starting extension initialization...');
 initializeStorage();
 
 // Schedule periodic cleanup
-chrome.alarms.create('qarbon-cleanup', { delayInMinutes: 60, periodInMinutes: 24 * 60 });
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.create('qarbon-cleanup', {
+  delayInMinutes: 60,
+  periodInMinutes: 24 * 60,
+});
+chrome.alarms.onAlarm.addListener(alarm => {
   if (alarm.name === 'qarbon-cleanup') {
     logger.log('🧹 Running periodic cleanup...');
   }
 });
 
-logger.log('✅ QarbonQuery Extension Background Script DEBUG loaded successfully');
+logger.log(
+  '✅ QarbonQuery Extension Background Script DEBUG loaded successfully'
+);
 
 // Export debug functions for testing
 (globalThis as any).qarbonDebug = {
@@ -443,5 +480,5 @@ logger.log('✅ QarbonQuery Extension Background Script DEBUG loaded successfull
   debugInfo,
   pendingPrompts,
   isAIAPIRequest,
-  identifyProvider
+  identifyProvider,
 };

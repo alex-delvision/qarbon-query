@@ -1,6 +1,13 @@
-import { getOptimizedAIFactor, calculateBatchAI, getRegionMultiplier } from './optimized/factors';
+import {
+  getOptimizedAIFactor,
+  calculateBatchAI,
+  getRegionMultiplier,
+} from './optimized/factors';
 import { featureFlags } from './optimized/feature-flags';
-import { performanceTracker, measurePerformance } from './optimized/performance';
+import {
+  performanceTracker,
+  measurePerformance,
+} from './optimized/performance';
 
 /**
  * Crypto-only entry point for tree-shaking
@@ -51,9 +58,17 @@ export class CryptoEmissionsCalculator {
       throw new Error(`Unknown cryptocurrency: ${currency}`);
     }
 
-    const networkMultiplier = this.getNetworkMultiplier(options.network || 'mainnet');
-    const typeMultiplier = this.getTransactionTypeMultiplier(options.transactionType || 'transfer');
-    const amount = transactionCount * factor.co2PerTransaction * networkMultiplier * typeMultiplier;
+    const networkMultiplier = this.getNetworkMultiplier(
+      options.network || 'mainnet'
+    );
+    const typeMultiplier = this.getTransactionTypeMultiplier(
+      options.transactionType || 'transfer'
+    );
+    const amount =
+      transactionCount *
+      factor.co2PerTransaction *
+      networkMultiplier *
+      typeMultiplier;
 
     return {
       id: `crypto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -65,7 +80,7 @@ export class CryptoEmissionsCalculator {
       confidence: factor.confidence,
       currency,
       network: options.network,
-      transactionType: options.transactionType
+      transactionType: options.transactionType,
     };
   }
 
@@ -83,8 +98,11 @@ export class CryptoEmissionsCalculator {
       throw new Error(`Unknown cryptocurrency: ${currency}`);
     }
 
-    const networkMultiplier = this.getNetworkMultiplier(options.network || 'mainnet');
-    const amount = hashRate * durationHours * factor.co2PerHashPerHour * networkMultiplier;
+    const networkMultiplier = this.getNetworkMultiplier(
+      options.network || 'mainnet'
+    );
+    const amount =
+      hashRate * durationHours * factor.co2PerHashPerHour * networkMultiplier;
 
     return {
       id: `crypto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -96,7 +114,7 @@ export class CryptoEmissionsCalculator {
       confidence: factor.confidence,
       currency,
       network: options.network,
-      transactionType: 'mining'
+      transactionType: 'mining',
     };
   }
 
@@ -115,11 +133,19 @@ export class CryptoEmissionsCalculator {
     }
 
     if (!factor.co2PerStakedTokenPerHour) {
-      throw new Error(`${currency} does not support staking emissions calculation`);
+      throw new Error(
+        `${currency} does not support staking emissions calculation`
+      );
     }
 
-    const networkMultiplier = this.getNetworkMultiplier(options.network || 'mainnet');
-    const amount = stakedAmount * durationHours * factor.co2PerStakedTokenPerHour * networkMultiplier;
+    const networkMultiplier = this.getNetworkMultiplier(
+      options.network || 'mainnet'
+    );
+    const amount =
+      stakedAmount *
+      durationHours *
+      factor.co2PerStakedTokenPerHour *
+      networkMultiplier;
 
     return {
       id: `crypto_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -131,28 +157,44 @@ export class CryptoEmissionsCalculator {
       confidence: factor.confidence,
       currency,
       network: options.network,
-      transactionType: 'staking'
+      transactionType: 'staking',
     };
   }
 
   /**
    * Batch calculate emissions for multiple crypto operations
    */
-  calculateBatch(inputs: Array<{
-    type: 'transaction' | 'mining' | 'staking';
-    amount: number;
-    currency: string;
-    duration?: number;
-    options?: CryptoCalculationOptions;
-  }>): CryptoEmissionData[] {
+  calculateBatch(
+    inputs: Array<{
+      type: 'transaction' | 'mining' | 'staking';
+      amount: number;
+      currency: string;
+      duration?: number;
+      options?: CryptoCalculationOptions;
+    }>
+  ): CryptoEmissionData[] {
     return inputs.map(input => {
       switch (input.type) {
         case 'transaction':
-          return this.calculateTransactionEmissions(input.amount, input.currency, input.options);
+          return this.calculateTransactionEmissions(
+            input.amount,
+            input.currency,
+            input.options
+          );
         case 'mining':
-          return this.calculateMiningEmissions(input.amount, input.currency, input.duration || 1, input.options);
+          return this.calculateMiningEmissions(
+            input.amount,
+            input.currency,
+            input.duration || 1,
+            input.options
+          );
         case 'staking':
-          return this.calculateStakingEmissions(input.amount, input.currency, input.duration || 1, input.options);
+          return this.calculateStakingEmissions(
+            input.amount,
+            input.currency,
+            input.duration || 1,
+            input.options
+          );
         default:
           throw new Error(`Unknown operation type: ${input.type}`);
       }
@@ -184,16 +226,16 @@ export class CryptoEmissionsCalculator {
     }
 
     const networkMultipliers: Record<string, number> = {
-      'mainnet': 1.0,
-      'testnet': 0.1,
-      'polygon': 0.001,
-      'bsc': 0.005,
-      'arbitrum': 0.01,
-      'optimism': 0.01,
-      'avalanche': 0.1,
-      'solana': 0.0001,
-      'cardano': 0.001,
-      'lightning': 0.0001
+      mainnet: 1.0,
+      testnet: 0.1,
+      polygon: 0.001,
+      bsc: 0.005,
+      arbitrum: 0.01,
+      optimism: 0.01,
+      avalanche: 0.1,
+      solana: 0.0001,
+      cardano: 0.001,
+      lightning: 0.0001,
     };
 
     const multiplier = networkMultipliers[network] || 1.0;
@@ -206,11 +248,11 @@ export class CryptoEmissionsCalculator {
    */
   private getTransactionTypeMultiplier(transactionType: string): number {
     const typeMultipliers: Record<string, number> = {
-      'transfer': 1.0,
-      'mint': 2.0,
-      'smart_contract': 3.0,
-      'mining': 1.0,
-      'staking': 0.1
+      transfer: 1.0,
+      mint: 2.0,
+      smart_contract: 3.0,
+      mining: 1.0,
+      staking: 0.1,
     };
 
     return typeMultipliers[transactionType] || 1.0;
@@ -253,7 +295,7 @@ export class CryptoEmissionsCalculator {
       factorCacheSize: this.factorCache.size,
       networkCacheSize: this.networkCache.size,
       factorKeys: Array.from(this.factorCache.keys()),
-      networkKeys: Array.from(this.networkCache.keys())
+      networkKeys: Array.from(this.networkCache.keys()),
     };
   }
 }
@@ -267,27 +309,39 @@ export { getCryptoFactor, CRYPTO_FACTORS };
 /**
  * Quick calculation functions for popular cryptocurrencies
  */
-export function calculateBitcoinTransactionEmissions(transactions: number): number {
+export function calculateBitcoinTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 707; // Pre-calculated factor in grams
 }
 
-export function calculateEthereumTransactionEmissions(transactions: number): number {
+export function calculateEthereumTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 0.0212; // Post-merge PoS emissions
 }
 
-export function calculateLitecoinTransactionEmissions(transactions: number): number {
+export function calculateLitecoinTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 18.5;
 }
 
-export function calculateDogecoinTransactionEmissions(transactions: number): number {
+export function calculateDogecoinTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 0.12;
 }
 
-export function calculateSolanaTransactionEmissions(transactions: number): number {
+export function calculateSolanaTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 0.00051;
 }
 
-export function calculateCardanoTransactionEmissions(transactions: number): number {
+export function calculateCardanoTransactionEmissions(
+  transactions: number
+): number {
   return transactions * 0.0012;
 }
 

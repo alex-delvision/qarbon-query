@@ -1,20 +1,24 @@
 # Uncertainty Quantification Module
 
-This module provides comprehensive uncertainty quantification capabilities for AI emissions calculations, including Monte Carlo simulation, sensitivity analysis, and uncertainty propagation.
+This module provides comprehensive uncertainty quantification capabilities for AI emissions
+calculations, including Monte Carlo simulation, sensitivity analysis, and uncertainty propagation.
 
 ## Features
 
 ### 🎲 Monte Carlo Simulation
+
 - Support for multiple probability distributions (uniform, normal, lognormal, triangular)
 - Configurable sample sizes and confidence intervals
 - Full distribution statistics including percentiles and confidence intervals
 
 ### 📊 Sensitivity Analysis
+
 - Partial derivative-based sensitivity coefficients
 - Sobol indices for global sensitivity analysis
 - Parameter importance ranking
 
 ### 🔄 Uncertainty Propagation
+
 - Linear approximation methods for fast calculations
 - Monte Carlo-based propagation for complex models
 - Confidence interval conversion between different levels
@@ -32,7 +36,7 @@ const emissionFn = (params: Record<string, number>) => {
 
 const uncertainties = {
   tokens: { low: 900, high: 1100 },
-  emissionFactor: { low: 0.001, high: 0.003 }
+  emissionFactor: { low: 0.001, high: 0.003 },
 };
 
 const result = monteCarlo(emissionFn, uncertainties, 10000, 0.95);
@@ -49,7 +53,7 @@ const result = calculateAIEmissionsWithUncertainty(1000, 'gpt-4', {
   includeUncertainty: true,
   confidenceLevel: 95,
   method: 'montecarlo',
-  iterations: 5000
+  iterations: 5000,
 });
 
 console.log(`Base emission: ${result.amount} g CO2e`);
@@ -70,7 +74,7 @@ const emissionFn = (params: Record<string, number>) => {
 const uncertainties = {
   tokens: { low: 900, high: 1100 },
   emissionFactor: { low: 0.001, high: 0.003 },
-  overhead: { low: 0, high: 10 }
+  overhead: { low: 0, high: 10 },
 };
 
 const results = sensitivityAnalysis(emissionFn, uncertainties);
@@ -86,6 +90,7 @@ results.forEach(result => {
 Performs Monte Carlo simulation for uncertainty quantification.
 
 **Parameters:**
+
 - `emissionFn`: Function that calculates emissions given parameters
 - `params`: Parameter uncertainties with ranges and distributions
 - `iterations`: Number of Monte Carlo iterations (default: 10000)
@@ -98,6 +103,7 @@ Performs Monte Carlo simulation for uncertainty quantification.
 Performs sensitivity analysis using partial derivatives and Sobol indices.
 
 **Parameters:**
+
 - `emissionFn`: Function that calculates emissions given parameters
 - `params`: Parameter uncertainties
 - `baseParams`: Base parameter values for derivative calculation (optional)
@@ -110,6 +116,7 @@ Performs sensitivity analysis using partial derivatives and Sobol indices.
 Creates an uncertainty propagation function for complex calculations.
 
 **Parameters:**
+
 - `inputUncertainties`: Parameter uncertainties
 - `options`: Method settings (linear vs montecarlo, confidence level, iterations)
 
@@ -120,6 +127,7 @@ Creates an uncertainty propagation function for complex calculations.
 Enhanced AI emissions calculation with optional uncertainty quantification.
 
 **Parameters:**
+
 - `tokens`: Number of tokens processed
 - `model`: AI model name
 - `options`: Uncertainty options including method and confidence level
@@ -131,6 +139,7 @@ Enhanced AI emissions calculation with optional uncertainty quantification.
 The module supports several probability distributions for parameter uncertainties:
 
 ### Uniform Distribution
+
 ```typescript
 {
   low: 0.8,
@@ -140,6 +149,7 @@ The module supports several probability distributions for parameter uncertaintie
 ```
 
 ### Normal Distribution
+
 ```typescript
 {
   low: 0.8,
@@ -150,6 +160,7 @@ The module supports several probability distributions for parameter uncertaintie
 ```
 
 ### Lognormal Distribution
+
 ```typescript
 {
   low: 0.8,
@@ -160,6 +171,7 @@ The module supports several probability distributions for parameter uncertaintie
 ```
 
 ### Triangular Distribution
+
 ```typescript
 {
   low: 0.8,
@@ -172,20 +184,24 @@ The module supports several probability distributions for parameter uncertaintie
 ## Confidence Levels
 
 The module supports standard confidence levels:
+
 - **90%**: Z-score = 1.645
 - **95%**: Z-score = 1.96 (default)
 - **99%**: Z-score = 2.576
 
-Confidence intervals can be converted between different levels using the `adjustConfidenceInterval` function.
+Confidence intervals can be converted between different levels using the `adjustConfidenceInterval`
+function.
 
 ## Methods Comparison
 
 ### Linear Approximation
+
 - **Pros**: Fast, deterministic, good for small uncertainties
 - **Cons**: Less accurate for large uncertainties or non-linear models
 - **Use case**: Quick estimates, linear models
 
-### Monte Carlo Simulation  
+### Monte Carlo Simulation
+
 - **Pros**: Accurate for any model complexity, handles non-linear relationships
 - **Cons**: Slower, requires more computation
 - **Use case**: Complex models, high accuracy requirements
@@ -200,7 +216,9 @@ Confidence intervals can be converted between different levels using the `adjust
 
 ## Integration with AI Emissions Calculator
 
-The uncertainty module is fully integrated with the AI emissions calculator. Simply use `calculateAIEmissionsWithUncertainty` instead of the standard `calculateAIEmissions` function to get uncertainty bounds.
+The uncertainty module is fully integrated with the AI emissions calculator. Simply use
+`calculateAIEmissionsWithUncertainty` instead of the standard `calculateAIEmissions` function to get
+uncertainty bounds.
 
 ```typescript
 // Standard calculation
@@ -209,15 +227,17 @@ const basic = calculateAIEmissions(1000, 'gpt-4');
 // With uncertainty quantification
 const withUncertainty = calculateAIEmissionsWithUncertainty(1000, 'gpt-4', {
   includeUncertainty: true,
-  confidenceLevel: 95
+  confidenceLevel: 95,
 });
 ```
 
-The module automatically uses confidence intervals from emission factors when available, or applies typical model uncertainties (±25%) when not specified.
+The module automatically uses confidence intervals from emission factors when available, or applies
+typical model uncertainties (±25%) when not specified.
 
 ## Examples
 
 See `example.ts` for comprehensive usage examples including:
+
 - Basic Monte Carlo simulation
 - Sensitivity analysis for complex models
 - Real-world AI emissions with uncertainty

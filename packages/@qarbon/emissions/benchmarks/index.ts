@@ -38,11 +38,11 @@ interface MemorySnapshot {
 class PerformanceBenchmark {
   private results: BenchmarkResult[] = [];
   private calculator: EmissionsCalculator;
-  
+
   constructor() {
     this.calculator = new EmissionsCalculator({
       enableOptimizations: true,
-      enableUncertainty: false
+      enableUncertainty: false,
     });
   }
 
@@ -55,7 +55,7 @@ class PerformanceBenchmark {
       heapUsed: usage.heapUsed,
       heapTotal: usage.heapTotal,
       external: usage.external,
-      arrayBuffers: usage.arrayBuffers
+      arrayBuffers: usage.arrayBuffers,
     };
   }
 
@@ -74,13 +74,13 @@ class PerformanceBenchmark {
    */
   async benchmarkSingleCalculation(): Promise<BenchmarkResult> {
     console.log('🚀 Benchmarking single calculation speed...');
-    
+
     const iterations = 1000;
     const calculations = [
       () => this.calculator.calculateDigitalEmissions(100, 30, 'desktop'),
       () => this.calculator.calculateTransportEmissions(50, 'car'),
       () => this.calculator.calculateEnergyEmissions(10, 'grid'),
-      () => this.calculator.calculateAIEmissions(1000, 'gpt-4')
+      () => this.calculator.calculateAIEmissions(1000, 'gpt-4'),
     ];
 
     this.forceGC();
@@ -94,10 +94,10 @@ class PerformanceBenchmark {
 
     const end = performance.now();
     const endMemory = this.getMemorySnapshot();
-    
+
     const duration = (end - start) / iterations;
     const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
-    
+
     const result: BenchmarkResult = {
       name: 'Single Calculation Speed',
       duration,
@@ -108,8 +108,8 @@ class PerformanceBenchmark {
         iterations,
         avgDuration: duration,
         memoryPerCalc: memoryDelta / iterations,
-        calculationTypes: calculations.length
-      }
+        calculationTypes: calculations.length,
+      },
     };
 
     this.results.push(result);
@@ -122,7 +122,7 @@ class PerformanceBenchmark {
    */
   async benchmarkBatchThroughput(): Promise<BenchmarkResult> {
     console.log('🚀 Benchmarking batch calculation throughput...');
-    
+
     const batchSize = 5000;
     const inputs = Array.from({ length: batchSize }, (_, i) => ({
       type: ['digital', 'transport', 'energy', 'ai'][i % 4] as any,
@@ -134,7 +134,7 @@ class PerformanceBenchmark {
       consumption: 10 + (i % 20),
       source: 'grid' as const,
       tokens: 1000 + (i % 1000),
-      model: ['gpt-3.5', 'gpt-4', 'claude-3'][i % 3]
+      model: ['gpt-3.5', 'gpt-4', 'claude-3'][i % 3],
     }));
 
     this.forceGC();
@@ -145,7 +145,7 @@ class PerformanceBenchmark {
 
     const end = performance.now();
     const endMemory = this.getMemorySnapshot();
-    
+
     const duration = end - start;
     const throughput = (batchSize / duration) * 1000; // calculations per second
     const memoryDelta = endMemory.heapUsed - startMemory.heapUsed;
@@ -161,8 +161,8 @@ class PerformanceBenchmark {
         batchSize,
         throughputPerSec: Math.round(throughput),
         memoryPerCalc: memoryDelta / batchSize,
-        avgTimePerCalc: duration / batchSize
-      }
+        avgTimePerCalc: duration / batchSize,
+      },
     };
 
     this.results.push(result);
@@ -175,27 +175,28 @@ class PerformanceBenchmark {
    */
   async benchmarkMemoryUsage(): Promise<BenchmarkResult> {
     console.log('🚀 Benchmarking memory usage under load...');
-    
+
     this.forceGC();
     const startMemory = this.getMemorySnapshot();
     let peakMemory = startMemory.heapUsed;
-    
+
     const start = performance.now();
 
     // Create multiple calculator instances and run concurrent operations
-    const calculators = Array.from({ length: 10 }, () => new EmissionsCalculator());
+    const calculators = Array.from(
+      { length: 10 },
+      () => new EmissionsCalculator()
+    );
     const promises = [];
 
     for (let batch = 0; batch < 5; batch++) {
       const batchInputs = Array.from({ length: 1000 }, (_, i) => ({
         type: 'ai' as const,
         tokens: 1000,
-        model: 'gpt-4'
+        model: 'gpt-4',
       }));
 
-      promises.push(
-        ...calculators.map(calc => calc.calculate(batchInputs))
-      );
+      promises.push(...calculators.map(calc => calc.calculate(batchInputs)));
 
       // Check memory usage
       const currentMemory = this.getMemorySnapshot();
@@ -203,10 +204,10 @@ class PerformanceBenchmark {
     }
 
     await Promise.all(promises);
-    
+
     const end = performance.now();
     const endMemory = this.getMemorySnapshot();
-    
+
     const duration = end - start;
     const memoryDelta = peakMemory - startMemory.heapUsed;
 
@@ -221,8 +222,8 @@ class PerformanceBenchmark {
         peakMemoryMB: Math.round(peakMemory / 1024 / 1024),
         endMemoryMB: Math.round(endMemory.heapUsed / 1024 / 1024),
         calculatorInstances: calculators.length,
-        totalCalculations: 50000
-      }
+        totalCalculations: 50000,
+      },
     };
 
     this.results.push(result);
@@ -235,14 +236,19 @@ class PerformanceBenchmark {
    */
   async benchmarkAdapterDetection(): Promise<BenchmarkResult> {
     console.log('🚀 Benchmarking adapter detection speed...');
-    
+
     const testData = [
       // CSV data
       'timestamp,emissions,energy,model\n2024-01-01,1.23,0.5,gpt-4\n2024-01-02,2.34,0.8,claude-3',
       // JSON data
-      JSON.stringify([{ timestamp: '2024-01-01', emissions: 1.23, model: 'gpt-4' }]),
+      JSON.stringify([
+        { timestamp: '2024-01-01', emissions: 1.23, model: 'gpt-4' },
+      ]),
       // CodeCarbon JSON
-      JSON.stringify({ timestamp: '2024-01-01T12:00:00', emissions: { total: 1.23 } }),
+      JSON.stringify({
+        timestamp: '2024-01-01T12:00:00',
+        emissions: { total: 1.23 },
+      }),
       // MLCO2 format
       JSON.stringify({ experiment: { emissions: 1.23, energy: 0.5 } }),
       // Eco2AI format
@@ -252,7 +258,7 @@ class PerformanceBenchmark {
       // XML-like
       '<data><emission>1.23</emission></data>',
       // Webhook stream
-      'data: {"emission": 1.23}\n\n'
+      'data: {"emission": 1.23}\n\n',
     ];
 
     const iterations = 1000;
@@ -279,8 +285,8 @@ class PerformanceBenchmark {
         avgDurationMs: duration,
         successfulDetections: detections,
         detectionRate: detections / iterations,
-        testDataTypes: testData.length
-      }
+        testDataTypes: testData.length,
+      },
     };
 
     this.results.push(result);
@@ -293,13 +299,13 @@ class PerformanceBenchmark {
    */
   async benchmarkCacheHitRates(): Promise<BenchmarkResult> {
     console.log('🚀 Benchmarking cache hit rates...');
-    
+
     const models = ['gpt-3.5', 'gpt-4', 'claude-3', 'gemini-pro'];
     const categories = ['digital', 'transport', 'energy'];
     const types = [
       ['mobile', 'desktop', 'tablet'],
       ['car', 'train', 'plane'],
-      ['grid', 'renewable', 'fossil']
+      ['grid', 'renewable', 'fossil'],
     ];
 
     const iterations = 10000;
@@ -324,7 +330,7 @@ class PerformanceBenchmark {
       const categoryIndex = i % categories.length;
       const category = categories[categoryIndex];
       const type = types[categoryIndex][i % types[categoryIndex].length];
-      
+
       const factor1 = getEmissionFactor(category, type);
       const factor2 = getEmissionFactor(category, type); // Should hit cache
       if (factor1 && factor2 && factor1 === factor2) {
@@ -347,8 +353,8 @@ class PerformanceBenchmark {
         aiCacheHits: aiHits,
         factorCacheHits: factorHits,
         overallHitRate: Math.round(overallHitRate * 100) / 100,
-        avgLookupTime: duration / iterations
-      }
+        avgLookupTime: duration / iterations,
+      },
     };
 
     this.results.push(result);
@@ -360,14 +366,14 @@ class PerformanceBenchmark {
    */
   async runAll(): Promise<BenchmarkResult[]> {
     console.log('🎯 Starting Performance Benchmark Suite');
-    console.log('=' .repeat(50));
+    console.log('='.repeat(50));
 
     const benchmarks = [
       () => this.benchmarkSingleCalculation(),
       () => this.benchmarkBatchThroughput(),
       () => this.benchmarkMemoryUsage(),
       () => this.benchmarkAdapterDetection(),
-      () => this.benchmarkCacheHitRates()
+      () => this.benchmarkCacheHitRates(),
     ];
 
     for (const benchmark of benchmarks) {
@@ -389,7 +395,7 @@ class PerformanceBenchmark {
    */
   printResults(): void {
     console.log('\n📊 Performance Benchmark Results');
-    console.log('=' .repeat(80));
+    console.log('='.repeat(80));
 
     let passed = 0;
     let total = this.results.length;
@@ -397,20 +403,28 @@ class PerformanceBenchmark {
     this.results.forEach(result => {
       const status = result.passed ? '✅ PASS' : '❌ FAIL';
       const emoji = result.passed ? '🚀' : '🐌';
-      
+
       console.log(`\n${emoji} ${result.name}: ${status}`);
-      console.log(`   Duration: ${result.duration.toFixed(2)}ms (target: ${result.target}${result.target === TARGETS.CACHE_HIT_RATE ? '' : 'ms'})`);
-      
+      console.log(
+        `   Duration: ${result.duration.toFixed(2)}ms (target: ${result.target}${result.target === TARGETS.CACHE_HIT_RATE ? '' : 'ms'})`
+      );
+
       if (result.throughput) {
-        console.log(`   Throughput: ${Math.round(result.throughput).toLocaleString()}/sec`);
+        console.log(
+          `   Throughput: ${Math.round(result.throughput).toLocaleString()}/sec`
+        );
       }
-      
+
       if (result.memoryUsage) {
-        console.log(`   Memory: ${Math.round(result.memoryUsage / 1024 / 1024)}MB`);
+        console.log(
+          `   Memory: ${Math.round(result.memoryUsage / 1024 / 1024)}MB`
+        );
       }
-      
+
       if (result.cacheHitRate) {
-        console.log(`   Cache Hit Rate: ${(result.cacheHitRate * 100).toFixed(1)}%`);
+        console.log(
+          `   Cache Hit Rate: ${(result.cacheHitRate * 100).toFixed(1)}%`
+        );
       }
 
       if (result.details) {
@@ -420,13 +434,17 @@ class PerformanceBenchmark {
       if (result.passed) passed++;
     });
 
-    console.log('\n' + '=' .repeat(80));
-    console.log(`📈 Overall Score: ${passed}/${total} benchmarks passed (${Math.round((passed/total) * 100)}%)`);
-    
+    console.log('\n' + '='.repeat(80));
+    console.log(
+      `📈 Overall Score: ${passed}/${total} benchmarks passed (${Math.round((passed / total) * 100)}%)`
+    );
+
     if (passed === total) {
       console.log('🎉 All performance targets met! Package is optimized.');
     } else {
-      console.log('⚠️  Some performance targets missed. Consider optimization.');
+      console.log(
+        '⚠️  Some performance targets missed. Consider optimization.'
+      );
     }
   }
 
@@ -445,8 +463,9 @@ class PerformanceBenchmark {
         total: this.results.length,
         passed: this.results.filter(r => r.passed).length,
         failed: this.results.filter(r => !r.passed).length,
-        passRate: this.results.filter(r => r.passed).length / this.results.length
-      }
+        passRate:
+          this.results.filter(r => r.passed).length / this.results.length,
+      },
     };
   }
 }
@@ -455,23 +474,22 @@ class PerformanceBenchmark {
 async function main() {
   if (require.main === module) {
     const benchmark = new PerformanceBenchmark();
-    
+
     try {
       await benchmark.runAll();
-      
+
       // Export results to file
       const results = benchmark.exportResults();
       const fs = require('fs');
       const path = require('path');
-      
+
       const outputFile = path.join(__dirname, 'benchmark-results.json');
       fs.writeFileSync(outputFile, JSON.stringify(results, null, 2));
       console.log(`\n💾 Results saved to: ${outputFile}`);
-      
+
       // Exit with non-zero code if any benchmarks failed
       const failed = results.summary.failed;
       process.exit(failed > 0 ? 1 : 0);
-      
     } catch (error) {
       console.error('Benchmark suite failed:', error);
       process.exit(1);

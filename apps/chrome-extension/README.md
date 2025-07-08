@@ -11,7 +11,7 @@ All critical foundation requirements have been implemented and tested.
 ### ✅ Requirements Met
 
 - [x] **Manifest V3 structure** - Valid and complete
-- [x] **Required permissions** - activeTab, storage, scripting, webNavigation  
+- [x] **Required permissions** - activeTab, storage, scripting, webNavigation
 - [x] **Service worker** - Basic structure with Chrome storage
 - [x] **Icon assets** - All sizes (16x16, 32x32, 48x48, 128x128)
 - [x] **Extension loads in Chrome** - Passes all validation tests
@@ -29,7 +29,7 @@ apps/chrome-extension/
 ├── src/
 │   ├── background.ts       # Service worker
 │   ├── content.ts          # Content script
-│   ├── popup.ts           # Popup script  
+│   ├── popup.ts           # Popup script
 │   ├── popup.html         # Popup UI
 │   ├── manifest.json      # Extension manifest
 │   └── icons/             # Icon assets
@@ -55,7 +55,7 @@ npm run build:extension   # Build JavaScript
 
 1. Open Chrome and navigate to `chrome://extensions/`
 2. Enable "Developer mode" (toggle in top-right corner)
-3. Click "Load unpacked" 
+3. Click "Load unpacked"
 4. Select the `extension/` folder
 5. Verify the extension appears in your toolbar
 
@@ -70,7 +70,7 @@ npm run build:extension   # Build JavaScript
 ```bash
 npm run build:complete    # Full build with asset copying
 npm run build:extension   # Webpack build only
-npm run test:extension    # Validate extension structure  
+npm run test:extension    # Validate extension structure
 npm run audit            # Comprehensive audit report
 npm run create-icons     # Generate placeholder icons
 ```
@@ -81,7 +81,7 @@ The built extension in `extension/` contains:
 
 - `manifest.json` - Extension configuration
 - `background.js` - Service worker (7.93 KB)
-- `content.js` - Content script (5.42 KB)  
+- `content.js` - Content script (5.42 KB)
 - `popup.js` - Popup script (5.84 KB)
 - `popup.html` - Popup interface (4.26 KB)
 - `icons/` - Extension icons (all required sizes)
@@ -93,7 +93,7 @@ The built extension in `extension/` contains:
 ### Current Implementation
 
 - **Real-time tracking** - Mock carbon footprint calculations
-- **Chrome storage** - Persistent daily emission data  
+- **Chrome storage** - Persistent daily emission data
 - **Popup interface** - Modern gradient UI with breakdown
 - **Content monitoring** - Page interaction and scroll tracking
 - **Service worker** - Background processing and storage
@@ -139,6 +139,7 @@ npm run test:extension
 ```
 
 This validates:
+
 - Manifest structure and syntax
 - Required file presence
 - JavaScript compilation
@@ -160,6 +161,7 @@ This validates:
 4. Test your changes
 
 For continuous development:
+
 ```bash
 npm run build:watch    # Auto-rebuild on changes
 ```
@@ -169,14 +171,14 @@ npm run build:watch    # Auto-rebuild on changes
 When making changes:
 
 1. Ensure TypeScript compilation passes
-2. Run the test suite to validate structure  
+2. Run the test suite to validate structure
 3. Test loading in Chrome
 4. Update this README if needed
 
 ## 📝 Next Steps
 
 1. **Immediate**: Load and test in Chrome browser
-2. **Short-term**: Implement React/Preact components  
+2. **Short-term**: Implement React/Preact components
 3. **Medium-term**: Connect to @qarbon/sdk for real tracking
 4. **Long-term**: Advanced features and analytics
 

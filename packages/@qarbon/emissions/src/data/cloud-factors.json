@@ -1,1 +1,39 @@
-{"t3.micro":{"co2PerHour":0.012,"confidence":{"low":0.01,"high":0.015},"provider":"aws","vcpu":2,"memory":1,"source":"AWS Sustainability Report 2024"},"t3.small":{"co2PerHour":0.024,"confidence":{"low":0.02,"high":0.03},"provider":"aws","vcpu":2,"memory":2,"source":"AWS Sustainability Report 2024"},"t3.medium":{"co2PerHour":0.048,"confidence":{"low":0.04,"high":0.06},"provider":"aws","vcpu":2,"memory":4,"source":"AWS Sustainability Report 2024"},"s3-standard":{"co2PerGBMonth":0.00001,"confidence":{"low":0.000008,"high":0.000012},"provider":"aws","storageType":"object","source":"AWS Sustainability Report 2024"},"internet-egress":{"co2PerGB":0.006,"confidence":{"low":0.004,"high":0.008},"transferType":"egress","source":"Carbon Trust Digital Carbon Footprint 2024"}}
+{
+  "t3.micro": {
+    "co2PerHour": 0.012,
+    "confidence": { "low": 0.01, "high": 0.015 },
+    "provider": "aws",
+    "vcpu": 2,
+    "memory": 1,
+    "source": "AWS Sustainability Report 2024"
+  },
+  "t3.small": {
+    "co2PerHour": 0.024,
+    "confidence": { "low": 0.02, "high": 0.03 },
+    "provider": "aws",
+    "vcpu": 2,
+    "memory": 2,
+    "source": "AWS Sustainability Report 2024"
+  },
+  "t3.medium": {
+    "co2PerHour": 0.048,
+    "confidence": { "low": 0.04, "high": 0.06 },
+    "provider": "aws",
+    "vcpu": 2,
+    "memory": 4,
+    "source": "AWS Sustainability Report 2024"
+  },
+  "s3-standard": {
+    "co2PerGBMonth": 0.00001,
+    "confidence": { "low": 0.000008, "high": 0.000012 },
+    "provider": "aws",
+    "storageType": "object",
+    "source": "AWS Sustainability Report 2024"
+  },
+  "internet-egress": {
+    "co2PerGB": 0.006,
+    "confidence": { "low": 0.004, "high": 0.008 },
+    "transferType": "egress",
+    "source": "Carbon Trust Digital Carbon Footprint 2024"
+  }
+}

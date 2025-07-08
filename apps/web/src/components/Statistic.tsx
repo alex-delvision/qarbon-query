@@ -25,14 +25,14 @@ export const Statistic: React.FC<StatisticProps> = ({
 }) => {
   const formatValue = (val: number | string): string => {
     if (typeof val === 'string') return val;
-    
+
     switch (format) {
       case 'percentage':
         return `${val.toFixed(1)}%`;
       case 'currency':
-        return new Intl.NumberFormat('en-US', { 
-          style: 'currency', 
-          currency: 'USD' 
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
         }).format(val);
       case 'bytes': {
         const units = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -62,34 +62,50 @@ export const Statistic: React.FC<StatisticProps> = ({
     <div
       className={`
         statistic-base
-        ${variant === 'large' ? 'statistic-large' : 
-          variant === 'compact' ? 'statistic-compact' : 'statistic-default'}
+        ${
+          variant === 'large'
+            ? 'statistic-large'
+            : variant === 'compact'
+              ? 'statistic-compact'
+              : 'statistic-default'
+        }
         ${className}
       `}
-      role="figure"
+      role='figure'
       aria-labelledby={`statistic-${label.replace(/\s+/g, '-').toLowerCase()}`}
     >
       <div
         className={`
           statistic-value
-          ${color === 'emerald' ? 'statistic-value-emerald' :
-            color === 'blue' ? 'statistic-value-blue' :
-            color === 'orange' ? 'statistic-value-orange' :
-            color === 'red' ? 'statistic-value-red' : 'statistic-value-default'}
+          ${
+            color === 'emerald'
+              ? 'statistic-value-emerald'
+              : color === 'blue'
+                ? 'statistic-value-blue'
+                : color === 'orange'
+                  ? 'statistic-value-orange'
+                  : color === 'red'
+                    ? 'statistic-value-red'
+                    : 'statistic-value-default'
+          }
         `}
-        aria-describedby={description ? `statistic-desc-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined}
+        aria-describedby={
+          description
+            ? `statistic-desc-${label.replace(/\s+/g, '-').toLowerCase()}`
+            : undefined
+        }
       >
         {formattedValue}
       </div>
-      <div 
-        className="statistic-label"
+      <div
+        className='statistic-label'
         id={`statistic-${label.replace(/\s+/g, '-').toLowerCase()}`}
       >
         {label}
       </div>
       {description && (
-        <div 
-          className="statistic-description"
+        <div
+          className='statistic-description'
           id={`statistic-desc-${label.replace(/\s+/g, '-').toLowerCase()}`}
         >
           {description}
@@ -98,6 +114,5 @@ export const Statistic: React.FC<StatisticProps> = ({
     </div>
   );
 };
-
 
 export default Statistic;

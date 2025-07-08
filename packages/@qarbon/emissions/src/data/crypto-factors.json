@@ -1,1 +1,44 @@
-{"bitcoin":{"co2PerTransaction":707,"co2PerHashPerHour":0.0000015,"confidence":{"low":600,"high":850},"consensusMechanism":"proof-of-work","source":"Cambridge Bitcoin Electricity Consumption Index 2024"},"ethereum":{"co2PerTransaction":0.0212,"co2PerStakedTokenPerHour":0.000001,"confidence":{"low":0.015,"high":0.03},"consensusMechanism":"proof-of-stake","source":"Ethereum Foundation Environmental Report 2024"},"litecoin":{"co2PerTransaction":18.5,"co2PerHashPerHour":2.5e-7,"confidence":{"low":15,"high":22},"consensusMechanism":"proof-of-work","source":"Litecoin Foundation Environmental Analysis 2024"},"dogecoin":{"co2PerTransaction":0.12,"co2PerHashPerHour":8e-8,"confidence":{"low":0.1,"high":0.15},"consensusMechanism":"proof-of-work","source":"Independent Cryptocurrency Research 2024"},"solana":{"co2PerTransaction":0.00051,"co2PerStakedTokenPerHour":1e-7,"confidence":{"low":0.0004,"high":0.0007},"consensusMechanism":"proof-of-stake","source":"Solana Foundation Environmental Report 2024"},"cardano":{"co2PerTransaction":0.0012,"co2PerStakedTokenPerHour":2e-7,"confidence":{"low":0.001,"high":0.0015},"consensusMechanism":"proof-of-stake","source":"Cardano Foundation Sustainability Report 2024"}}
+{
+  "bitcoin": {
+    "co2PerTransaction": 707,
+    "co2PerHashPerHour": 0.0000015,
+    "confidence": { "low": 600, "high": 850 },
+    "consensusMechanism": "proof-of-work",
+    "source": "Cambridge Bitcoin Electricity Consumption Index 2024"
+  },
+  "ethereum": {
+    "co2PerTransaction": 0.0212,
+    "co2PerStakedTokenPerHour": 0.000001,
+    "confidence": { "low": 0.015, "high": 0.03 },
+    "consensusMechanism": "proof-of-stake",
+    "source": "Ethereum Foundation Environmental Report 2024"
+  },
+  "litecoin": {
+    "co2PerTransaction": 18.5,
+    "co2PerHashPerHour": 2.5e-7,
+    "confidence": { "low": 15, "high": 22 },
+    "consensusMechanism": "proof-of-work",
+    "source": "Litecoin Foundation Environmental Analysis 2024"
+  },
+  "dogecoin": {
+    "co2PerTransaction": 0.12,
+    "co2PerHashPerHour": 8e-8,
+    "confidence": { "low": 0.1, "high": 0.15 },
+    "consensusMechanism": "proof-of-work",
+    "source": "Independent Cryptocurrency Research 2024"
+  },
+  "solana": {
+    "co2PerTransaction": 0.00051,
+    "co2PerStakedTokenPerHour": 1e-7,
+    "confidence": { "low": 0.0004, "high": 0.0007 },
+    "consensusMechanism": "proof-of-stake",
+    "source": "Solana Foundation Environmental Report 2024"
+  },
+  "cardano": {
+    "co2PerTransaction": 0.0012,
+    "co2PerStakedTokenPerHour": 2e-7,
+    "confidence": { "low": 0.001, "high": 0.0015 },
+    "consensusMechanism": "proof-of-stake",
+    "source": "Cardano Foundation Sustainability Report 2024"
+  }
+}

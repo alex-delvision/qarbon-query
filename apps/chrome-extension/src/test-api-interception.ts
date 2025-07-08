@@ -10,10 +10,12 @@ class AIImpactTrackerAdapter {
       ...data,
       timestamp: data.timestamp || Date.now(),
       provider: data.provider || 'unknown',
-      emissions: data.emissions || (data.tokens?.total || 0) * (data.energyPerToken || 0.001)
+      emissions:
+        data.emissions ||
+        (data.tokens?.total || 0) * (data.energyPerToken || 0.001),
     };
   }
-  
+
   detect(data: any) {
     return data && data.tokens && typeof data.tokens.total === 'number';
   }
@@ -25,11 +27,11 @@ const testOpenAIData = {
   tokens: {
     total: 150,
     prompt: 75,
-    completion: 75
+    completion: 75,
   },
   timestamp: Date.now(),
   energyPerToken: 0.001,
-  emissions: 0.15
+  emissions: 0.15,
 };
 
 const testAnthropicData = {
@@ -37,35 +39,34 @@ const testAnthropicData = {
   tokens: {
     total: 120,
     prompt: 60,
-    completion: 60
+    completion: 60,
   },
   timestamp: Date.now(),
   energyPerToken: 0.0012,
-  emissions: 0.144
+  emissions: 0.144,
 };
 
 // Test the AIImpactTrackerAdapter integration
 function testAIImpactTrackerAdapter() {
   console.log('Testing AIImpactTrackerAdapter...');
-  
+
   const adapter = new AIImpactTrackerAdapter();
-  
+
   try {
     // Test OpenAI data normalization
     const normalizedOpenAI = adapter.ingest(testOpenAIData);
     console.log('✅ OpenAI data normalized:', normalizedOpenAI);
-    
+
     // Test Anthropic data normalization
     const normalizedAnthropic = adapter.ingest(testAnthropicData);
     console.log('✅ Anthropic data normalized:', normalizedAnthropic);
-    
+
     // Test detection
     const isOpenAIDetected = adapter.detect(testOpenAIData);
     const isAnthropicDetected = adapter.detect(testAnthropicData);
-    
+
     console.log('✅ OpenAI detection:', isOpenAIDetected);
     console.log('✅ Anthropic detection:', isAnthropicDetected);
-    
   } catch (error) {
     console.error('❌ Error testing AIImpactTrackerAdapter:', error);
   }
@@ -74,30 +75,30 @@ function testAIImpactTrackerAdapter() {
 // Test storage simulation (without Chrome APIs)
 function testStorageSimulation() {
   console.log('Testing storage simulation...');
-  
+
   const today = new Date().toISOString().split('T')[0];
   const mockStorage: Record<string, any[]> = {};
-  
+
   // Simulate storing data
   const dataToStore = [testOpenAIData, testAnthropicData];
-  
+
   dataToStore.forEach(data => {
     const adapter = new AIImpactTrackerAdapter();
     const normalized = adapter.ingest(data);
-    
+
     if (!mockStorage[today as string]) {
       mockStorage[today as string] = [];
     }
     mockStorage[today as string]?.push(normalized);
   });
-  
+
   console.log('✅ Mock storage result:', mockStorage);
 }
 
 // Test URL pattern matching (simulating the isAIAPIRequest function)
 function testURLPatternMatching() {
   console.log('Testing URL pattern matching...');
-  
+
   const testUrls = [
     'https://api.openai.com/v1/chat/completions',
     'https://api.anthropic.com/v1/messages',
@@ -106,7 +107,7 @@ function testURLPatternMatching() {
     'https://claude.ai/api/organizations/org123/chat_conversations/conv456/completion',
     'https://example.com/not-ai-api',
   ];
-  
+
   const AI_PROVIDER_PATTERNS = [
     '*://api.openai.com/v1/chat/completions',
     '*://api.anthropic.com/v1/messages',
@@ -114,17 +115,19 @@ function testURLPatternMatching() {
     '*://bedrock*.amazonaws.com/model/*/invoke*',
     '*://claude.ai/api/organizations/*/chat_conversations/*/completion',
   ];
-  
+
   function isAIAPIRequest(url: string): boolean {
     return AI_PROVIDER_PATTERNS.some(pattern => {
       const regex = new RegExp(pattern.replace(/\*/g, '.*'));
       return regex.test(url);
     });
   }
-  
+
   testUrls.forEach(url => {
     const isAI = isAIAPIRequest(url);
-    console.log(`${isAI ? '✅' : '❌'} ${url} -> ${isAI ? 'AI API' : 'Not AI API'}`);
+    console.log(
+      `${isAI ? '✅' : '❌'} ${url} -> ${isAI ? 'AI API' : 'Not AI API'}`
+    );
   });
 }
 
@@ -145,5 +148,5 @@ export {
   testStorageSimulation,
   testURLPatternMatching,
   testOpenAIData,
-  testAnthropicData
+  testAnthropicData,
 };

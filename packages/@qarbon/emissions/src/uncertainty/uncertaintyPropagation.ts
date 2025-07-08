@@ -2,7 +2,11 @@
  * Uncertainty propagation utilities for combining and managing uncertainties
  */
 
-import { UncertaintyRange, ParameterUncertainty, UncertaintyResult } from './types';
+import {
+  UncertaintyRange,
+  ParameterUncertainty,
+  UncertaintyResult,
+} from './types';
 
 /**
  * Propagate uncertainty using linear approximation (Taylor series first-order)
@@ -12,7 +16,7 @@ export function linearUncertaintyPropagation(
   uncertainties: ParameterUncertainty
 ): UncertaintyRange {
   let variance = 0;
-  
+
   for (const [paramName, derivative] of Object.entries(partialDerivatives)) {
     if (paramName in uncertainties) {
       const uncertainty = uncertainties[paramName];
@@ -21,10 +25,10 @@ export function linearUncertaintyPropagation(
       variance += Math.pow(derivative * std, 2);
     }
   }
-  
+
   const stdDev = Math.sqrt(variance);
   const mean = 0; // Assuming we're calculating around the mean
-  
+
   return {
     low: mean - 1.96 * stdDev, // 95% confidence interval
     high: mean + 1.96 * stdDev,
@@ -45,18 +49,18 @@ export function combineIndependentUncertainties(
   if (uncertainties.length === 0) {
     return { low: 0, high: 0 };
   }
-  
+
   if (uncertainties.length === 1) {
     return uncertainties[0];
   }
-  
+
   let totalVariance = 0;
   let totalMean = 0;
-  
+
   for (const uncertainty of uncertainties) {
     const mean = (uncertainty.low + uncertainty.high) / 2;
     const range = uncertainty.high - uncertainty.low;
-    
+
     // Convert range to variance based on distribution
     let variance: number;
     switch (uncertainty.distribution) {
@@ -72,13 +76,13 @@ export function combineIndependentUncertainties(
       default:
         variance = Math.pow(range, 2) / 12; // Default to uniform
     }
-    
+
     totalVariance += variance;
     totalMean += mean;
   }
-  
+
   const combinedStd = Math.sqrt(totalVariance);
-  
+
   return {
     low: totalMean - 1.96 * combinedStd,
     high: totalMean + 1.96 * combinedStd,
@@ -100,18 +104,18 @@ export function convertConfidenceLevel(
 ): UncertaintyRange {
   const mean = (uncertainty.low + uncertainty.high) / 2;
   const currentHalfWidth = (uncertainty.high - uncertainty.low) / 2;
-  
+
   // Convert to standard deviation assuming normal distribution
   const alpha1 = 1 - fromLevel;
   const alpha2 = 1 - toLevel;
-  
+
   // Z-scores for the confidence levels
   const z1 = getZScore(1 - alpha1 / 2);
   const z2 = getZScore(1 - alpha2 / 2);
-  
+
   const std = currentHalfWidth / z1;
   const newHalfWidth = std * z2;
-  
+
   return {
     low: mean - newHalfWidth,
     high: mean + newHalfWidth,
@@ -131,9 +135,9 @@ function getZScore(p: number): number {
   if (p <= 0 || p >= 1) {
     throw new Error('Probability must be between 0 and 1');
   }
-  
+
   if (p === 0.5) return 0;
-  
+
   // Common values
   const commonValues: Record<string, number> = {
     '0.90': 1.282,
@@ -142,12 +146,12 @@ function getZScore(p: number): number {
     '0.99': 2.326,
     '0.995': 2.576,
   };
-  
+
   const key = p.toFixed(3);
   if (key in commonValues) {
     return commonValues[key];
   }
-  
+
   // Approximation using Beasley-Springer-Moro algorithm (simplified)
   const t = Math.sqrt(-2 * Math.log(1 - p));
   const c0 = 2.515517;
@@ -156,8 +160,10 @@ function getZScore(p: number): number {
   const d1 = 1.432788;
   const d2 = 0.189269;
   const d3 = 0.001308;
-  
-  return t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t);
+
+  return (
+    t - (c0 + c1 * t + c2 * t * t) / (1 + d1 * t + d2 * t * t + d3 * t * t * t)
+  );
 }
 
 /**
@@ -195,9 +201,13 @@ export function adjustConfidenceInterval(
     currentHigh,
     fromConfidence
   );
-  
-  const adjusted = convertConfidenceLevel(uncertainty, fromConfidence, toConfidence);
-  
+
+  const adjusted = convertConfidenceLevel(
+    uncertainty,
+    fromConfidence,
+    toConfidence
+  );
+
   return {
     low: adjusted.low,
     high: adjusted.high,
@@ -214,15 +224,26 @@ export function propagateUncertainty(
     confidenceLevel?: number;
     iterations?: number;
   } = {}
-): (emissionFn: (params: Record<string, number>) => number) => UncertaintyResult {
-  const { method = 'linear', confidenceLevel = 0.95, iterations = 1000 } = options;
-  
-  return (emissionFn) => {
+): (
+  emissionFn: (params: Record<string, number>) => number
+) => UncertaintyResult {
+  const {
+    method = 'linear',
+    confidenceLevel = 0.95,
+    iterations = 1000,
+  } = options;
+
+  return emissionFn => {
     if (method === 'montecarlo') {
       // Use Monte Carlo method
       const { monteCarlo } = require('./monteCarlo');
-      const stats = monteCarlo(emissionFn, inputUncertainties, iterations, confidenceLevel);
-      
+      const stats = monteCarlo(
+        emissionFn,
+        inputUncertainties,
+        iterations,
+        confidenceLevel
+      );
+
       return {
         low: stats.confidenceInterval.low,
         mean: stats.mean,
@@ -233,12 +254,14 @@ export function propagateUncertainty(
     } else {
       // Use linear approximation
       const baseParams: Record<string, number> = {};
-      for (const [paramName, uncertainty] of Object.entries(inputUncertainties)) {
+      for (const [paramName, uncertainty] of Object.entries(
+        inputUncertainties
+      )) {
         baseParams[paramName] = (uncertainty.low + uncertainty.high) / 2;
       }
-      
+
       const baseEmission = emissionFn(baseParams);
-      
+
       // Calculate partial derivatives
       const derivatives: Record<string, number> = {};
       for (const paramName of Object.keys(inputUncertainties)) {
@@ -248,9 +271,12 @@ export function propagateUncertainty(
         const perturbedEmission = emissionFn(perturbedParams);
         derivatives[paramName] = (perturbedEmission - baseEmission) / h;
       }
-      
-      const propagatedUncertainty = linearUncertaintyPropagation(derivatives, inputUncertainties);
-      
+
+      const propagatedUncertainty = linearUncertaintyPropagation(
+        derivatives,
+        inputUncertainties
+      );
+
       return {
         low: baseEmission + propagatedUncertainty.low,
         mean: baseEmission,

@@ -1,11 +1,15 @@
 /**
  * CSV Processing Example
- * 
+ *
  * This example demonstrates how to process CSV emissions data using
  * the CsvAdapter and EmissionsCalculator.
  */
 
-const { CsvAdapter, EmissionsCalculator, adapterRegistry } = require('@qarbon/emissions');
+const {
+  CsvAdapter,
+  EmissionsCalculator,
+  adapterRegistry,
+} = require('@qarbon/emissions');
 const fs = require('fs');
 const path = require('path');
 
@@ -17,12 +21,12 @@ async function processCsvData() {
     // Read sample CSV data
     const csvFilePath = path.join(__dirname, 'sample-data.csv');
     const csvContent = fs.readFileSync(csvFilePath, 'utf8');
-    
+
     // Parse CSV content
     const lines = csvContent.trim().split('\n');
     const headers = lines[0].split(',');
     const rows = lines.slice(1).map(line => line.split(','));
-    
+
     console.log('📄 Loaded CSV data:');
     console.log(`   Headers: ${headers.join(', ')}`);
     console.log(`   Rows: ${rows.length}\n`);
@@ -30,7 +34,7 @@ async function processCsvData() {
     // Method 1: Manual adapter configuration
     console.log('🔧 Method 1: Manual Adapter Configuration');
     console.log('------------------------------------------');
-    
+
     const csvAdapter = new CsvAdapter({
       columnMapping: {
         timestamp: 'date',
@@ -40,43 +44,51 @@ async function processCsvData() {
         duration: 'duration_h',
         source: 'source',
         device_id: 'device_id',
-        location: 'location'
+        location: 'location',
       },
       delimiter: ',',
       hasHeader: true,
       emissionsUnit: 'kg',
       energyUnit: 'kWh',
-      powerUnit: 'W'
+      powerUnit: 'W',
     });
 
     const csvData = {
       headers,
       rows,
-      config: csvAdapter.getMetadata()
+      config: csvAdapter.getMetadata(),
     };
 
     // Validate data
     const validation = csvAdapter.validate(csvData);
-    console.log('✅ Validation result:', validation.isValid ? 'PASSED' : 'FAILED');
+    console.log(
+      '✅ Validation result:',
+      validation.isValid ? 'PASSED' : 'FAILED'
+    );
     if (validation.warnings) {
       console.log('⚠️  Warnings:', validation.warnings);
     }
 
     // Normalize data
     const normalizedData = await csvAdapter.normalize(csvData);
-    console.log('🔄 Normalized data sample:', JSON.stringify(normalizedData, null, 2).substring(0, 300) + '...\n');
+    console.log(
+      '🔄 Normalized data sample:',
+      JSON.stringify(normalizedData, null, 2).substring(0, 300) + '...\n'
+    );
 
     // Method 2: Auto-detection
     console.log('🤖 Method 2: Auto-detection');
     console.log('---------------------------');
-    
+
     // Register the adapter first
     adapterRegistry.registerAdapter(csvAdapter);
-    
+
     // Auto-detect adapter
     const detectedAdapter = adapterRegistry.autoDetect(csvData);
     if (detectedAdapter) {
-      console.log(`✨ Auto-detected adapter: ${detectedAdapter.getMetadata().name}`);
+      console.log(
+        `✨ Auto-detected adapter: ${detectedAdapter.getMetadata().name}`
+      );
       const autoNormalized = await detectedAdapter.normalize(csvData);
       console.log('🔄 Auto-normalized data ready for calculation\n');
     } else {
@@ -86,10 +98,10 @@ async function processCsvData() {
     // Calculate emissions using the calculator
     console.log('🧮 Emissions Calculation');
     console.log('------------------------');
-    
+
     const calculator = new EmissionsCalculator({
       enableOptimizations: true,
-      enableUncertainty: true
+      enableUncertainty: true,
     });
 
     // Process first few rows as examples
@@ -98,13 +110,22 @@ async function processCsvData() {
 
     for (let i = 0; i < sampleRows.length; i++) {
       const row = sampleRows[i];
-      const [timestamp, co2_kg, energy_kwh, power_w, duration_h, source, location, device_id] = row;
-      
+      const [
+        timestamp,
+        co2_kg,
+        energy_kwh,
+        power_w,
+        duration_h,
+        source,
+        location,
+        device_id,
+      ] = row;
+
       // Create calculation input from CSV row
       const calculationInput = {
         type: 'energy',
         consumption: parseFloat(energy_kwh),
-        source: 'grid'
+        source: 'grid',
       };
 
       try {
@@ -114,8 +135,8 @@ async function processCsvData() {
           uncertaintyOptions: {
             method: 'montecarlo',
             iterations: 1000,
-            confidenceLevel: 95
-          }
+            confidenceLevel: 95,
+          },
         });
 
         calculationResults.push({
@@ -125,17 +146,20 @@ async function processCsvData() {
           device_id,
           input_energy_kwh: energy_kwh,
           calculated_emissions: result.data,
-          processing_time_ms: result.processingTime
+          processing_time_ms: result.processingTime,
         });
 
         console.log(`📊 Row ${i + 1} (${source}):`);
         console.log(`   Input: ${energy_kwh} kWh`);
-        console.log(`   Calculated: ${result.data.amount} ${result.data.unit} CO2`);
+        console.log(
+          `   Calculated: ${result.data.amount} ${result.data.unit} CO2`
+        );
         if (result.data.uncertainty) {
-          console.log(`   Uncertainty: ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`);
+          console.log(
+            `   Uncertainty: ${result.data.uncertainty.low} - ${result.data.uncertainty.high} ${result.data.unit}`
+          );
         }
         console.log(`   Processing: ${result.processingTime.toFixed(2)}ms\n`);
-
       } catch (error) {
         console.error(`❌ Error processing row ${i + 1}:`, error.message);
       }
@@ -144,25 +168,28 @@ async function processCsvData() {
     // Generate final report
     console.log('📈 Final Report');
     console.log('---------------');
-    
+
     const emissions = calculationResults.map(r => r.calculated_emissions);
     const report = calculator.generateResult(emissions);
-    
+
     console.log('📊 Summary:');
     console.log(`   Total Emissions: ${report.footprint.total} kg CO2`);
     console.log(`   Methodology: ${report.metadata.methodology}`);
-    console.log(`   Confidence: ${(report.metadata.confidence * 100).toFixed(1)}%`);
+    console.log(
+      `   Confidence: ${(report.metadata.confidence * 100).toFixed(1)}%`
+    );
     console.log(`   Calculated At: ${report.metadata.calculatedAt}`);
-    
+
     if (report.footprint.breakdown) {
       console.log('   Breakdown by category:');
-      Object.entries(report.footprint.breakdown).forEach(([category, amount]) => {
-        console.log(`     ${category}: ${amount} kg CO2`);
-      });
+      Object.entries(report.footprint.breakdown).forEach(
+        ([category, amount]) => {
+          console.log(`     ${category}: ${amount} kg CO2`);
+        }
+      );
     }
 
     console.log('\n✅ CSV processing complete!');
-
   } catch (error) {
     console.error('❌ Error processing CSV data:', error);
     process.exit(1);

@@ -11,7 +11,7 @@ const iconCache = new Map<string, string>();
  */
 export async function loadPlatformIcon(provider: string): Promise<string> {
   const normalizedProvider = provider.toLowerCase();
-  
+
   // Check cache first
   if (iconCache.has(normalizedProvider)) {
     return iconCache.get(normalizedProvider)!;
@@ -19,17 +19,17 @@ export async function loadPlatformIcon(provider: string): Promise<string> {
 
   // Icon mapping for SVG files
   const iconMap: Record<string, string> = {
-    'openai': 'openai.svg',
-    'anthropic': 'anthropic.svg',
-    'claude': 'anthropic.svg',
-    'google': 'google.svg',
-    'gemini': 'google.svg',
-    'bard': 'google.svg',
-    'microsoft': 'microsoft.svg',
-    'copilot': 'microsoft.svg',
-    'meta': 'meta.svg',
-    'facebook': 'meta.svg',
-    'default': 'default.svg'
+    openai: 'openai.svg',
+    anthropic: 'anthropic.svg',
+    claude: 'anthropic.svg',
+    google: 'google.svg',
+    gemini: 'google.svg',
+    bard: 'google.svg',
+    microsoft: 'microsoft.svg',
+    copilot: 'microsoft.svg',
+    meta: 'meta.svg',
+    facebook: 'meta.svg',
+    default: 'default.svg',
   };
 
   // Find matching icon filename
@@ -43,7 +43,9 @@ export async function loadPlatformIcon(provider: string): Promise<string> {
 
   try {
     // Load SVG content
-    const response = await fetch(chrome.runtime.getURL(`icons/platforms/${iconFile}`));
+    const response = await fetch(
+      chrome.runtime.getURL(`icons/platforms/${iconFile}`)
+    );
     if (response.ok) {
       const svgContent = await response.text();
       iconCache.set(normalizedProvider, svgContent);
@@ -55,15 +57,15 @@ export async function loadPlatformIcon(provider: string): Promise<string> {
 
   // Fallback to emoji or default
   const fallbackEmojis: Record<string, string> = {
-    'openai': '🤖',
-    'anthropic': '🤖',
-    'claude': '🤖',
-    'google': '🔍',
-    'gemini': '💎',
-    'microsoft': '💫',
-    'copilot': '🚁',
-    'meta': '🌐',
-    'default': '❓'
+    openai: '🤖',
+    anthropic: '🤖',
+    claude: '🤖',
+    google: '🔍',
+    gemini: '💎',
+    microsoft: '💫',
+    copilot: '🚁',
+    meta: '🌐',
+    default: '❓',
   };
 
   let fallbackIcon = fallbackEmojis['default'] || '❓';
@@ -139,14 +141,17 @@ export function updateTabUnderline(activeTab: string): void {
 /**
  * Show skeleton loader for element
  */
-export function showSkeletonLoader(element: HTMLElement, type: 'text' | 'title' | 'card' = 'text'): void {
+export function showSkeletonLoader(
+  element: HTMLElement,
+  type: 'text' | 'title' | 'card' = 'text'
+): void {
   const skeleton = document.createElement('div');
   skeleton.className = `skeleton skeleton-${type}`;
-  
+
   // Store original content
   const originalContent = element.innerHTML;
   element.setAttribute('data-original-content', originalContent);
-  
+
   // Replace with skeleton
   element.innerHTML = '';
   element.appendChild(skeleton);
@@ -176,7 +181,7 @@ export function applyGlassMorphism(element: HTMLElement): void {
  * Initialize enhanced platform breakdown with icons
  */
 export async function renderEnhancedPlatformBreakdown(
-  elementId: string, 
+  elementId: string,
   breakdown: Record<string, { emissions: number; queries: number }>
 ): Promise<void> {
   const categoryBreakdown = document.getElementById(elementId);
@@ -194,27 +199,31 @@ export async function renderEnhancedPlatformBreakdown(
     categoryBreakdown.appendChild(noDataItem);
   } else {
     // Sort by emissions descending
-    const sortedEntries = Object.entries(breakdown).sort((a, b) => b[1].emissions - a[1].emissions);
+    const sortedEntries = Object.entries(breakdown).sort(
+      (a, b) => b[1].emissions - a[1].emissions
+    );
 
     for (const [provider, data] of sortedEntries) {
       const item = document.createElement('div');
       item.className = 'category-item platform-item glass';
-      
+
       // Load platform icon
       const iconContent = await loadPlatformIcon(provider);
-      
+
       // Auto-format emissions
       const isKg = data.emissions >= 1000;
       const displayValue = isKg ? data.emissions / 1000 : data.emissions;
       const unit = isKg ? 'kg' : 'g';
-      const formattedValue = isKg ? displayValue.toFixed(3) : displayValue.toFixed(1);
-      
+      const formattedValue = isKg
+        ? displayValue.toFixed(3)
+        : displayValue.toFixed(1);
+
       // Check if icon is SVG or emoji
       const isEmoji = !iconContent.includes('<svg');
-      const iconHtml = isEmoji 
+      const iconHtml = isEmoji
         ? `<span class="platform-icon-emoji">${iconContent}</span>`
         : `<div class="platform-icon-svg">${iconContent}</div>`;
-      
+
       item.innerHTML = `
         <div class="platform-info">
           ${iconHtml}
@@ -225,11 +234,11 @@ export async function renderEnhancedPlatformBreakdown(
           <span class="query-badge">${data.queries}</span>
         </div>
       `;
-      
+
       // Add animation delay for staggered appearance
       item.style.animationDelay = `${sortedEntries.indexOf([provider, data]) * 0.1}s`;
       item.style.animation = 'slideIn 0.5s ease-out forwards';
-      
+
       categoryBreakdown.appendChild(item);
     }
   }
@@ -314,7 +323,7 @@ export function initializeUIEnhancements(): void {
   addPlatformIconStyles();
 
   // Add ripple effect to all buttons
-  document.addEventListener('click', (event) => {
+  document.addEventListener('click', event => {
     const button = (event.target as HTMLElement).closest('.btn');
     if (button && event instanceof MouseEvent) {
       addRippleEffect(button as HTMLElement, event);
@@ -322,14 +331,19 @@ export function initializeUIEnhancements(): void {
   });
 
   // Apply glass-morphism to existing cards
-  document.querySelectorAll('.emissions-card, .chart-container, .breakdown-section').forEach(element => {
-    applyGlassMorphism(element as HTMLElement);
-  });
+  document
+    .querySelectorAll('.emissions-card, .chart-container, .breakdown-section')
+    .forEach(element => {
+      applyGlassMorphism(element as HTMLElement);
+    });
 
   // Enhanced responsive handling
   const handleResize = () => {
     const width = window.innerWidth;
-    document.body.setAttribute('data-width', width < 350 ? 'small' : width > 380 ? 'large' : 'medium');
+    document.body.setAttribute(
+      'data-width',
+      width < 350 ? 'small' : width > 380 ? 'large' : 'medium'
+    );
   };
 
   window.addEventListener('resize', handleResize);
@@ -358,7 +372,7 @@ export async function loadDataWithSkeleton<T>(
     // Load data with minimum delay for smooth UX
     const [data] = await Promise.all([
       loadFunction(),
-      new Promise(resolve => setTimeout(resolve, 800)) // Minimum skeleton time
+      new Promise(resolve => setTimeout(resolve, 800)), // Minimum skeleton time
     ]);
 
     return data;

@@ -3,6 +3,7 @@
 ## 🚨 **Current Status**: Clean Extension Built Successfully
 
 Your extension has been rebuilt with a **completely clean, minimal implementation** that:
+
 - ✅ Contains **ZERO deprecated APIs**
 - ✅ Uses only Manifest V3 compliant code
 - ✅ Has minimal permissions (`storage`, `declarativeNetRequest`)
@@ -12,7 +13,7 @@ Your extension has been rebuilt with a **completely clean, minimal implementatio
 
 The issue is likely one of the following:
 
-### **1. Chrome Extension Cache Issues** 
+### **1. Chrome Extension Cache Issues**
 
 Chrome may be caching the old version of your extension. **SOLUTION**:
 
@@ -20,7 +21,7 @@ Chrome may be caching the old version of your extension. **SOLUTION**:
 # Complete Chrome Extension Reset Process:
 
 1. Go to chrome://extensions/
-2. Find "QarbonQuery Carbon Tracker" 
+2. Find "QarbonQuery Carbon Tracker"
 3. Click "Remove" to completely uninstall
 4. Close Chrome completely (Cmd+Q on Mac)
 5. Wait 10 seconds
@@ -34,12 +35,14 @@ Chrome may be caching the old version of your extension. **SOLUTION**:
 ### **2. Wrong Extension Directory**
 
 Make sure you're loading the correct directory:
+
 - ✅ **CORRECT**: `/Users/delvision/qarbon-query/apps/chrome-extension/extension`
 - ❌ **WRONG**: `/Users/delvision/qarbon-query/apps/chrome-extension/src`
 
 ### **3. Multiple Extension Versions**
 
 Check if you have multiple versions installed:
+
 ```bash
 1. Go to chrome://extensions/
 2. Look for ANY extension with "QarbonQuery" or "Carbon" in the name
@@ -52,7 +55,7 @@ Check if you have multiple versions installed:
 ```bash
 1. chrome://extensions/
 2. Turn OFF "Developer mode"
-3. Wait 5 seconds  
+3. Wait 5 seconds
 4. Turn ON "Developer mode"
 5. Try loading the extension again
 ```
@@ -60,6 +63,7 @@ Check if you have multiple versions installed:
 ### **5. Browser Permissions/Security**
 
 Some corporate or restricted Chrome installations may block certain APIs:
+
 ```bash
 1. Check if you're using Chrome with enterprise policies
 2. Try in a clean Chrome profile:
@@ -73,12 +77,14 @@ Some corporate or restricted Chrome installations may block certain APIs:
 After following the reset process, verify the extension loads correctly:
 
 ### **Step 1: Check Extension Loading**
+
 1. Load the extension following the reset process above
 2. Look for the extension in `chrome://extensions/`
 3. Status should show "✅ Service worker (Inactive)" - this is NORMAL
 4. No error messages should appear
 
 ### **Step 2: Test Basic Functionality**
+
 1. Click the extension icon in Chrome toolbar
 2. Popup should open without errors
 3. Check Chrome DevTools console (F12) - should show:
@@ -89,6 +95,7 @@ After following the reset process, verify the extension loads correctly:
    ```
 
 ### **Step 3: Test Storage**
+
 1. In DevTools, go to Application tab
 2. Look for "Extension storage" in left sidebar
 3. Should see your extension with `qarbon_settings` key
@@ -100,7 +107,7 @@ If the issue persists, try loading in **Incognito Mode**:
 ```bash
 1. Open Chrome Incognito window (Cmd+Shift+N)
 2. Go to chrome://extensions/
-3. Enable "Developer mode" 
+3. Enable "Developer mode"
 4. Enable "Allow in incognito" for the extension
 5. Load the extension
 6. Test in incognito mode
@@ -109,13 +116,15 @@ If the issue persists, try loading in **Incognito Mode**:
 ## 📊 **What The Clean Extension Contains**
 
 **Current Extension Specs:**
+
 - **Manifest**: Minimal V3 with only essential permissions
 - **Background**: 2.4KB clean service worker
-- **Content**: Standard content script for DOM monitoring  
+- **Content**: Standard content script for DOM monitoring
 - **Popup**: Working UI with storage debugging
 - **DNR Rules**: 8 rules for AI provider header modification
 
 **Zero Deprecated APIs:**
+
 - ❌ No `webRequest` anywhere
 - ❌ No `webRequestBlocking` anywhere
 - ❌ No `background.scripts`
@@ -138,7 +147,9 @@ cat /Users/delvision/qarbon-query/apps/chrome-extension/extension/manifest.json 
 ```
 
 Expected outputs:
-1. Directory should contain: `manifest.json`, `background.js`, `content.js`, `popup.js`, `popup.html`, `dnr_rules.json`, `icons/`
+
+1. Directory should contain: `manifest.json`, `background.js`, `content.js`, `popup.js`,
+   `popup.html`, `dnr_rules.json`, `icons/`
 2. Grep should return no results (empty)
 3. Manifest version should be `3`
 
@@ -152,13 +163,15 @@ If you're STILL getting webRequestBlocking errors after the complete reset:
    - Extension requires Chrome 88+ for Manifest V3
 4. **Try Chrome Canary** or **Chrome Beta** if using older Chrome version
 
-The current extension is **guaranteed clean** and should work. Persistence of errors typically indicates caching, wrong directory, or Chrome version issues rather than code problems.
+The current extension is **guaranteed clean** and should work. Persistence of errors typically
+indicates caching, wrong directory, or Chrome version issues rather than code problems.
 
 ## ✅ **Success Indicators**
 
 You'll know it's working when:
+
 - ✅ Extension loads without ANY error messages
-- ✅ Extension icon appears in Chrome toolbar  
+- ✅ Extension icon appears in Chrome toolbar
 - ✅ Popup opens when clicking icon
 - ✅ Console shows "QarbonQuery Extension Background Script loaded"
 - ✅ No webRequest/webRequestBlocking mentions anywhere

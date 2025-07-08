@@ -1,6 +1,6 @@
 /**
  * @qarbon/core - Core pipeline orchestration
- * 
+ *
  * Main entry point for the qarbon-query core pipeline system.
  * Provides unified processing from any input format to emission results.
  */
@@ -18,12 +18,12 @@ export type {
   UncertaintyConfig,
   CompatibilityConfig,
   OptimizationMetrics,
-  UncertaintyMetrics
+  UncertaintyMetrics,
 } from './types';
 
 // Re-export shared types for convenience
-export type { 
-  EmissionData, 
-  EmissionResult, 
-  CarbonFootprint 
+export type {
+  EmissionData,
+  EmissionResult,
+  CarbonFootprint,
 } from '@qarbon/shared';

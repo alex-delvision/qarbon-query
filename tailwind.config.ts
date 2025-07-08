@@ -1,4 +1,4 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
   content: [
@@ -33,7 +33,7 @@ const config: Config = {
       colors: {
         'forest-green': '#2E7D32',
         'sky-blue': '#00B0FF',
-        'charcoal': '#1B1B1F',
+        charcoal: '#1B1B1F',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -53,7 +53,7 @@ const config: Config = {
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
-    function({ addUtilities }: { addUtilities: any }) {
+    function ({ addUtilities }: { addUtilities: any }) {
       const newUtilities = {
         '.neumorphic-card': {
           background: 'linear-gradient(145deg, #f0f0f0, #cacaca)',
@@ -90,10 +90,10 @@ const config: Config = {
         '.counter-digit.updating': {
           animation: 'counter-tick 0.3s ease-in-out',
         },
-      }
-      addUtilities(newUtilities)
+      };
+      addUtilities(newUtilities);
     },
   ],
-}
+};
 
-export default config
+export default config;

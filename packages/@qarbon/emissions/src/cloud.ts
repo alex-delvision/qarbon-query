@@ -1,6 +1,13 @@
-import { getOptimizedAIFactor, calculateBatchAI, getRegionMultiplier } from './optimized/factors';
+import {
+  getOptimizedAIFactor,
+  calculateBatchAI,
+  getRegionMultiplier,
+} from './optimized/factors';
 import { featureFlags } from './optimized/feature-flags';
-import { performanceTracker, measurePerformance } from './optimized/performance';
+import {
+  performanceTracker,
+  measurePerformance,
+} from './optimized/performance';
 
 /**
  * Cloud-only entry point for tree-shaking
@@ -51,7 +58,9 @@ export class CloudEmissionsCalculator {
       throw new Error(`Unknown instance type: ${instanceType}`);
     }
 
-    const regionMultiplier = this.getRegionMultiplier(options.region || 'us-east-1');
+    const regionMultiplier = this.getRegionMultiplier(
+      options.region || 'us-east-1'
+    );
     const amount = cpuHours * factor.co2PerHour * regionMultiplier;
 
     return {
@@ -63,7 +72,7 @@ export class CloudEmissionsCalculator {
       category: 'cloud',
       confidence: factor.confidence,
       provider: options.provider,
-      region: options.region
+      region: options.region,
     };
   }
 
@@ -80,7 +89,9 @@ export class CloudEmissionsCalculator {
       throw new Error(`Unknown storage type: ${storageType}`);
     }
 
-    const regionMultiplier = this.getRegionMultiplier(options.region || 'us-east-1');
+    const regionMultiplier = this.getRegionMultiplier(
+      options.region || 'us-east-1'
+    );
     const amount = storageGB * factor.co2PerGBMonth * regionMultiplier;
 
     return {
@@ -93,7 +104,7 @@ export class CloudEmissionsCalculator {
       confidence: factor.confidence,
       provider: options.provider,
       service: 'storage',
-      region: options.region
+      region: options.region,
     };
   }
 
@@ -110,7 +121,9 @@ export class CloudEmissionsCalculator {
       throw new Error(`Unknown transfer type: ${transferType}`);
     }
 
-    const regionMultiplier = this.getRegionMultiplier(options.region || 'us-east-1');
+    const regionMultiplier = this.getRegionMultiplier(
+      options.region || 'us-east-1'
+    );
     const amount = dataTransferGB * factor.co2PerGB * regionMultiplier;
 
     return {
@@ -123,27 +136,41 @@ export class CloudEmissionsCalculator {
       confidence: factor.confidence,
       provider: options.provider,
       service: 'network',
-      region: options.region
+      region: options.region,
     };
   }
 
   /**
    * Batch calculate emissions for multiple cloud resources
    */
-  calculateBatch(inputs: Array<{
-    type: 'compute' | 'storage' | 'network';
-    amount: number;
-    resourceType: string;
-    options?: CloudCalculationOptions;
-  }>): CloudEmissionData[] {
+  calculateBatch(
+    inputs: Array<{
+      type: 'compute' | 'storage' | 'network';
+      amount: number;
+      resourceType: string;
+      options?: CloudCalculationOptions;
+    }>
+  ): CloudEmissionData[] {
     return inputs.map(input => {
       switch (input.type) {
         case 'compute':
-          return this.calculateComputeEmissions(input.amount, input.resourceType, input.options);
+          return this.calculateComputeEmissions(
+            input.amount,
+            input.resourceType,
+            input.options
+          );
         case 'storage':
-          return this.calculateStorageEmissions(input.amount, input.resourceType, input.options);
+          return this.calculateStorageEmissions(
+            input.amount,
+            input.resourceType,
+            input.options
+          );
         case 'network':
-          return this.calculateNetworkEmissions(input.amount, input.resourceType, input.options);
+          return this.calculateNetworkEmissions(
+            input.amount,
+            input.resourceType,
+            input.options
+          );
         default:
           throw new Error(`Unknown resource type: ${input.type}`);
       }
@@ -176,15 +203,15 @@ export class CloudEmissionsCalculator {
 
     // Simplified region multipliers for common regions
     const regionMultipliers: Record<string, number> = {
-      'us-east-1': 1.0,      // Virginia - baseline
-      'us-west-2': 0.3,      // Oregon - clean energy
-      'eu-west-1': 0.6,      // Ireland - moderate clean energy
-      'eu-north-1': 0.1,     // Stockholm - very clean energy
-      'ap-southeast-1': 1.4,  // Singapore - high carbon intensity
-      'ap-south-1': 1.8,     // Mumbai - coal heavy
-      'ca-central-1': 0.2,   // Canada - clean energy
-      'us-west-1': 0.4,      // N. California - clean energy
-      'eu-central-1': 0.8,   // Frankfurt - moderate
+      'us-east-1': 1.0, // Virginia - baseline
+      'us-west-2': 0.3, // Oregon - clean energy
+      'eu-west-1': 0.6, // Ireland - moderate clean energy
+      'eu-north-1': 0.1, // Stockholm - very clean energy
+      'ap-southeast-1': 1.4, // Singapore - high carbon intensity
+      'ap-south-1': 1.8, // Mumbai - coal heavy
+      'ca-central-1': 0.2, // Canada - clean energy
+      'us-west-1': 0.4, // N. California - clean energy
+      'eu-central-1': 0.8, // Frankfurt - moderate
       'ap-northeast-1': 1.2, // Tokyo - moderate-high
     };
 
@@ -223,7 +250,7 @@ export class CloudEmissionsCalculator {
       factorCacheSize: this.factorCache.size,
       regionCacheSize: this.regionCache.size,
       factorKeys: Array.from(this.factorCache.keys()),
-      regionKeys: Array.from(this.regionCache.keys())
+      regionKeys: Array.from(this.regionCache.keys()),
     };
   }
 }
@@ -237,19 +264,28 @@ export { getCloudFactor, CLOUD_FACTORS };
 /**
  * Quick calculation functions for common AWS instance types
  */
-export function calculateEC2T3MicroEmissions(hours: number, region = 'us-east-1'): number {
+export function calculateEC2T3MicroEmissions(
+  hours: number,
+  region = 'us-east-1'
+): number {
   const baseEmission = hours * 0.012; // Pre-calculated factor
   const regionMultiplier = region === 'us-west-2' ? 0.3 : 1.0;
   return baseEmission * regionMultiplier;
 }
 
-export function calculateEC2T3SmallEmissions(hours: number, region = 'us-east-1'): number {
+export function calculateEC2T3SmallEmissions(
+  hours: number,
+  region = 'us-east-1'
+): number {
   const baseEmission = hours * 0.024;
   const regionMultiplier = region === 'us-west-2' ? 0.3 : 1.0;
   return baseEmission * regionMultiplier;
 }
 
-export function calculateS3StorageEmissions(storageGB: number, region = 'us-east-1'): number {
+export function calculateS3StorageEmissions(
+  storageGB: number,
+  region = 'us-east-1'
+): number {
   const baseEmission = storageGB * 0.00001; // Per GB per month
   const regionMultiplier = region === 'us-west-2' ? 0.3 : 1.0;
   return baseEmission * regionMultiplier;

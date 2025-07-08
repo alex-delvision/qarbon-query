@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 console.log('📋 QarbonQuery Chrome Extension - Final Audit Report\n');
-console.log('=' .repeat(60));
+console.log('='.repeat(60));
 
 // Check build status
 const extensionDir = path.join(__dirname, '../extension');
@@ -16,12 +16,12 @@ console.log('─'.repeat(30));
 if (hasBuiltExtension) {
   console.log('✅ Extension package built successfully');
   console.log(`📁 Location: ${extensionDir}`);
-  
+
   // Get build size
-  const getDirectorySize = (dirPath) => {
+  const getDirectorySize = dirPath => {
     let totalSize = 0;
     if (!fs.existsSync(dirPath)) return 0;
-    
+
     const files = fs.readdirSync(dirPath, { recursive: true });
     files.forEach(file => {
       const filePath = path.join(dirPath, file);
@@ -36,7 +36,7 @@ if (hasBuiltExtension) {
     });
     return totalSize;
   };
-  
+
   const size = getDirectorySize(extensionDir);
   console.log(`📊 Package size: ${(size / 1024).toFixed(2)} KB`);
 } else {
@@ -50,15 +50,23 @@ console.log('─'.repeat(30));
 try {
   const manifestPath = path.join(extensionDir, 'manifest.json');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  
+
   console.log(`✅ Manifest version: ${manifest.manifest_version}`);
   console.log(`✅ Extension name: "${manifest.name}"`);
   console.log(`✅ Version: ${manifest.version}`);
   console.log(`✅ Permissions: ${manifest.permissions?.length || 0} declared`);
-  console.log(`✅ Host permissions: ${manifest.host_permissions ? 'Configured' : 'Not configured'}`);
-  console.log(`✅ Background service worker: ${manifest.background?.service_worker || 'Not configured'}`);
-  console.log(`✅ Content scripts: ${manifest.content_scripts?.length || 0} configured`);
-  console.log(`✅ Action popup: ${manifest.action?.default_popup || 'Not configured'}`);
+  console.log(
+    `✅ Host permissions: ${manifest.host_permissions ? 'Configured' : 'Not configured'}`
+  );
+  console.log(
+    `✅ Background service worker: ${manifest.background?.service_worker || 'Not configured'}`
+  );
+  console.log(
+    `✅ Content scripts: ${manifest.content_scripts?.length || 0} configured`
+  );
+  console.log(
+    `✅ Action popup: ${manifest.action?.default_popup || 'Not configured'}`
+  );
 } catch (error) {
   console.log('❌ Manifest validation failed:', error.message);
 }
@@ -105,12 +113,36 @@ console.log('─'.repeat(30));
 
 const features = [
   { name: 'Manifest V3 structure', status: '✅', notes: 'Valid and complete' },
-  { name: 'Required permissions', status: '✅', notes: 'activeTab, storage, scripting, webNavigation' },
-  { name: 'Service worker', status: '✅', notes: 'Basic structure with Chrome storage' },
-  { name: 'Icon assets (all sizes)', status: '✅', notes: '16, 32, 48, 128px PNG files' },
-  { name: 'Extension loads in Chrome', status: '✅', notes: 'Passes validation tests' },
-  { name: 'TypeScript compilation', status: '✅', notes: 'Compiles without errors' },
-  { name: 'Preact/React setup', status: '⚠️', notes: 'Basic structure, needs full implementation' },
+  {
+    name: 'Required permissions',
+    status: '✅',
+    notes: 'activeTab, storage, scripting, webNavigation',
+  },
+  {
+    name: 'Service worker',
+    status: '✅',
+    notes: 'Basic structure with Chrome storage',
+  },
+  {
+    name: 'Icon assets (all sizes)',
+    status: '✅',
+    notes: '16, 32, 48, 128px PNG files',
+  },
+  {
+    name: 'Extension loads in Chrome',
+    status: '✅',
+    notes: 'Passes validation tests',
+  },
+  {
+    name: 'TypeScript compilation',
+    status: '✅',
+    notes: 'Compiles without errors',
+  },
+  {
+    name: 'Preact/React setup',
+    status: '⚠️',
+    notes: 'Basic structure, needs full implementation',
+  },
 ];
 
 features.forEach(({ name, status, notes }) => {
@@ -148,9 +180,11 @@ console.log(`   ${extensionDir}`);
 console.log('6. Verify extension appears in the list');
 console.log('7. Click the extension icon in the toolbar to test popup');
 
-console.log('\n' + '=' .repeat(60));
+console.log('\n' + '='.repeat(60));
 console.log('✅ AUDIT COMPLETE - Chrome Extension Foundation Ready!');
-console.log('=' .repeat(60));
+console.log('='.repeat(60));
 
-console.log('\nThe QarbonQuery Chrome Extension has passed all foundation audits');
+console.log(
+  '\nThe QarbonQuery Chrome Extension has passed all foundation audits'
+);
 console.log('and is ready for loading and testing in Chrome browser.');

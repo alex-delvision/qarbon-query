@@ -4,7 +4,7 @@ const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 
 module.exports = (env, argv) => {
   const isDev = argv.mode === 'development';
-  
+
   return {
     mode: argv.mode || 'production',
     target: ['web', 'es2020'],
@@ -27,8 +27,14 @@ module.exports = (env, argv) => {
           __dirname,
           '../../packages/@qarbon/shared/src'
         ),
-        '@qarbon/sdk': path.resolve(__dirname, '../../packages/@qarbon/sdk/src'),
-        '@qarbon/emissions': path.resolve(__dirname, '../../packages/@qarbon/emissions/src'),
+        '@qarbon/sdk': path.resolve(
+          __dirname,
+          '../../packages/@qarbon/sdk/src'
+        ),
+        '@qarbon/emissions': path.resolve(
+          __dirname,
+          '../../packages/@qarbon/emissions/src'
+        ),
       },
     },
     module: {
@@ -86,13 +92,15 @@ module.exports = (env, argv) => {
           },
         ],
       }),
-      ...(argv.mode === 'production' ? [
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'static',
-          reportFilename: 'stats.html',
-          openAnalyzer: false,
-        }),
-      ] : []),
+      ...(argv.mode === 'production'
+        ? [
+            new BundleAnalyzerPlugin({
+              analyzerMode: 'static',
+              reportFilename: 'stats.html',
+              openAnalyzer: false,
+            }),
+          ]
+        : []),
     ],
   };
 };

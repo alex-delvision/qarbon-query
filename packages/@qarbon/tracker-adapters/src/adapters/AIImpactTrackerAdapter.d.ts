@@ -44,64 +44,67 @@
  * @author Qarbon Development Team
  * @since 1.0.0
  */
-import type { EmissionAdapter, FormatConfidence } from '../UniversalTrackerRegistry.js';
+import type {
+  EmissionAdapter,
+  FormatConfidence,
+} from '../UniversalTrackerRegistry.js';
 export interface AIImpactTrackerData {
+  model: string;
+  tokens: {
+    prompt: number;
+    completion: number;
+    total: number;
+  };
+  timestamp: string | number;
+  energyPerToken: number;
+  emissions: number;
+  confidence?: {
+    low: number;
+    high: number;
+  };
+}
+export declare class AIImpactTrackerAdapter implements EmissionAdapter {
+  /**
+   * Detect if the raw data is AI Impact Tracker format
+   * Quick sniff test for AI Impact Tracker emission data structure
+   *
+   * @param raw - The raw data to detect (string or object)
+   * @returns true if data appears to be AI Impact Tracker format, false otherwise
+   */
+  detect(raw: unknown): boolean;
+  /**
+   * Analyze input and return confidence score for AI Impact Tracker format
+   * Searches for canonical AI Impact Tracker property sets
+   */
+  detectConfidence(input: Buffer | NodeJS.ReadableStream): FormatConfidence;
+  /**
+   * Ingest and normalize AI Impact Tracker data into canonical format
+   *
+   * @param raw - The raw AI Impact Tracker data (string or object)
+   * @returns Normalized emission data with camelCase properties
+   * @throws Error if data format is invalid or required fields are missing
+   */
+  ingest(raw: unknown): {
     model: string;
     tokens: {
-        prompt: number;
-        completion: number;
-        total: number;
+      prompt: number;
+      completion: number;
+      total: number;
     };
     timestamp: string | number;
     energyPerToken: number;
     emissions: number;
     confidence?: {
-        low: number;
-        high: number;
+      low: number;
+      high: number;
     };
-}
-export declare class AIImpactTrackerAdapter implements EmissionAdapter {
-    /**
-     * Detect if the raw data is AI Impact Tracker format
-     * Quick sniff test for AI Impact Tracker emission data structure
-     *
-     * @param raw - The raw data to detect (string or object)
-     * @returns true if data appears to be AI Impact Tracker format, false otherwise
-     */
-    detect(raw: unknown): boolean;
-    /**
-     * Analyze input and return confidence score for AI Impact Tracker format
-     * Searches for canonical AI Impact Tracker property sets
-     */
-    detectConfidence(input: Buffer | NodeJS.ReadableStream): FormatConfidence;
-    /**
-     * Ingest and normalize AI Impact Tracker data into canonical format
-     *
-     * @param raw - The raw AI Impact Tracker data (string or object)
-     * @returns Normalized emission data with camelCase properties
-     * @throws Error if data format is invalid or required fields are missing
-     */
-    ingest(raw: unknown): {
-        model: string;
-        tokens: {
-            prompt: number;
-            completion: number;
-            total: number;
-        };
-        timestamp: string | number;
-        energyPerToken: number;
-        emissions: number;
-        confidence?: {
-            low: number;
-            high: number;
-        };
-    };
-    /**
-     * Check if the given data has the required AI Impact Tracker fields
-     *
-     * @param data - The data to check
-     * @returns true if data has required fields: model, tokens.total, timestamp, energyPerToken
-     */
-    private hasAIImpactTrackerFields;
+  };
+  /**
+   * Check if the given data has the required AI Impact Tracker fields
+   *
+   * @param data - The data to check
+   * @returns true if data has required fields: model, tokens.total, timestamp, energyPerToken
+   */
+  private hasAIImpactTrackerFields;
 }
 //# sourceMappingURL=AIImpactTrackerAdapter.d.ts.map

@@ -21,13 +21,13 @@ class StreamBuffer {
 
   addChunk(chunk: string): void {
     this.buffer += chunk;
-    
+
     // Split on double newlines to separate JSON chunks
     const parts = this.buffer.split('\n\n');
-    
+
     // Keep the last part in buffer (might be incomplete)
     this.buffer = parts.pop() || '';
-    
+
     // Add complete chunks
     this.chunks.push(...parts.filter(part => part.trim()));
   }
@@ -58,14 +58,14 @@ export function parseOpenAI(json: any): ParsedResponse {
   // Handle regular response
   const usage = json.usage || {};
   const model = json.model || 'unknown';
-  
+
   return {
     model,
     tokens: {
       prompt: usage.prompt_tokens || 0,
       completion: usage.completion_tokens || 0,
-      total: usage.total_tokens || 0
-    }
+      total: usage.total_tokens || 0,
+    },
   };
 }
 
@@ -75,7 +75,7 @@ export function parseOpenAI(json: any): ParsedResponse {
 function parseOpenAIStreaming(streamData: string): ParsedResponse {
   const buffer = new StreamBuffer();
   buffer.addChunk(streamData);
-  
+
   let model = 'unknown';
   let promptTokens = 0;
   let completionTokens = 0;
@@ -86,13 +86,13 @@ function parseOpenAIStreaming(streamData: string): ParsedResponse {
       // Remove 'data: ' prefix if present
       const jsonStr = chunk.replace(/^data:\s*/, '');
       if (jsonStr === '[DONE]') continue;
-      
+
       const parsed = JSON.parse(jsonStr);
-      
+
       if (parsed.model) {
         model = parsed.model;
       }
-      
+
       if (parsed.usage) {
         promptTokens = parsed.usage.prompt_tokens || promptTokens;
         completionTokens = parsed.usage.completion_tokens || completionTokens;
@@ -109,8 +109,8 @@ function parseOpenAIStreaming(streamData: string): ParsedResponse {
     tokens: {
       prompt: promptTokens,
       completion: completionTokens,
-      total: totalTokens
-    }
+      total: totalTokens,
+    },
   };
 }
 
@@ -126,14 +126,14 @@ export function parseAnthropic(json: any): ParsedResponse {
   // Handle regular response
   const usage = json.usage || {};
   const model = json.model || 'unknown';
-  
+
   return {
     model,
     tokens: {
       prompt: usage.input_tokens || 0,
       completion: usage.output_tokens || 0,
-      total: (usage.input_tokens || 0) + (usage.output_tokens || 0)
-    }
+      total: (usage.input_tokens || 0) + (usage.output_tokens || 0),
+    },
   };
 }
 
@@ -143,7 +143,7 @@ export function parseAnthropic(json: any): ParsedResponse {
 function parseAnthropicStreaming(streamData: string): ParsedResponse {
   const buffer = new StreamBuffer();
   buffer.addChunk(streamData);
-  
+
   let model = 'unknown';
   let inputTokens = 0;
   let outputTokens = 0;
@@ -153,18 +153,18 @@ function parseAnthropicStreaming(streamData: string): ParsedResponse {
       // Remove 'data: ' prefix if present
       const jsonStr = chunk.replace(/^data:\s*/, '');
       if (jsonStr === '[DONE]') continue;
-      
+
       const parsed = JSON.parse(jsonStr);
-      
+
       if (parsed.model) {
         model = parsed.model;
       }
-      
+
       if (parsed.usage) {
         inputTokens = parsed.usage.input_tokens || inputTokens;
         outputTokens = parsed.usage.output_tokens || outputTokens;
       }
-      
+
       // Handle message_stop event with usage
       if (parsed.type === 'message_stop' && parsed.usage) {
         inputTokens = parsed.usage.input_tokens || inputTokens;
@@ -181,8 +181,8 @@ function parseAnthropicStreaming(streamData: string): ParsedResponse {
     tokens: {
       prompt: inputTokens,
       completion: outputTokens,
-      total: inputTokens + outputTokens
-    }
+      total: inputTokens + outputTokens,
+    },
   };
 }
 
@@ -198,14 +198,14 @@ export function parseGoogle(json: any): ParsedResponse {
   // Handle regular response
   const usageMetadata = json.usageMetadata || {};
   const model = json.model || 'unknown';
-  
+
   return {
     model,
     tokens: {
       prompt: usageMetadata.promptTokenCount || 0,
       completion: usageMetadata.candidatesTokenCount || 0,
-      total: usageMetadata.totalTokenCount || 0
-    }
+      total: usageMetadata.totalTokenCount || 0,
+    },
   };
 }
 
@@ -215,7 +215,7 @@ export function parseGoogle(json: any): ParsedResponse {
 function parseGoogleStreaming(streamData: string): ParsedResponse {
   const buffer = new StreamBuffer();
   buffer.addChunk(streamData);
-  
+
   let model = 'unknown';
   let promptTokens = 0;
   let candidatesTokens = 0;
@@ -224,14 +224,15 @@ function parseGoogleStreaming(streamData: string): ParsedResponse {
   for (const chunk of buffer.getChunks()) {
     try {
       const parsed = JSON.parse(chunk);
-      
+
       if (parsed.model) {
         model = parsed.model;
       }
-      
+
       if (parsed.usageMetadata) {
         promptTokens = parsed.usageMetadata.promptTokenCount || promptTokens;
-        candidatesTokens = parsed.usageMetadata.candidatesTokenCount || candidatesTokens;
+        candidatesTokens =
+          parsed.usageMetadata.candidatesTokenCount || candidatesTokens;
         totalTokens = parsed.usageMetadata.totalTokenCount || totalTokens;
       }
     } catch (e) {
@@ -245,8 +246,8 @@ function parseGoogleStreaming(streamData: string): ParsedResponse {
     tokens: {
       prompt: promptTokens,
       completion: candidatesTokens,
-      total: totalTokens
-    }
+      total: totalTokens,
+    },
   };
 }
 
@@ -262,14 +263,16 @@ export function parseBedrock(json: any): ParsedResponse {
   // Handle regular response
   const usage = json.usage || {};
   const model = json.model || json.modelId || 'unknown';
-  
+
   return {
     model,
     tokens: {
       prompt: usage.inputTokens || 0,
       completion: usage.outputTokens || 0,
-      total: usage.totalTokens || (usage.inputTokens || 0) + (usage.outputTokens || 0)
-    }
+      total:
+        usage.totalTokens ||
+        (usage.inputTokens || 0) + (usage.outputTokens || 0),
+    },
   };
 }
 
@@ -279,7 +282,7 @@ export function parseBedrock(json: any): ParsedResponse {
 function parseBedrockStreaming(streamData: string): ParsedResponse {
   const buffer = new StreamBuffer();
   buffer.addChunk(streamData);
-  
+
   let model = 'unknown';
   let inputTokens = 0;
   let outputTokens = 0;
@@ -287,16 +290,16 @@ function parseBedrockStreaming(streamData: string): ParsedResponse {
   for (const chunk of buffer.getChunks()) {
     try {
       const parsed = JSON.parse(chunk);
-      
+
       if (parsed.model || parsed.modelId) {
         model = parsed.model || parsed.modelId;
       }
-      
+
       if (parsed.usage) {
         inputTokens = parsed.usage.inputTokens || inputTokens;
         outputTokens = parsed.usage.outputTokens || outputTokens;
       }
-      
+
       // Handle different event types in streaming
       if (parsed['amazon-bedrock-invocationMetrics']) {
         const metrics = parsed['amazon-bedrock-invocationMetrics'];
@@ -314,8 +317,8 @@ function parseBedrockStreaming(streamData: string): ParsedResponse {
     tokens: {
       prompt: inputTokens,
       completion: outputTokens,
-      total: inputTokens + outputTokens
-    }
+      total: inputTokens + outputTokens,
+    },
   };
 }
 
@@ -344,17 +347,17 @@ export function parseTokens(json: any, provider?: string): ParsedResponse {
     if (json.usage && 'prompt_tokens' in json.usage) {
       return parseOpenAI(json);
     }
-    
+
     // Anthropic detection
     if (json.usage && 'input_tokens' in json.usage) {
       return parseAnthropic(json);
     }
-    
+
     // Google detection
     if (json.usageMetadata && 'promptTokenCount' in json.usageMetadata) {
       return parseGoogle(json);
     }
-    
+
     // Bedrock detection
     if (json.usage && 'inputTokens' in json.usage) {
       return parseBedrock(json);
@@ -367,8 +370,8 @@ export function parseTokens(json: any, provider?: string): ParsedResponse {
     tokens: {
       prompt: 0,
       completion: 0,
-      total: 0
-    }
+      total: 0,
+    },
   };
 }
 

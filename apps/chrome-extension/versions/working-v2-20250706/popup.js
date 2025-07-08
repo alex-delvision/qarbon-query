@@ -5,20 +5,25 @@ async function updateEmissions() {
   try {
     // Get all tabs
     const tabs = await chrome.tabs.query({});
-    
+
     let totalToday = 0;
     let totalWeek = 0;
-    
+
     // Check each tab for emissions data
     for (const tab of tabs) {
-      if (tab.url && (tab.url.includes('claude.ai') || tab.url.includes('chatgpt.com'))) {
+      if (
+        tab.url &&
+        (tab.url.includes('claude.ai') || tab.url.includes('chatgpt.com'))
+      ) {
         try {
           const results = await chrome.scripting.executeScript({
             target: { tabId: tab.id },
             func: () => {
-              const data = JSON.parse(localStorage.getItem('qarbon_emissions') || '{}');
+              const data = JSON.parse(
+                localStorage.getItem('qarbon_emissions') || '{}'
+              );
               const today = new Date().toDateString();
-              
+
               // Calculate week total
               let weekTotal = 0;
               const now = new Date();
@@ -27,14 +32,14 @@ async function updateEmissions() {
                 date.setDate(date.getDate() - i);
                 weekTotal += data[date.toDateString()] || 0;
               }
-              
+
               return {
                 today: data[today] || 0,
-                week: weekTotal
+                week: weekTotal,
               };
-            }
+            },
           });
-          
+
           if (results && results[0] && results[0].result) {
             totalToday += results[0].result.today;
             totalWeek += results[0].result.week;
@@ -44,12 +49,16 @@ async function updateEmissions() {
         }
       }
     }
-    
+
     // Update UI
     document.getElementById('today').textContent = totalToday.toFixed(2) + 'g';
     document.getElementById('week').textContent = totalWeek.toFixed(2) + 'g';
-    
-    console.log('✅ Updated:', totalToday.toFixed(4) + 'g today,', totalWeek.toFixed(4) + 'g this week');
+
+    console.log(
+      '✅ Updated:',
+      totalToday.toFixed(4) + 'g today,',
+      totalWeek.toFixed(4) + 'g this week'
+    );
   } catch (error) {
     console.error('Error updating emissions:', error);
   }

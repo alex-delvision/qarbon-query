@@ -10,30 +10,30 @@ function testRealTimeEmissions() {
       emissions: 2.5,
       confidence: { low: 2.0, high: 3.0 },
       provider: 'openai',
-      model: 'gpt-3.5-turbo'
+      model: 'gpt-3.5-turbo',
     },
     {
       emissions: 15.2,
       confidence: { low: 12.1, high: 18.3 },
       provider: 'anthropic',
-      model: 'claude-3-haiku'
+      model: 'claude-3-haiku',
     },
     {
       emissions: 35.8,
       confidence: { low: 30.2, high: 41.4 },
       provider: 'openai',
-      model: 'gpt-4'
+      model: 'gpt-4',
     },
     {
       emissions: 65.5,
       confidence: { low: 58.9, high: 72.1 },
       provider: 'anthropic',
-      model: 'claude-3-opus'
-    }
+      model: 'claude-3-opus',
+    },
   ];
 
   console.log('Testing real-time emission display...');
-  
+
   testData.forEach((data, index) => {
     setTimeout(() => {
       const message = {
@@ -45,21 +45,20 @@ function testRealTimeEmissions() {
           emissions: data.emissions,
           confidence: data.confidence,
           timestamp: Date.now(),
-          energy: data.emissions * 0.001
-        }
+          energy: data.emissions * 0.001,
+        },
       };
-      
+
       // Send to all contexts (popup, content scripts, etc.)
-      chrome.runtime.sendMessage(message).catch((error) => {
+      chrome.runtime.sendMessage(message).catch(error => {
         console.log('No message receivers available:', error?.message);
       });
-      
+
       console.log(`Test ${index + 1}: Sent emission data:`, {
         emissions: data.emissions,
         confidence: data.confidence,
-        colorLevel: getColorLevel(data.emissions)
+        colorLevel: getColorLevel(data.emissions),
       });
-      
     }, index * 6000); // 6 second intervals to see each display change
   });
 }
@@ -73,8 +72,12 @@ function getColorLevel(emissions) {
 }
 
 // Auto-run test when script is loaded
-console.log('Real-time emission test script loaded. Run testRealTimeEmissions() to test.');
-console.log('Make sure the popup is open to see the real-time display in action.');
+console.log(
+  'Real-time emission test script loaded. Run testRealTimeEmissions() to test.'
+);
+console.log(
+  'Make sure the popup is open to see the real-time display in action.'
+);
 
 // Export for manual testing
 if (typeof window !== 'undefined') {

@@ -3,7 +3,12 @@
  */
 
 import { Transform, TransformCallback } from 'stream';
-import { EmissionInput, EmissionOutput, StreamingCalculationOptions, BatchMetrics } from './types';
+import {
+  EmissionInput,
+  EmissionOutput,
+  StreamingCalculationOptions,
+  BatchMetrics,
+} from './types';
 import { batchCalculator } from './batch-calculator';
 import { featureFlags } from './feature-flags';
 
@@ -52,7 +57,7 @@ export class StreamingCalculator extends Transform {
     try {
       // Handle both single inputs and arrays
       const inputs = Array.isArray(chunk) ? chunk : [chunk];
-      
+
       // Add to buffer
       this.buffer.push(...inputs);
       this.metrics.totalInputs += inputs.length;
@@ -92,11 +97,14 @@ export class StreamingCalculator extends Transform {
     }
 
     const inputs = this.buffer.splice(0, this.batchSize);
-    
+
     try {
-      const { results, metrics } = await batchCalculator.calculateBatch(inputs, {
-        features: this.features,
-      });
+      const { results, metrics } = await batchCalculator.calculateBatch(
+        inputs,
+        {
+          features: this.features,
+        }
+      );
 
       // Merge metrics
       this.mergeMetrics(metrics);
@@ -183,7 +191,7 @@ export class LogProcessor extends Transform {
     try {
       const text = chunk.toString();
       const lines = (this.lineBuffer + text).split('\n');
-      
+
       // Keep last incomplete line in buffer
       this.lineBuffer = lines.pop() || '';
 
@@ -227,7 +235,7 @@ export class ResultAggregator extends Transform {
 
   constructor(windowMs: number = 1000) {
     super({ objectMode: true });
-    
+
     this.aggregationWindow = windowMs;
     this.windowStart = Date.now();
   }
@@ -242,7 +250,7 @@ export class ResultAggregator extends Transform {
   ): void {
     try {
       const now = Date.now();
-      
+
       // Check if we need to flush current window
       if (now - this.windowStart >= this.aggregationWindow) {
         this.flushWindow();
@@ -251,7 +259,7 @@ export class ResultAggregator extends Transform {
 
       // Add to current window
       this.aggregatedResults.push(chunk);
-      
+
       callback();
     } catch (error) {
       callback(error);
@@ -276,10 +284,10 @@ export class ResultAggregator extends Transform {
 
     // Calculate aggregated statistics
     const summary = this.calculateSummary(this.aggregatedResults);
-    
+
     // Emit aggregated result
     this.push(summary);
-    
+
     // Reset for next window
     this.aggregatedResults = [];
   }
@@ -288,13 +296,20 @@ export class ResultAggregator extends Transform {
    * Calculate summary statistics for aggregated results
    */
   private calculateSummary(results: EmissionOutput[]) {
-    const categories = new Map<string, { count: number; total: number; unit: string }>();
-    
+    const categories = new Map<
+      string,
+      { count: number; total: number; unit: string }
+    >();
+
     for (const result of results) {
       if (!categories.has(result.category)) {
-        categories.set(result.category, { count: 0, total: 0, unit: result.unit });
+        categories.set(result.category, {
+          count: 0,
+          total: 0,
+          unit: result.unit,
+        });
       }
-      
+
       const category = categories.get(result.category)!;
       category.count++;
       category.total += result.amount;
@@ -306,7 +321,10 @@ export class ResultAggregator extends Transform {
       windowEnd: new Date().toISOString(),
       totalResults: results.length,
       categories: Object.fromEntries(categories),
-      totalEmissions: Array.from(categories.values()).reduce((sum, cat) => sum + cat.total, 0),
+      totalEmissions: Array.from(categories.values()).reduce(
+        (sum, cat) => sum + cat.total,
+        0
+      ),
     };
 
     return summary;
@@ -325,7 +343,9 @@ export function createStreamingPipeline(options: {
 
   // Log processor (if parser provided)
   if (options.logParser) {
-    pipeline.push(new LogProcessor(options.logParser, options.calculationOptions));
+    pipeline.push(
+      new LogProcessor(options.logParser, options.calculationOptions)
+    );
   }
 
   // Streaming calculator
@@ -349,7 +369,7 @@ export const logParsers = {
   json: (line: string): EmissionInput | null => {
     try {
       const data = JSON.parse(line);
-      
+
       if (data.category && data.type && typeof data.value === 'number') {
         return {
           id: data.id || `json_${Date.now()}_${Math.random()}`,
@@ -365,7 +385,7 @@ export const logParsers = {
     } catch {
       // Invalid JSON, skip
     }
-    
+
     return null;
   },
 
@@ -374,10 +394,10 @@ export const logParsers = {
    */
   csv: (line: string): EmissionInput | null => {
     const parts = line.split(',').map(p => p.trim());
-    
+
     if (parts.length >= 4) {
       const [category, type, value, unit = '', model = '', region = ''] = parts;
-      
+
       if (category && type && !isNaN(Number(value))) {
         return {
           id: `csv_${Date.now()}_${Math.random()}`,
@@ -390,7 +410,7 @@ export const logParsers = {
         };
       }
     }
-    
+
     return null;
   },
 
@@ -399,11 +419,13 @@ export const logParsers = {
    */
   aiUsage: (line: string): EmissionInput | null => {
     // Example: "2024-01-01T12:00:00Z [AI] model=gpt-4 tokens=1500 region=us-east-1"
-    const match = line.match(/\[AI\]\s+model=(\S+)\s+tokens=(\d+)(?:\s+region=(\S+))?/);
-    
+    const match = line.match(
+      /\[AI\]\s+model=(\S+)\s+tokens=(\d+)(?:\s+region=(\S+))?/
+    );
+
     if (match) {
       const [, model, tokens, region] = match;
-      
+
       return {
         id: `ai_${Date.now()}_${Math.random()}`,
         category: 'ai',
@@ -413,7 +435,7 @@ export const logParsers = {
         region: region || 'global',
       };
     }
-    
+
     return null;
   },
 };

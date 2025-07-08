@@ -20,13 +20,26 @@ export const Section: React.FC<SectionProps> = ({
       id={id}
       className={`
         section-base
-        ${variant === 'narrow' ? 'section-narrow' : 
-          variant === 'wide' ? 'section-wide' : 
-          variant === 'full' ? 'section-full' : 'section-default'}
-        ${padding === 'none' ? 'section-padding-none' :
-          padding === 'sm' ? 'section-padding-sm' :
-          padding === 'lg' ? 'section-padding-lg' :
-          padding === 'xl' ? 'section-padding-xl' : 'section-padding-md'}
+        ${
+          variant === 'narrow'
+            ? 'section-narrow'
+            : variant === 'wide'
+              ? 'section-wide'
+              : variant === 'full'
+                ? 'section-full'
+                : 'section-default'
+        }
+        ${
+          padding === 'none'
+            ? 'section-padding-none'
+            : padding === 'sm'
+              ? 'section-padding-sm'
+              : padding === 'lg'
+                ? 'section-padding-lg'
+                : padding === 'xl'
+                  ? 'section-padding-xl'
+                  : 'section-padding-md'
+        }
         ${className}
       `}
     >
@@ -34,6 +47,5 @@ export const Section: React.FC<SectionProps> = ({
     </section>
   );
 };
-
 
 export default Section;

@@ -48,24 +48,28 @@ interface CalculationOptions {
 }
 
 // Input types for batch processing
-type SingleInput = {
-  type: 'digital';
-  dataTransfer: number;
-  timeSpent: number;
-  deviceType?: 'mobile' | 'desktop' | 'tablet';
-} | {
-  type: 'transport';
-  distance: number;
-  mode?: 'car' | 'train' | 'plane' | 'bus';
-} | {
-  type: 'energy';
-  consumption: number;
-  source?: 'grid' | 'renewable' | 'fossil';
-} | {
-  type: 'ai';
-  tokens: number;
-  model: string;
-};
+type SingleInput =
+  | {
+      type: 'digital';
+      dataTransfer: number;
+      timeSpent: number;
+      deviceType?: 'mobile' | 'desktop' | 'tablet';
+    }
+  | {
+      type: 'transport';
+      distance: number;
+      mode?: 'car' | 'train' | 'plane' | 'bus';
+    }
+  | {
+      type: 'energy';
+      consumption: number;
+      source?: 'grid' | 'renewable' | 'fossil';
+    }
+  | {
+      type: 'ai';
+      tokens: number;
+      model: string;
+    };
 
 type BatchInput = SingleInput & CalculationOptions;
 
@@ -87,7 +91,10 @@ try {
 }
 import { getEmissionFactor, getAIFactor } from './factors';
 import { monteCarlo, simpleMonteCarloRange } from './uncertainty/monteCarlo';
-import { createUncertaintyFromCI, adjustConfidenceInterval } from './uncertainty/uncertaintyPropagation';
+import {
+  createUncertaintyFromCI,
+  adjustConfidenceInterval,
+} from './uncertainty/uncertaintyPropagation';
 import { adapterRegistry, BaseAdapter } from './adapters';
 import { GridIntensityManager } from './grid/intensity-manager';
 import { BatchCalculator } from './optimizations/batch-calculator';
@@ -105,10 +112,12 @@ export class EmissionsCalculator {
   private optimizationsEnabled: boolean;
   private uncertaintyEnabled: boolean;
 
-  constructor(options: {
-    enableOptimizations?: boolean;
-    enableUncertainty?: boolean;
-  } = {}) {
+  constructor(
+    options: {
+      enableOptimizations?: boolean;
+      enableUncertainty?: boolean;
+    } = {}
+  ) {
     this.gridIntensityManager = new GridIntensityManager();
     this.batchCalculator = new BatchCalculator();
     this.streamingCalculator = new StreamingCalculator();
@@ -155,12 +164,15 @@ export class EmissionsCalculator {
     deviceType: 'mobile' | 'desktop' | 'tablet' = 'desktop',
     options: CalculationOptions = {}
   ): Promise<EmissionData> {
-    return this.calculateSingle({
-      type: 'digital',
-      dataTransfer,
-      timeSpent,
-      deviceType
-    }, options).then(result => result.data as EmissionData);
+    return this.calculateSingle(
+      {
+        type: 'digital',
+        dataTransfer,
+        timeSpent,
+        deviceType,
+      },
+      options
+    ).then(result => result.data as EmissionData);
   }
 
   /**
@@ -171,19 +183,26 @@ export class EmissionsCalculator {
     mode: 'car' | 'train' | 'plane' | 'bus' = 'car',
     options: CalculationOptions = {}
   ): Promise<EmissionData> {
-    return this.calculateSingle({
-      type: 'transport',
-      distance,
-      mode
-    }, options).then(result => result.data as EmissionData);
+    return this.calculateSingle(
+      {
+        type: 'transport',
+        distance,
+        mode,
+      },
+      options
+    ).then(result => result.data as EmissionData);
   }
 
   /**
    * Check if input is a structured SingleInput type
    */
   private isStructuredInput(input: any): input is SingleInput {
-    return input && typeof input === 'object' && 'type' in input &&
-           ['digital', 'transport', 'energy', 'ai'].includes(input.type);
+    return (
+      input &&
+      typeof input === 'object' &&
+      'type' in input &&
+      ['digital', 'transport', 'energy', 'ai'].includes(input.type)
+    );
   }
 
   /**
@@ -194,17 +213,26 @@ export class EmissionsCalculator {
     options: CalculationOptions
   ): Promise<CalculationResult> {
     const startTime = performance.now();
-    
+
     // Apply regional grid intensity if needed and region is provided
     let regionAdjustment = 1;
-    if (options.region && (input.type === 'digital' || input.type === 'energy')) {
+    if (
+      options.region &&
+      (input.type === 'digital' || input.type === 'energy')
+    ) {
       try {
         const timestamp = options.timestamp || new Date();
-        const intensityResponse = await this.gridIntensityManager.getIntensity(options.region, timestamp);
+        const intensityResponse = await this.gridIntensityManager.getIntensity(
+          options.region,
+          timestamp
+        );
         // Apply regional adjustment based on grid intensity
         regionAdjustment = intensityResponse.intensity / 475; // 475 is global average
       } catch (error) {
-        console.warn(`Failed to get regional grid intensity for ${options.region}:`, error);
+        console.warn(
+          `Failed to get regional grid intensity for ${options.region}:`,
+          error
+        );
       }
     }
 
@@ -253,7 +281,10 @@ export class EmissionsCalculator {
       const uncertaintyOptions = options.uncertaintyOptions || {};
       const uncertainty = this.calculateEmissionUncertainty(
         emissionData.amount,
-        emissionData.confidence || { low: emissionData.amount * 0.8, high: emissionData.amount * 1.2 },
+        emissionData.confidence || {
+          low: emissionData.amount * 0.8,
+          high: emissionData.amount * 1.2,
+        },
         uncertaintyOptions.confidenceLevel || 95,
         uncertaintyOptions.method || 'montecarlo',
         uncertaintyOptions.iterations || 1000
@@ -265,7 +296,7 @@ export class EmissionsCalculator {
     return {
       data: finalData,
       processingTime,
-      source: 'direct'
+      source: 'direct',
     };
   }
 
@@ -277,25 +308,34 @@ export class EmissionsCalculator {
     options: CalculationOptions
   ): Promise<CalculationResult[]> {
     const startTime = performance.now();
-    
+
     // Use optimized batch calculator if enabled and available
-    if (this.optimizationsEnabled && featureFlags.getFlags().enableBatchOptimizations) {
+    if (
+      this.optimizationsEnabled &&
+      featureFlags.getFlags().enableBatchOptimizations
+    ) {
       try {
         // Convert inputs to batch format
         const batchInputs = inputs.map(input => ({ ...input, ...options }));
-        const { results } = await this.batchCalculator.calculateBatch(batchInputs, {
-          // batchSize: options.batchSize || 100,
-          features: featureFlags.getFlags()
-        });
-        
+        const { results } = await this.batchCalculator.calculateBatch(
+          batchInputs,
+          {
+            // batchSize: options.batchSize || 100,
+            features: featureFlags.getFlags(),
+          }
+        );
+
         const processingTime = performance.now() - startTime;
         return results.map(result => ({
           data: result as EmissionData,
           processingTime: processingTime / results.length,
-          source: 'batch' as const
+          source: 'batch' as const,
         }));
       } catch (error) {
-        console.warn('Batch optimization failed, falling back to sequential processing:', error);
+        console.warn(
+          'Batch optimization failed, falling back to sequential processing:',
+          error
+        );
       }
     }
 
@@ -303,14 +343,17 @@ export class EmissionsCalculator {
     const results: CalculationResult[] = [];
     for (const input of inputs) {
       try {
-        const result = await this.calculate(input, options) as CalculationResult;
+        const result = (await this.calculate(
+          input,
+          options
+        )) as CalculationResult;
         results.push(result);
       } catch (error) {
         console.error('Failed to process input:', input, error);
         // Continue processing other inputs
       }
     }
-    
+
     return results;
   }
 
@@ -323,26 +366,29 @@ export class EmissionsCalculator {
     options: CalculationOptions
   ): Promise<CalculationResult> {
     const startTime = performance.now();
-    
+
     try {
       // Validate input with adapter
       const validation = adapter.validate(input);
       if (!validation.isValid) {
-        throw new Error(`Adapter validation failed: ${validation.errors?.join(', ')}`);
+        throw new Error(
+          `Adapter validation failed: ${validation.errors?.join(', ')}`
+        );
       }
 
       // Normalize data using adapter
       const normalizedData = await adapter.normalize(input);
-      
+
       // Convert normalized data to structured input format
-      const structuredInput = this.normalizedDataToStructuredInput(normalizedData);
-      
+      const structuredInput =
+        this.normalizedDataToStructuredInput(normalizedData);
+
       // Process using regular calculation
       const result = await this.calculateSingle(structuredInput, options);
-      
+
       return {
         ...result,
-        source: 'adapter'
+        source: 'adapter',
       };
     } catch (error) {
       console.error('Adapter processing failed:', error);
@@ -358,39 +404,39 @@ export class EmissionsCalculator {
     options: CalculationOptions
   ): Promise<CalculationResult> {
     const startTime = performance.now();
-    
+
     // Try to infer input type and convert to structured format
     let structuredInput: SingleInput;
-    
+
     if (input.dataTransfer !== undefined || input.timeSpent !== undefined) {
       structuredInput = {
         type: 'digital',
         dataTransfer: input.dataTransfer || 0,
         timeSpent: input.timeSpent || 0,
-        deviceType: input.deviceType
+        deviceType: input.deviceType,
       };
     } else if (input.distance !== undefined) {
       structuredInput = {
         type: 'transport',
         distance: input.distance,
-        mode: input.mode
+        mode: input.mode,
       };
     } else if (input.consumption !== undefined) {
       structuredInput = {
         type: 'energy',
         consumption: input.consumption,
-        source: input.source
+        source: input.source,
       };
     } else if (input.tokens !== undefined || input.model !== undefined) {
       structuredInput = {
         type: 'ai',
         tokens: input.tokens || 0,
-        model: input.model
+        model: input.model,
       };
     } else {
       throw new Error('Unable to process input: unknown format');
     }
-    
+
     return this.calculateSingle(structuredInput, options);
   }
 
@@ -402,17 +448,20 @@ export class EmissionsCalculator {
     if (normalizedData.type) {
       return normalizedData as SingleInput;
     }
-    
+
     // Try to infer type from available fields
-    if (normalizedData.dataTransfer !== undefined || normalizedData.timeSpent !== undefined) {
+    if (
+      normalizedData.dataTransfer !== undefined ||
+      normalizedData.timeSpent !== undefined
+    ) {
       return {
         type: 'digital',
         dataTransfer: normalizedData.dataTransfer || 0,
         timeSpent: normalizedData.timeSpent || 0,
-        deviceType: normalizedData.deviceType
+        deviceType: normalizedData.deviceType,
       };
     }
-    
+
     // Add more inference logic as needed
     throw new Error('Unable to convert normalized data to structured input');
   }
@@ -426,7 +475,8 @@ export class EmissionsCalculator {
     deviceType: 'mobile' | 'desktop' | 'tablet'
   ): EmissionData {
     const factor = getEmissionFactor('digital', deviceType);
-    const amount = dataTransfer * factor.dataFactor + timeSpent * factor.timeFactor;
+    const amount =
+      dataTransfer * factor.dataFactor + timeSpent * factor.timeFactor;
 
     return {
       id: `digital_${Date.now()}`,
@@ -481,9 +531,8 @@ export class EmissionsCalculator {
       throw new Error(`Unknown AI model: ${model}`);
     }
 
-    const amount = tokens > 0 
-      ? tokens * factor.co2PerToken
-      : factor.co2PerQuery || 0;
+    const amount =
+      tokens > 0 ? tokens * factor.co2PerToken : factor.co2PerQuery || 0;
 
     return {
       id: `ai_${Date.now()}`,
@@ -504,11 +553,14 @@ export class EmissionsCalculator {
     source: 'grid' | 'renewable' | 'fossil' = 'grid',
     options: CalculationOptions = {}
   ): Promise<EmissionData> {
-    return this.calculateSingle({
-      type: 'energy',
-      consumption,
-      source
-    }, options).then(result => result.data as EmissionData);
+    return this.calculateSingle(
+      {
+        type: 'energy',
+        consumption,
+        source,
+      },
+      options
+    ).then(result => result.data as EmissionData);
   }
 
   /**
@@ -519,11 +571,14 @@ export class EmissionsCalculator {
     model: string,
     options: CalculationOptions = {}
   ): Promise<EmissionData> {
-    return this.calculateSingle({
-      type: 'ai',
-      tokens,
-      model
-    }, options).then(result => result.data as EmissionData);
+    return this.calculateSingle(
+      {
+        type: 'ai',
+        tokens,
+        model,
+      },
+      options
+    ).then(result => result.data as EmissionData);
   }
 
   /**
@@ -538,7 +593,7 @@ export class EmissionsCalculator {
       includeUncertainty = false,
       confidenceLevel = 95,
       method = 'montecarlo',
-      iterations = 1000
+      iterations = 1000,
     } = options;
 
     const factor = getAIFactor(model);
@@ -547,9 +602,8 @@ export class EmissionsCalculator {
     }
 
     // Base calculation
-    const baseAmount = tokens > 0 
-      ? tokens * factor.co2PerToken
-      : factor.co2PerQuery || 0;
+    const baseAmount =
+      tokens > 0 ? tokens * factor.co2PerToken : factor.co2PerQuery || 0;
 
     const baseData: EmissionData = {
       id: `ai_${Date.now()}`,
@@ -576,7 +630,7 @@ export class EmissionsCalculator {
 
     return {
       ...baseData,
-      uncertainty: uncertaintyData
+      uncertainty: uncertaintyData,
     };
   }
 
@@ -592,7 +646,7 @@ export class EmissionsCalculator {
   ): { low: number; mean: number; high: number; confidenceLevel: number } {
     // Convert confidence level to decimal
     const confidenceLevelDecimal = targetConfidenceLevel / 100;
-    
+
     // If we have existing confidence intervals from factors, use them
     if (factorConfidence && factorConfidence.low && factorConfidence.high) {
       // Adjust the confidence interval to the target level (assuming 95% CI in factors)
@@ -602,34 +656,34 @@ export class EmissionsCalculator {
         0.95, // Assuming factors have 95% CI
         confidenceLevelDecimal
       );
-      
+
       return {
         low: Math.round(adjusted.low * 100) / 100,
         mean: Math.round(baseAmount * 100) / 100,
         high: Math.round(adjusted.high * 100) / 100,
-        confidenceLevel: targetConfidenceLevel
+        confidenceLevel: targetConfidenceLevel,
       };
     }
-    
+
     // If no confidence intervals available, create uncertainty based on typical model uncertainty
     // AI model emissions typically have 20-30% uncertainty
     const uncertaintyPercent = 0.25; // 25% uncertainty
     const range = baseAmount * uncertaintyPercent;
-    
+
     if (method === 'montecarlo') {
       // Use Monte Carlo simulation for more accurate uncertainty propagation
       const emissionFn = (params: Record<string, number>) => {
         return params.emissionFactor * baseAmount;
       };
-      
+
       const uncertainties = {
         emissionFactor: {
           low: 1 - uncertaintyPercent,
           high: 1 + uncertaintyPercent,
-          distribution: 'normal' as const
-        }
+          distribution: 'normal' as const,
+        },
       };
-      
+
       try {
         const result = simpleMonteCarloRange(
           emissionFn,
@@ -637,27 +691,30 @@ export class EmissionsCalculator {
           iterations,
           confidenceLevelDecimal
         );
-        
+
         return {
           low: Math.round(result.low * 100) / 100,
           mean: Math.round(result.mean * 100) / 100,
           high: Math.round(result.high * 100) / 100,
-          confidenceLevel: targetConfidenceLevel
+          confidenceLevel: targetConfidenceLevel,
         };
       } catch (error) {
-        console.warn('Monte Carlo simulation failed, falling back to linear method:', error);
+        console.warn(
+          'Monte Carlo simulation failed, falling back to linear method:',
+          error
+        );
       }
     }
-    
+
     // Linear approximation method
     const zScore = this.getZScoreForConfidence(confidenceLevelDecimal);
     const std = range / 2; // Convert range to standard deviation
-    
+
     return {
       low: Math.round((baseAmount - zScore * std) * 100) / 100,
       mean: Math.round(baseAmount * 100) / 100,
       high: Math.round((baseAmount + zScore * std) * 100) / 100,
-      confidenceLevel: targetConfidenceLevel
+      confidenceLevel: targetConfidenceLevel,
     };
   }
 
@@ -668,9 +725,9 @@ export class EmissionsCalculator {
     const confidenceMap: Record<string, number> = {
       '0.90': 1.645,
       '0.95': 1.96,
-      '0.99': 2.576
+      '0.99': 2.576,
     };
-    
+
     const key = confidenceLevel.toFixed(2);
     return confidenceMap[key] || 1.96; // Default to 95% CI
   }

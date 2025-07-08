@@ -34,6 +34,11 @@ export interface EmissionResult {
 }
 
 // Type exports
-export type EmissionCategory = 'transport' | 'energy' | 'digital' | 'ai' | 'other';
+export type EmissionCategory =
+  | 'transport'
+  | 'energy'
+  | 'digital'
+  | 'ai'
+  | 'other';
 export type EmissionUnit = 'kg' | 'g' | 'tonnes';
 export type Period = 'daily' | 'weekly' | 'monthly' | 'yearly';

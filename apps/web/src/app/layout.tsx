@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Script from "next/script";
-import { Toaster } from "react-hot-toast";
-import "./globals.css";
-import { GA_MEASUREMENT_ID } from "../lib/analytics";
+import type { Metadata } from 'next';
+import { Geist, Geist_Mono } from 'next/font/google';
+import Script from 'next/script';
+import { Toaster } from 'react-hot-toast';
+import './globals.css';
+import { GA_MEASUREMENT_ID } from '../lib/analytics';
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-sans',
+  subsets: ['latin'],
+  display: 'swap',
   preload: true,
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-  display: "swap",
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+  display: 'swap',
   preload: true,
 });
 
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     'sustainability',
     'ML carbon footprint',
     'green AI',
-    'carbon offset'
+    'carbon offset',
   ],
   authors: [{ name: 'QarbonQuery Team' }],
   creator: 'QarbonQuery',
@@ -96,37 +96,37 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth antialiased">
+    <html lang='en' className='scroll-smooth antialiased'>
       <head>
-        <link rel="canonical" href="https://qarbonquery.com" />
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-        <meta name="theme-color" content="#10b981" />
-        <meta name="msapplication-TileColor" content="#10b981" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel='canonical' href='https://qarbonquery.com' />
+        <link rel='icon' href='/favicon.ico' sizes='any' />
+        <link rel='icon' href='/favicon.svg' type='image/svg+xml' />
+        <link rel='apple-touch-icon' href='/apple-touch-icon.png' />
+        <link rel='manifest' href='/site.webmanifest' />
+        <meta name='theme-color' content='#10b981' />
+        <meta name='msapplication-TileColor' content='#10b981' />
+        <meta name='viewport' content='width=device-width, initial-scale=1' />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <Toaster position="top-right" />
-        
+        <Toaster position='top-right' />
+
         {/* Vercel Analytics */}
         <Script
-          src="https://va.vercel-scripts.com/v1/script.js"
-          strategy="lazyOnload"
+          src='https://va.vercel-scripts.com/v1/script.js'
+          strategy='lazyOnload'
         />
-        
+
         {/* Google Analytics 4 */}
         {GA_MEASUREMENT_ID && (
           <>
             <Script
               src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-              strategy="lazyOnload"
+              strategy='lazyOnload'
             />
-            <Script id="google-analytics" strategy="lazyOnload">
+            <Script id='google-analytics' strategy='lazyOnload'>
               {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}

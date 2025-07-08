@@ -5,6 +5,7 @@ This API endpoint handles email subscriptions to your newsletter using ConvertKi
 ## Setup
 
 1. **Environment Variables**: Add your ConvertKit API key and form ID to your environment variables:
+
    ```bash
    CONVERTKIT_API_KEY=your_convertkit_api_key_here
    CONVERTKIT_FORM_ID=your_convertkit_form_id_here
@@ -19,6 +20,7 @@ This API endpoint handles email subscriptions to your newsletter using ConvertKi
 ### POST `/api/subscribe`
 
 **Request Body:**
+
 ```json
 {
   "email": "user@example.com"
@@ -26,6 +28,7 @@ This API endpoint handles email subscriptions to your newsletter using ConvertKi
 ```
 
 **Success Response:**
+
 ```json
 {
   "success": true,
@@ -34,6 +37,7 @@ This API endpoint handles email subscriptions to your newsletter using ConvertKi
 ```
 
 **Error Response:**
+
 ```json
 {
   "success": false,
@@ -49,7 +53,8 @@ This API endpoint handles email subscriptions to your newsletter using ConvertKi
 
 ## Frontend Integration
 
-The API is already integrated with the `CallToAction` component using `react-hot-toast` for user feedback:
+The API is already integrated with the `CallToAction` component using `react-hot-toast` for user
+feedback:
 
 ```typescript
 import toast from 'react-hot-toast';

@@ -15,19 +15,19 @@ const external = [
   'crypto',
   'events',
   'buffer',
-  'worker_threads'
+  'worker_threads',
 ];
 
 const commonPlugins = [
   nodeResolve({
     preferBuiltins: true,
-    exportConditions: ['node', 'default']
+    exportConditions: ['node', 'default'],
   }),
   esbuild({
     target: 'es2020',
     minify: false,
-    tsconfig: './tsconfig.json'
-  })
+    tsconfig: './tsconfig.json',
+  }),
 ];
 
 const minifyPlugins = [
@@ -36,12 +36,18 @@ const minifyPlugins = [
     compress: {
       drop_console: true,
       drop_debugger: true,
-      pure_funcs: ['console.log', 'console.debug', 'console.info']
+      pure_funcs: ['console.log', 'console.debug', 'console.info'],
     },
     mangle: {
-      reserved: ['Calculator', 'EmissionsCalculator', 'AIEmissionsCalculator', 'CloudEmissionsCalculator', 'CryptoEmissionsCalculator']
-    }
-  })
+      reserved: [
+        'Calculator',
+        'EmissionsCalculator',
+        'AIEmissionsCalculator',
+        'CloudEmissionsCalculator',
+        'CryptoEmissionsCalculator',
+      ],
+    },
+  }),
 ];
 
 export default [
@@ -53,19 +59,19 @@ export default [
         file: 'dist/index.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/index.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
-  
+
   // Minified main bundle
   {
     input: 'src/index.ts',
@@ -74,11 +80,11 @@ export default [
         file: 'dist/index.min.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // AI-only bundle
@@ -89,17 +95,17 @@ export default [
         file: 'dist/ai.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/ai.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
 
   // AI-only minified bundle
@@ -109,10 +115,10 @@ export default [
       file: 'dist/ai.min.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // Cloud-only bundle
@@ -123,17 +129,17 @@ export default [
         file: 'dist/cloud.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/cloud.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
 
   // Cloud-only minified bundle
@@ -143,10 +149,10 @@ export default [
       file: 'dist/cloud.min.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // Crypto-only bundle
@@ -157,17 +163,17 @@ export default [
         file: 'dist/crypto.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/crypto.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
 
   // Crypto-only minified bundle
@@ -177,10 +183,10 @@ export default [
       file: 'dist/crypto.min.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // Calculator-only bundle
@@ -191,17 +197,17 @@ export default [
         file: 'dist/calculator.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/calculator.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
 
   // Calculator-only minified bundle
@@ -211,10 +217,10 @@ export default [
       file: 'dist/calculator.min.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // Factors-only bundle
@@ -225,17 +231,17 @@ export default [
         file: 'dist/factors.js',
         format: 'es',
         exports: 'named',
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: 'dist/factors.cjs',
         format: 'cjs',
         exports: 'named',
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
     external,
-    plugins: commonPlugins
+    plugins: commonPlugins,
   },
 
   // Factors-only minified bundle
@@ -245,10 +251,10 @@ export default [
       file: 'dist/factors.min.js',
       format: 'es',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     external,
-    plugins: minifyPlugins
+    plugins: minifyPlugins,
   },
 
   // Browser bundle - includes all dependencies
@@ -259,19 +265,19 @@ export default [
       format: 'umd',
       name: 'QarbonEmissions',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     plugins: [
       nodeResolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       esbuild({
         target: 'es2020',
         minify: false,
-        tsconfig: './tsconfig.json'
-      })
-    ]
+        tsconfig: './tsconfig.json',
+      }),
+    ],
   },
 
   // Browser bundle - minified
@@ -282,28 +288,28 @@ export default [
       format: 'umd',
       name: 'QarbonEmissions',
       exports: 'named',
-      sourcemap: true
+      sourcemap: true,
     },
     plugins: [
       nodeResolve({
         browser: true,
-        preferBuiltins: false
+        preferBuiltins: false,
       }),
       esbuild({
         target: 'es2020',
         minify: true,
-        tsconfig: './tsconfig.json'
+        tsconfig: './tsconfig.json',
       }),
       terser({
         compress: {
           drop_console: true,
           drop_debugger: true,
-          pure_funcs: ['console.log', 'console.debug', 'console.info']
+          pure_funcs: ['console.log', 'console.debug', 'console.info'],
         },
         mangle: {
-          reserved: ['QarbonEmissions']
-        }
-      })
-    ]
-  }
+          reserved: ['QarbonEmissions'],
+        },
+      }),
+    ],
+  },
 ];

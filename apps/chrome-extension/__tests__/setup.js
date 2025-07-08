@@ -6,7 +6,7 @@ global.chrome = {
   ...global.chrome,
   runtime: {
     ...global.chrome.runtime,
-    getURL: jest.fn((path) => `chrome-extension://test-extension-id/${path}`),
+    getURL: jest.fn(path => `chrome-extension://test-extension-id/${path}`),
   },
   storage: {
     ...global.chrome.storage,

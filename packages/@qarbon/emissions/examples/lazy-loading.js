@@ -7,7 +7,7 @@ class LazyEmissionsCalculator {
   constructor() {
     this.calculators = new Map();
   }
-  
+
   async getAICalculator() {
     if (!this.calculators.has('ai')) {
       const { aiCalculator } = await import('qarbon-emissions/ai');
@@ -15,7 +15,7 @@ class LazyEmissionsCalculator {
     }
     return this.calculators.get('ai');
   }
-  
+
   async getCloudCalculator() {
     if (!this.calculators.has('cloud')) {
       const { cloudCalculator } = await import('qarbon-emissions/cloud');
@@ -23,7 +23,7 @@ class LazyEmissionsCalculator {
     }
     return this.calculators.get('cloud');
   }
-  
+
   async getCryptoCalculator() {
     if (!this.calculators.has('crypto')) {
       const { cryptoCalculator } = await import('qarbon-emissions/crypto');
@@ -31,20 +31,24 @@ class LazyEmissionsCalculator {
     }
     return this.calculators.get('crypto');
   }
-  
+
   async calculateAI(tokens, model) {
     const calculator = await this.getAICalculator();
     return calculator.calculateTokenEmissions(tokens, model);
   }
-  
+
   async calculateCloud(hours, instanceType, options) {
     const calculator = await this.getCloudCalculator();
     return calculator.calculateComputeEmissions(hours, instanceType, options);
   }
-  
+
   async calculateCrypto(transactions, currency, options) {
     const calculator = await this.getCryptoCalculator();
-    return calculator.calculateTransactionEmissions(transactions, currency, options);
+    return calculator.calculateTransactionEmissions(
+      transactions,
+      currency,
+      options
+    );
   }
 }
 
@@ -56,7 +60,9 @@ const aiEmission = await calculator.calculateAI(1000, 'gpt-4');
 console.log('AI Emission:', aiEmission);
 
 // Only loads the cloud bundle when needed
-const cloudEmission = await calculator.calculateCloud(5, 't3.micro', { region: 'us-west-2' });
+const cloudEmission = await calculator.calculateCloud(5, 't3.micro', {
+  region: 'us-west-2',
+});
 console.log('Cloud Emission:', cloudEmission);
 
 export { LazyEmissionsCalculator };

@@ -20,15 +20,15 @@ function isValidEmail(email: string): boolean {
 function getClientIP(request: NextRequest): string {
   const forwarded = request.headers.get('x-forwarded-for');
   const real = request.headers.get('x-real-ip');
-  
+
   if (forwarded) {
     return forwarded.split(',')[0].trim();
   }
-  
+
   if (real) {
     return real;
   }
-  
+
   return 'unknown';
 }
 
@@ -36,18 +36,18 @@ function checkRateLimit(ip: string): boolean {
   const now = Date.now();
   const windowMs = 15 * 60 * 1000; // 15 minutes
   const maxRequests = 5; // Max 5 requests per 15 minutes per IP
-  
+
   const record = rateLimitStore.get(ip);
-  
+
   if (!record || now > record.resetTime) {
     rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
     return true;
   }
-  
+
   if (record.count >= maxRequests) {
     return false;
   }
-  
+
   record.count++;
   return true;
 }
@@ -57,17 +57,20 @@ async function subscribeToConvertKit(email: string) {
     throw new Error('ConvertKit configuration missing');
   }
 
-  const response = await fetch(`https://api.convertkit.com/v3/forms/${CONVERTKIT_FORM_ID}/subscribe`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      api_key: CONVERTKIT_API_KEY,
-      email,
-      tags: ['qarbon-query-website'],
-    }),
-  });
+  const response = await fetch(
+    `https://api.convertkit.com/v3/forms/${CONVERTKIT_FORM_ID}/subscribe`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        api_key: CONVERTKIT_API_KEY,
+        email,
+        tags: ['qarbon-query-website'],
+      }),
+    }
+  );
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -78,7 +81,11 @@ async function subscribeToConvertKit(email: string) {
 }
 
 async function subscribeToMailchimp(email: string) {
-  if (!MAILCHIMP_API_KEY || !MAILCHIMP_AUDIENCE_ID || !MAILCHIMP_SERVER_PREFIX) {
+  if (
+    !MAILCHIMP_API_KEY ||
+    !MAILCHIMP_AUDIENCE_ID ||
+    !MAILCHIMP_SERVER_PREFIX
+  ) {
     throw new Error('Mailchimp configuration missing');
   }
 
@@ -88,7 +95,7 @@ async function subscribeToMailchimp(email: string) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${MAILCHIMP_API_KEY}`,
+        Authorization: `Bearer ${MAILCHIMP_API_KEY}`,
       },
       body: JSON.stringify({
         email_address: email,
@@ -104,7 +111,9 @@ async function subscribeToMailchimp(email: string) {
     if (errorData.title === 'Member Exists') {
       return { message: 'Email already subscribed' };
     }
-    throw new Error(`Mailchimp error: ${response.status} - ${errorData.detail || 'Unknown error'}`);
+    throw new Error(
+      `Mailchimp error: ${response.status} - ${errorData.detail || 'Unknown error'}`
+    );
   }
 
   return await response.json();
@@ -115,7 +124,7 @@ export default async function handler(request: NextRequest) {
   if (request.method !== 'POST') {
     return NextResponse.json(
       { error: 'Method not allowed' },
-      { status: 405, headers: { 'Allow': 'POST' } }
+      { status: 405, headers: { Allow: 'POST' } }
     );
   }
 
@@ -133,10 +142,7 @@ export default async function handler(request: NextRequest) {
 
     // Validate email
     if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Email is required' }, { status: 400 });
     }
 
     if (!isValidEmail(email)) {
@@ -166,42 +172,65 @@ export default async function handler(request: NextRequest) {
         service = 'convertkit';
       }
       // Fallback to Mailchimp if ConvertKit is not configured
-      else if (MAILCHIMP_API_KEY && MAILCHIMP_AUDIENCE_ID && MAILCHIMP_SERVER_PREFIX) {
+      else if (
+        MAILCHIMP_API_KEY &&
+        MAILCHIMP_AUDIENCE_ID &&
+        MAILCHIMP_SERVER_PREFIX
+      ) {
         result = await subscribeToMailchimp(email);
         service = 'mailchimp';
-      }
-      else {
+      } else {
         throw new Error('No email service configured');
       }
 
-      console.warn(`Subscription successful via ${service}:`, { email, result });
-
-      return NextResponse.json({
-        message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',
-        service,
+      console.warn(`Subscription successful via ${service}:`, {
+        email,
+        result,
       });
 
+      return NextResponse.json({
+        message:
+          "Thank you for subscribing! You'll receive updates about Qarbon Query.",
+        service,
+      });
     } catch (subscriptionError) {
       console.error(`${service} subscription error:`, subscriptionError);
 
       // Try the other service as fallback
       try {
-        if (service === 'convertkit' && MAILCHIMP_API_KEY && MAILCHIMP_AUDIENCE_ID && MAILCHIMP_SERVER_PREFIX) {
+        if (
+          service === 'convertkit' &&
+          MAILCHIMP_API_KEY &&
+          MAILCHIMP_AUDIENCE_ID &&
+          MAILCHIMP_SERVER_PREFIX
+        ) {
           result = await subscribeToMailchimp(email);
           service = 'mailchimp';
-          console.warn(`Fallback subscription successful via ${service}:`, { email, result });
-          
+          console.warn(`Fallback subscription successful via ${service}:`, {
+            email,
+            result,
+          });
+
           return NextResponse.json({
-            message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',
+            message:
+              "Thank you for subscribing! You'll receive updates about Qarbon Query.",
             service,
           });
-        } else if (service === 'mailchimp' && CONVERTKIT_API_KEY && CONVERTKIT_FORM_ID) {
+        } else if (
+          service === 'mailchimp' &&
+          CONVERTKIT_API_KEY &&
+          CONVERTKIT_FORM_ID
+        ) {
           result = await subscribeToConvertKit(email);
           service = 'convertkit';
-          console.warn(`Fallback subscription successful via ${service}:`, { email, result });
-          
+          console.warn(`Fallback subscription successful via ${service}:`, {
+            email,
+            result,
+          });
+
           return NextResponse.json({
-            message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',
+            message:
+              "Thank you for subscribing! You'll receive updates about Qarbon Query.",
             service,
           });
         }
@@ -215,10 +244,9 @@ export default async function handler(request: NextRequest) {
         { status: 500 }
       );
     }
-
   } catch (error) {
     console.error('Newsletter subscription error:', error);
-    
+
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

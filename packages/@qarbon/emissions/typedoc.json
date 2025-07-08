@@ -12,13 +12,7 @@
   "plugin": [],
   "theme": "default",
   "categorizeByGroup": true,
-  "categoryOrder": [
-    "Calculator",
-    "Adapters", 
-    "Data Types",
-    "Utilities",
-    "Other"
-  ],
+  "categoryOrder": ["Calculator", "Adapters", "Data Types", "Utilities", "Other"],
   "sort": ["source-order"],
   "validation": {
     "notExported": false,

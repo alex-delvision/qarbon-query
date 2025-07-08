@@ -79,7 +79,7 @@ const streamingCalculator = new StreamingCalculator({ batchSize: 100 });
 fs.createReadStream('emissions.log')
   .pipe(logProcessor)
   .pipe(streamingCalculator)
-  .on('data', (result) => {
+  .on('data', result => {
     console.log('Emission calculated:', result);
   });
 ```
@@ -94,8 +94,8 @@ import { featureFlags } from '@qarbon/emissions/optimizations';
 // Update feature flags
 featureFlags.updateFlags({
   enableWasmCalculations: false, // Disable WASM
-  enableSIMDOperations: true,    // Enable SIMD
-  wasmBatchThreshold: 2000,      // Higher threshold
+  enableSIMDOperations: true, // Enable SIMD
+  wasmBatchThreshold: 2000, // Higher threshold
 });
 
 // Environment variable support
@@ -104,11 +104,11 @@ featureFlags.updateFlags({
 
 ## Performance Characteristics
 
-| Method | Batch Size | Performance | Memory Usage | Fallback |
-|--------|------------|-------------|--------------|-----------|
-| Regular | < 100 | Baseline | Low | N/A |
-| SIMD | 100-1000 | 2-4x faster | Medium | Regular |
-| WASM | > 1000 | 5-10x faster | High | SIMD/Regular |
+| Method  | Batch Size | Performance  | Memory Usage | Fallback     |
+| ------- | ---------- | ------------ | ------------ | ------------ |
+| Regular | < 100      | Baseline     | Low          | N/A          |
+| SIMD    | 100-1000   | 2-4x faster  | Medium       | Regular      |
+| WASM    | > 1000     | 5-10x faster | High         | SIMD/Regular |
 
 ## Build Requirements
 
@@ -134,7 +134,7 @@ class BatchCalculator {
     inputs: EmissionInput[],
     options?: BatchCalculationOptions
   ): Promise<{ results: EmissionOutput[]; metrics: BatchMetrics }>;
-  
+
   getMetrics(): BatchMetrics;
   resetMetrics(): void;
 }
@@ -229,6 +229,6 @@ console.log({
   optimizationsUsed: {
     wasm: metrics.useWasm,
     simd: metrics.useSIMD,
-  }
+  },
 });
 ```

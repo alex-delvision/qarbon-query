@@ -1,17 +1,17 @@
 /**
  * CodeCarbon Adapter
- * 
+ *
  * Handles data from CodeCarbon (https://codecarbon.io/), a Python library for tracking
  * carbon emissions from compute resources during code execution.
- * 
+ *
  * @example
  * ```typescript
  * import { CodeCarbonAdapter } from './CodeCarbonAdapter';
- * 
+ *
  * const adapter = new CodeCarbonAdapter();
  * const result = adapter.normalize(codeCarbonData);
  * ```
- * 
+ *
  * @example CodeCarbon JSON format:
  * ```json
  * {
@@ -48,7 +48,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export interface CodeCarbonData {
@@ -90,7 +96,7 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
       version: '1.0.0',
       description: 'Adapter for CodeCarbon emissions tracking data',
       supportedFormats: ['json'],
-      confidence: 0.95
+      confidence: 0.95,
     });
   }
 
@@ -144,14 +150,16 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   normalize(input: CodeCarbonData): NormalizedData {
     const validation = this.validate(input);
     if (!validation.isValid) {
-      throw new Error(`Invalid CodeCarbon data: ${validation.errors?.join(', ')}`);
+      throw new Error(
+        `Invalid CodeCarbon data: ${validation.errors?.join(', ')}`
+      );
     }
 
     return {
@@ -159,15 +167,15 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
       timestamp: new Date(input.timestamp).toISOString(),
       source: 'codecarbon',
       category: 'compute',
-      
+
       // Core emissions data
       emissions: {
         total: input.emissions,
         unit: 'kg',
         rate: input.emissions_rate,
-        scope: 'scope2' // Electricity-based emissions
+        scope: 'scope2', // Electricity-based emissions
       },
-      
+
       // Energy consumption breakdown
       energy: {
         total: input.energy_consumed,
@@ -175,71 +183,78 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
         breakdown: {
           cpu: input.cpu_energy || 0,
           gpu: input.gpu_energy || 0,
-          ram: input.ram_energy || 0
-        }
+          ram: input.ram_energy || 0,
+        },
       },
-      
+
       // Power consumption breakdown
       power: {
         cpu: input.cpu_power,
         gpu: input.gpu_power,
-        ram: input.ram_power
+        ram: input.ram_power,
       },
-      
+
       // Execution context
       execution: {
         duration: input.duration,
         project: input.project_name,
         run_id: input.run_id,
-        tracking_mode: input.tracking_mode
+        tracking_mode: input.tracking_mode,
       },
-      
+
       // Geographic and infrastructure data
       location: {
         country: input.country_name,
         country_code: input.country_iso_code,
         region: input.region,
-        coordinates: input.longitude && input.latitude ? {
-          longitude: input.longitude,
-          latitude: input.latitude
-        } : undefined
+        coordinates:
+          input.longitude && input.latitude
+            ? {
+                longitude: input.longitude,
+                latitude: input.latitude,
+              }
+            : undefined,
       },
-      
+
       // Cloud infrastructure
-      cloud: input.cloud_provider ? {
-        provider: input.cloud_provider,
-        region: input.cloud_region
-      } : undefined,
-      
+      cloud: input.cloud_provider
+        ? {
+            provider: input.cloud_provider,
+            region: input.cloud_region,
+          }
+        : undefined,
+
       // Hardware specifications
       hardware: {
         cpu: {
           count: input.cpu_count,
-          model: input.cpu_model
+          model: input.cpu_model,
         },
-        gpu: input.gpu_count ? {
-          count: input.gpu_count,
-          model: input.gpu_model
-        } : undefined,
+        gpu: input.gpu_count
+          ? {
+              count: input.gpu_count,
+              model: input.gpu_model,
+            }
+          : undefined,
         ram: {
           total_size: input.ram_total_size,
-          unit: 'GB'
-        }
+          unit: 'GB',
+        },
       },
-      
+
       // Software environment
       software: {
         os: input.os,
         python_version: input.python_version,
-        codecarbon_version: input.codecarbon_version
+        codecarbon_version: input.codecarbon_version,
       },
-      
+
       // Metadata
       metadata: {
         adapter: 'CodeCarbonAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.95
-      }
+        confidence: 0.95,
+      },
     };
   }
 
@@ -253,18 +268,30 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
         weight: 0.4,
         test: (data: any) => {
           // Check for CodeCarbon specific fields
-          const codeCarbonFields = ['codecarbon_version', 'tracking_mode', 'emissions_rate'];
-          return codeCarbonFields.some(field => data && typeof data === 'object' && field in data);
-        }
+          const codeCarbonFields = [
+            'codecarbon_version',
+            'tracking_mode',
+            'emissions_rate',
+          ];
+          return codeCarbonFields.some(
+            field => data && typeof data === 'object' && field in data
+          );
+        },
       },
       {
         weight: 0.3,
         test: (data: any) => {
           // Check for typical CodeCarbon structure
           if (typeof data !== 'object' || data === null) return false;
-          const requiredFields = ['timestamp', 'project_name', 'run_id', 'emissions', 'energy_consumed'];
+          const requiredFields = [
+            'timestamp',
+            'project_name',
+            'run_id',
+            'emissions',
+            'energy_consumed',
+          ];
           return requiredFields.every(field => field in data);
-        }
+        },
       },
       {
         weight: 0.2,
@@ -273,17 +300,22 @@ export class CodeCarbonAdapter extends BaseAdapter<CodeCarbonData> {
           if (typeof data !== 'object' || data === null) return false;
           const energyFields = ['cpu_energy', 'gpu_energy', 'ram_energy'];
           return energyFields.some(field => field in data);
-        }
+        },
       },
       {
         weight: 0.1,
         test: (data: any) => {
           // Check for CodeCarbon hardware info pattern
           if (typeof data !== 'object' || data === null) return false;
-          const hardwareFields = ['cpu_count', 'cpu_model', 'gpu_count', 'gpu_model'];
+          const hardwareFields = [
+            'cpu_count',
+            'cpu_model',
+            'gpu_count',
+            'gpu_model',
+          ];
           return hardwareFields.some(field => field in data);
-        }
-      }
+        },
+      },
     ];
   }
 

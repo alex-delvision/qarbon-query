@@ -9,7 +9,7 @@ export { CsvAdapter } from './CsvAdapter.js';
 export { XmlAdapter } from './XmlAdapter.js';
 export { CodeCarbonAdapter } from './CodeCarbonAdapter.js';
 export { AIImpactTrackerAdapter } from './AIImpactTrackerAdapter.js';
-export { JSONSchemaAdapter, } from './JSONSchemaAdapter.js';
+export { JSONSchemaAdapter } from './JSONSchemaAdapter.js';
 export { FitAdapter } from './FitAdapter.js';
 // Future tracker adapter exports will be added here:
 // export { GoogleAnalyticsAdapter } from './GoogleAnalyticsAdapter';

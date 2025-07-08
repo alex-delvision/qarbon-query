@@ -76,7 +76,7 @@ export abstract class BaseAdapter<I = any> {
     for (const heuristic of heuristics) {
       const result = heuristic.test(data);
       const score = typeof result === 'boolean' ? (result ? 1 : 0) : result;
-      
+
       weightedScore += score * heuristic.weight;
       totalWeight += heuristic.weight;
     }
@@ -114,18 +114,25 @@ class VectorSimilarity {
    */
   static extractFeatureVector(data: any): number[] {
     const features: number[] = [];
-    
+
     // Basic structural features
     features.push(typeof data === 'object' ? 1 : 0);
     features.push(Array.isArray(data) ? 1 : 0);
     features.push(data === null ? 1 : 0);
-    
+
     if (typeof data === 'object' && data !== null) {
       const keys = Object.keys(data);
       features.push(keys.length);
-      
+
       // Common field presence indicators
-      const commonFields = ['emissions', 'carbon', 'co2', 'energy', 'fuel', 'electricity'];
+      const commonFields = [
+        'emissions',
+        'carbon',
+        'co2',
+        'energy',
+        'fuel',
+        'electricity',
+      ];
       for (const field of commonFields) {
         features.push(keys.some(k => k.toLowerCase().includes(field)) ? 1 : 0);
       }
@@ -159,32 +166,39 @@ class FuzzyRules {
   /**
    * Get fuzzy rules for a specific adapter
    */
-  private static getRulesForAdapter(_adapterName: string): Array<{condition: (data: any) => boolean, weight: number}> {
+  private static getRulesForAdapter(
+    _adapterName: string
+  ): Array<{ condition: (data: any) => boolean; weight: number }> {
     // Default fuzzy rules - can be extended per adapter
     return [
       {
-        condition: (data) => typeof data === 'object' && data !== null,
-        weight: 0.2
+        condition: data => typeof data === 'object' && data !== null,
+        weight: 0.2,
       },
       {
-        condition: (data) => {
+        condition: data => {
           if (typeof data === 'object' && data !== null) {
             const keys = Object.keys(data).map(k => k.toLowerCase());
-            return keys.some(k => k.includes('emission') || k.includes('carbon') || k.includes('co2'));
+            return keys.some(
+              k =>
+                k.includes('emission') ||
+                k.includes('carbon') ||
+                k.includes('co2')
+            );
           }
           return false;
         },
-        weight: 0.4
+        weight: 0.4,
       },
       {
-        condition: (data) => {
+        condition: data => {
           if (Array.isArray(data) && data.length > 0) {
             return typeof data[0] === 'object';
           }
           return false;
         },
-        weight: 0.3
-      }
+        weight: 0.3,
+      },
     ];
   }
 }
@@ -200,7 +214,7 @@ export class AdapterRegistry {
   registerAdapter(adapter: BaseAdapter): void {
     const metadata = adapter.getMetadata();
     this.adapters.set(metadata.name, adapter);
-    
+
     // Pre-calculate feature vectors for known data patterns
     // This would typically be done with training data
     this.adapterVectors.set(metadata.name, this.generateAdapterVector(adapter));
@@ -238,7 +252,7 @@ export class AdapterRegistry {
       return null;
     }
 
-    const candidates: Array<{adapter: BaseAdapter, score: number}> = [];
+    const candidates: Array<{ adapter: BaseAdapter; score: number }> = [];
     const inputVector = VectorSimilarity.extractFeatureVector(data);
 
     for (const [name, adapter] of Array.from(this.adapters.entries())) {
@@ -251,7 +265,10 @@ export class AdapterRegistry {
       // 2. ML cosine similarity
       const adapterVector = this.adapterVectors.get(name);
       if (adapterVector) {
-        const similarity = VectorSimilarity.cosineSimilarity(inputVector, adapterVector);
+        const similarity = VectorSimilarity.cosineSimilarity(
+          inputVector,
+          adapterVector
+        );
         score += similarity * 0.4;
       }
 
@@ -264,10 +281,12 @@ export class AdapterRegistry {
 
     // Sort by score (descending) and return the best match
     candidates.sort((a, b) => b.score - a.score);
-    
+
     // Return the best adapter if confidence is above threshold
     const bestCandidate = candidates[0];
-    return bestCandidate && bestCandidate.score > 0.5 ? bestCandidate.adapter : null;
+    return bestCandidate && bestCandidate.score > 0.5
+      ? bestCandidate.adapter
+      : null;
   }
 
   /**
@@ -279,7 +298,9 @@ export class AdapterRegistry {
 
     // Basic metadata features
     vector.push(metadata.name.length / 20); // Normalized name length
-    vector.push(metadata.supportedFormats ? metadata.supportedFormats.length / 10 : 0);
+    vector.push(
+      metadata.supportedFormats ? metadata.supportedFormats.length / 10 : 0
+    );
     vector.push(metadata.confidence || 0.5);
 
     // Pad or truncate to fixed length

@@ -1,6 +1,7 @@
 # Analytics Setup and Usage
 
-This directory contains the analytics wrapper for QarbonQuery, providing safe tracking with both Google Analytics 4 and Vercel Analytics.
+This directory contains the analytics wrapper for QarbonQuery, providing safe tracking with both
+Google Analytics 4 and Vercel Analytics.
 
 ## Features
 
@@ -23,17 +24,18 @@ NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
 
 ### 2. Layout Integration
 
-The analytics scripts are automatically loaded in `app/layout.tsx` when `NEXT_PUBLIC_GA_ID` is present.
+The analytics scripts are automatically loaded in `app/layout.tsx` when `NEXT_PUBLIC_GA_ID` is
+present.
 
 ### 3. Event Tracking
 
 Import and use the tracking functions in your components:
 
 ```tsx
-import { 
-  trackExtensionInstallClick, 
-  trackNpmCopyClick, 
-  trackNewsletterSubmitted 
+import {
+  trackExtensionInstallClick,
+  trackNpmCopyClick,
+  trackNewsletterSubmitted,
 } from '@/lib/analytics';
 
 // In your component
@@ -48,7 +50,7 @@ const handleExtensionInstall = () => {
 ### Core Event Tracking
 
 - `trackExtensionInstallClick(extensionType: string)` - Track extension install button clicks
-- `trackNpmCopyClick(packageName: string)` - Track NPM copy button clicks  
+- `trackNpmCopyClick(packageName: string)` - Track NPM copy button clicks
 - `trackNewsletterSubmitted(source: string, email?: string)` - Track newsletter subscriptions
 
 ### Generic Tracking
@@ -65,6 +67,7 @@ const handleExtensionInstall = () => {
 ## Event Details
 
 ### extension_install_click
+
 ```javascript
 {
   event: 'extension_install_click',
@@ -74,6 +77,7 @@ const handleExtensionInstall = () => {
 ```
 
 ### npm_copy_click
+
 ```javascript
 {
   event: 'npm_copy_click',
@@ -83,6 +87,7 @@ const handleExtensionInstall = () => {
 ```
 
 ### newsletter_submitted
+
 ```javascript
 {
   event: 'newsletter_submitted',
@@ -104,13 +109,13 @@ The analytics wrapper includes privacy-focused defaults:
 ## Usage Examples
 
 ### Extension Install Button
+
 ```tsx
-<button onClick={() => trackExtensionInstallClick('chrome')}>
-  Install Chrome Extension
-</button>
+<button onClick={() => trackExtensionInstallClick('chrome')}>Install Chrome Extension</button>
 ```
 
 ### NPM Copy Button
+
 ```tsx
 const handleCopyNpm = async () => {
   trackNpmCopyClick('qarbon-query');
@@ -119,6 +124,7 @@ const handleCopyNpm = async () => {
 ```
 
 ### Newsletter Form
+
 ```tsx
 const handleSubmit = (email: string) => {
   trackNewsletterSubmitted('header', email);
@@ -128,7 +134,8 @@ const handleSubmit = (email: string) => {
 
 ## Vercel Analytics
 
-Vercel Analytics is automatically enabled when deployed to Vercel. No additional configuration is needed.
+Vercel Analytics is automatically enabled when deployed to Vercel. No additional configuration is
+needed.
 
 ## Testing
 

@@ -95,11 +95,7 @@ export class FeatureFlagsManager {
     }
 
     // Numeric flags
-    const numericFlags = [
-      'wasmBatchThreshold',
-      'cacheTTL',
-      'maxCacheSize',
-    ];
+    const numericFlags = ['wasmBatchThreshold', 'cacheTTL', 'maxCacheSize'];
 
     for (const flag of numericFlags) {
       const envVar = `QARBON_${flag.toUpperCase()}`;

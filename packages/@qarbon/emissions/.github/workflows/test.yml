@@ -2,245 +2,245 @@ name: Test Suite
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
 
 jobs:
   test-node:
     name: Test on Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [18, 20]
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run type checking
-      run: npm run check-types
-      
-    - name: Run linter
-      run: npm run lint
-      
-    - name: Run tests
-      run: npm test
-      
-    - name: Run tests with coverage
-      run: npm run test:coverage
-      
-    - name: Upload coverage to Codecov
-      if: matrix.node-version == 20
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        files: ./coverage/lcov.info
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run type checking
+        run: npm run check-types
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == 20
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: true
 
   test-browser:
     name: Test in Browser Environment
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Install Playwright browsers
-      run: npx playwright install chromium
-      
-    - name: Run browser tests
-      run: BROWSER_TEST=true npm run test:browser
-      env:
-        CI: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+
+      - name: Run browser tests
+        run: BROWSER_TEST=true npm run test:browser
+        env:
+          CI: true
 
   performance-benchmarks:
     name: Performance Benchmarks
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run performance tests
-      run: npm run test -- --grep="Performance Benchmarks"
-      
-    - name: Store benchmark results
-      uses: benchmark-action/github-action-benchmark@v1
-      if: github.ref == 'refs/heads/main'
-      with:
-        tool: 'vitest'
-        output-file-path: benchmark-results.json
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        auto-push: true
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run performance tests
+        run: npm run test -- --grep="Performance Benchmarks"
+
+      - name: Store benchmark results
+        uses: benchmark-action/github-action-benchmark@v1
+        if: github.ref == 'refs/heads/main'
+        with:
+          tool: "vitest"
+          output-file-path: benchmark-results.json
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          auto-push: true
 
   adapter-integration:
     name: Adapter Integration Tests
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run adapter tests
-      run: npm run test -- src/__tests__/adapters/
-      
-    - name: Run factor validation tests
-      run: npm run test -- src/__tests__/factors.test.ts
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run adapter tests
+        run: npm run test -- src/__tests__/adapters/
+
+      - name: Run factor validation tests
+        run: npm run test -- src/__tests__/factors.test.ts
 
   uncertainty-validation:
     name: Uncertainty Validation Tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run Monte Carlo convergence tests
-      run: npm run test -- src/__tests__/uncertainty/montecarlo-convergence.test.ts
-      
-    - name: Run existing uncertainty tests
-      run: npm run test -- src/__tests__/uncertainty.spec.ts
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Monte Carlo convergence tests
+        run: npm run test -- src/__tests__/uncertainty/montecarlo-convergence.test.ts
+
+      - name: Run existing uncertainty tests
+        run: npm run test -- src/__tests__/uncertainty.spec.ts
 
   grid-manager-tests:
     name: Grid Manager Tests
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run grid manager tests
-      run: npm run test -- src/__tests__/grid/
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run grid manager tests
+        run: npm run test -- src/__tests__/grid/
 
   check-coverage:
     name: Coverage Requirements
     runs-on: ubuntu-latest
     needs: [test-node, test-browser]
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Generate coverage report
-      run: npm run test:coverage
-      
-    - name: Check coverage thresholds
-      run: |
-        # Extract coverage percentages and check against thresholds
-        LINES=$(grep -o '"lines":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
-        FUNCTIONS=$(grep -o '"functions":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
-        BRANCHES=$(grep -o '"branches":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
-        STATEMENTS=$(grep -o '"statements":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
-        
-        echo "Coverage: Lines: ${LINES}%, Functions: ${FUNCTIONS}%, Branches: ${BRANCHES}%, Statements: ${STATEMENTS}%"
-        
-        # Check thresholds (80% for all metrics)
-        if (( $(echo "$LINES < 80" | bc -l) )); then
-          echo "Line coverage below 80%: ${LINES}%"
-          exit 1
-        fi
-        if (( $(echo "$FUNCTIONS < 80" | bc -l) )); then
-          echo "Function coverage below 80%: ${FUNCTIONS}%"
-          exit 1
-        fi
-        if (( $(echo "$BRANCHES < 80" | bc -l) )); then
-          echo "Branch coverage below 80%: ${BRANCHES}%"
-          exit 1
-        fi
-        if (( $(echo "$STATEMENTS < 80" | bc -l) )); then
-          echo "Statement coverage below 80%: ${STATEMENTS}%"
-          exit 1
-        fi
-        
-        echo "All coverage thresholds met!"
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate coverage report
+        run: npm run test:coverage
+
+      - name: Check coverage thresholds
+        run: |
+          # Extract coverage percentages and check against thresholds
+          LINES=$(grep -o '"lines":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+          FUNCTIONS=$(grep -o '"functions":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+          BRANCHES=$(grep -o '"branches":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+          STATEMENTS=$(grep -o '"statements":{"pct":[0-9.]*' coverage/coverage-summary.json | grep -o '[0-9.]*$')
+
+          echo "Coverage: Lines: ${LINES}%, Functions: ${FUNCTIONS}%, Branches: ${BRANCHES}%, Statements: ${STATEMENTS}%"
+
+          # Check thresholds (80% for all metrics)
+          if (( $(echo "$LINES < 80" | bc -l) )); then
+            echo "Line coverage below 80%: ${LINES}%"
+            exit 1
+          fi
+          if (( $(echo "$FUNCTIONS < 80" | bc -l) )); then
+            echo "Function coverage below 80%: ${FUNCTIONS}%"
+            exit 1
+          fi
+          if (( $(echo "$BRANCHES < 80" | bc -l) )); then
+            echo "Branch coverage below 80%: ${BRANCHES}%"
+            exit 1
+          fi
+          if (( $(echo "$STATEMENTS < 80" | bc -l) )); then
+            echo "Statement coverage below 80%: ${STATEMENTS}%"
+            exit 1
+          fi
+
+          echo "All coverage thresholds met!"
 
   security-audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js 20
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Run security audit
-      run: npm audit --audit-level moderate
-      
-    - name: Check for known vulnerabilities
-      run: npx audit-ci --moderate
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        run: npm audit --audit-level moderate
+
+      - name: Check for known vulnerabilities
+        run: npx audit-ci --moderate

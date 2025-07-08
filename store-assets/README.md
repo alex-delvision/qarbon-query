@@ -2,15 +2,19 @@
 
 ## 📦 Complete Store Submission Package
 
-This directory contains all the deliverables needed for submitting **Qarbon Query Carbon Footprint Tracker v1.1.0** to the Chrome Web Store.
+This directory contains all the deliverables needed for submitting **Qarbon Query Carbon Footprint
+Tracker v1.1.0** to the Chrome Web Store.
 
 ---
 
 ## 🎯 Quick Overview
 
-**Qarbon Query** is a privacy-first carbon footprint tracker that helps users understand and reduce the environmental impact of their web browsing through real-time emissions data and sustainability insights.
+**Qarbon Query** is a privacy-first carbon footprint tracker that helps users understand and reduce
+the environmental impact of their web browsing through real-time emissions data and sustainability
+insights.
 
 ### 🌟 Core Features
+
 - Real-time CO₂e tracking per website
 - 14-day, 7-day, and 30-day trend charts
 - Category breakdown and daily goals
@@ -22,17 +26,19 @@ This directory contains all the deliverables needed for submitting **Qarbon Quer
 ## 📋 Assets Inventory
 
 ### 🎨 Visual Assets
-| Asset | File | Specifications | Preview |
-|-------|------|---------------|---------|
-| **Banner** | [`banner.png`](banner.png) | 1400×560px | ![Banner](banner.png) |
-| **Tile** | [`tile.png`](tile.png) | 440×280px | ![Tile](tile.png) |
-| **Icon Set** | [`icons/`](icons/) | 16×16, 32×32, 48×48, 128×128 | ![Icon](icons/icon128.png) |
+
+| Asset        | File                       | Specifications               | Preview                    |
+| ------------ | -------------------------- | ---------------------------- | -------------------------- |
+| **Banner**   | [`banner.png`](banner.png) | 1400×560px                   | ![Banner](banner.png)      |
+| **Tile**     | [`tile.png`](tile.png)     | 440×280px                    | ![Tile](tile.png)          |
+| **Icon Set** | [`icons/`](icons/)         | 16×16, 32×32, 48×48, 128×128 | ![Icon](icons/icon128.png) |
 
 ### 📱 Screenshots
-| Screenshot | File | Dimensions | Description |
-|------------|------|------------|-------------|
+
+| Screenshot         | File                                                                             | Dimensions | Description                                            |
+| ------------------ | -------------------------------------------------------------------------------- | ---------- | ------------------------------------------------------ |
 | **Main Dashboard** | [`screenshots/screenshot-1-1280x800.png`](screenshots/screenshot-1-1280x800.png) | 1280×800px | ![Screenshot 1](screenshots/screenshot-1-1280x800.png) |
-| **Settings Panel** | [`screenshots/screenshot-2-640x400.png`](screenshots/screenshot-2-640x400.png) | 640×400px | ![Screenshot 2](screenshots/screenshot-2-640x400.png) |
+| **Settings Panel** | [`screenshots/screenshot-2-640x400.png`](screenshots/screenshot-2-640x400.png)   | 640×400px  | ![Screenshot 2](screenshots/screenshot-2-640x400.png)  |
 
 ---
 
@@ -41,13 +47,17 @@ This directory contains all the deliverables needed for submitting **Qarbon Quer
 ### 📄 Store Descriptions
 
 #### Short Description
+
 **File:** [`listing_short.txt`](listing_short.txt)
+
 ```
 Track and reduce your web browsing carbon footprint with real-time emissions data and sustainability insights.
 ```
 
 #### Key Features
+
 **File:** [`listing_features.md`](listing_features.md)
+
 - Real-time CO₂e tracking per site
 - 14-/7-/30-day trend charts
 - Category breakdown & daily goals
@@ -55,7 +65,9 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 - One-click CSV export & settings panel
 
 #### Detailed Description
+
 **File:** [`listing_long.md`](listing_long.md)
+
 - Comprehensive product overview
 - How it works explanation
 - Key features breakdown
@@ -68,7 +80,9 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 ## 🔒 Legal & Compliance
 
 ### Privacy Policy
+
 **File:** [`privacy-policy.html`](privacy-policy.html)
+
 - Complete privacy policy for Chrome Web Store
 - GDPR and CCPA compliance
 - Clear data usage explanation
@@ -79,7 +93,9 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 ## 📦 Technical Deliverables
 
 ### Extension Package
+
 **File:** [`qarbonquery-carbon-tracker-1.1.0.zip`](qarbonquery-carbon-tracker-1.1.0.zip)
+
 - Complete Chrome extension package
 - Ready for upload to Chrome Web Store
 - Version 1.1.0 with all features
@@ -87,7 +103,9 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 - **Includes:** Manifest v3, background scripts, content scripts, UI components
 
 ### Submission Checklist
+
 **File:** [`submission_checklist.md`](submission_checklist.md)
+
 - Complete pre-submission checklist
 - Store policy compliance verification
 - Technical requirements confirmation
@@ -98,24 +116,28 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 ## 🎯 Chrome Web Store Requirements Compliance
 
 ### ✅ Visual Assets
+
 - [x] **Banner:** 1400×560px PNG ✓
 - [x] **Tile:** 440×280px PNG ✓
 - [x] **Icons:** 16×16, 32×32, 48×48, 128×128 PNG ✓
 - [x] **Screenshots:** 1280×800px and 640×400px PNG ✓
 
 ### ✅ Listing Content
+
 - [x] **Short Description:** Under 132 characters ✓
 - [x] **Detailed Description:** Comprehensive with features ✓
 - [x] **Key Features:** Bullet-point format ✓
 - [x] **Category:** Productivity/Sustainability ✓
 
 ### ✅ Technical Requirements
+
 - [x] **Manifest V3:** Compliant ✓
 - [x] **Permissions:** Minimal and justified ✓
 - [x] **CSP:** Strict content security policy ✓
 - [x] **Privacy Policy:** Complete and accessible ✓
 
 ### ✅ Store Policies
+
 - [x] **Single Purpose:** Carbon footprint tracking ✓
 - [x] **Privacy:** Local data storage, no tracking ✓
 - [x] **User Data:** Transparent usage disclosure ✓
@@ -126,11 +148,13 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
 ## 🚀 Submission Process
 
 ### 1. Developer Dashboard Setup
+
 1. Access [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
 2. Create new item or update existing
 3. Upload `qarbonquery-carbon-tracker-1.1.0.zip`
 
 ### 2. Store Listing Configuration
+
 1. **Product Details:**
    - Name: "Qarbon Query - Carbon Footprint Tracker"
    - Category: Productivity
@@ -153,20 +177,21 @@ Track and reduce your web browsing carbon footprint with real-time emissions dat
    - Complete store policy compliance
 
 ### 3. Pre-Submission Verification
+
 Review and complete all items in [`submission_checklist.md`](submission_checklist.md)
 
 ---
 
 ## 📊 Asset Specifications Summary
 
-| Asset Type | Count | Total Size | Format |
-|------------|-------|------------|---------|
-| Icons | 5 files | ~2KB | PNG |
-| Screenshots | 2 files | ~65KB | PNG |
-| Banner/Tile | 2 files | ~58KB | PNG |
-| Extension Package | 1 file | ~190KB | ZIP |
-| Documentation | 5 files | ~15KB | TXT/MD/HTML |
-| **Total** | **15 files** | **~330KB** | **Mixed** |
+| Asset Type        | Count        | Total Size | Format      |
+| ----------------- | ------------ | ---------- | ----------- |
+| Icons             | 5 files      | ~2KB       | PNG         |
+| Screenshots       | 2 files      | ~65KB      | PNG         |
+| Banner/Tile       | 2 files      | ~58KB      | PNG         |
+| Extension Package | 1 file       | ~190KB     | ZIP         |
+| Documentation     | 5 files      | ~15KB      | TXT/MD/HTML |
+| **Total**         | **15 files** | **~330KB** | **Mixed**   |
 
 ---
 
@@ -183,12 +208,15 @@ Review and complete all items in [`submission_checklist.md`](submission_checklis
 ## 📞 Support
 
 For questions about this submission package:
+
 - **Email:** support@qarbon.dev
-- **Documentation:** [Chrome Extension Developer Guide](https://developer.chrome.com/docs/extensions/)
-- **Store Policy:** [Chrome Web Store Program Policies](https://developer.chrome.com/webstore/program-policies)
+- **Documentation:**
+  [Chrome Extension Developer Guide](https://developer.chrome.com/docs/extensions/)
+- **Store Policy:**
+  [Chrome Web Store Program Policies](https://developer.chrome.com/webstore/program-policies)
 
 ---
 
-*Generated on: July 4, 2024*  
-*Package Version: 1.1.0*  
-*Submission Ready: ✅*
+_Generated on: July 4, 2024_  
+_Package Version: 1.1.0_  
+_Submission Ready: ✅_

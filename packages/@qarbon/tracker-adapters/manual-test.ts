@@ -58,7 +58,7 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
     return {
       adapterName: 'AIImpactTrackerAdapter',
       score: 0.9,
-      evidence: 'Testing confidence'
+      evidence: 'Testing confidence',
     };
   }
 
@@ -70,7 +70,9 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
       try {
         input = JSON.parse(raw);
       } catch (error) {
-        throw new Error(`Failed to parse AI Impact Tracker JSON data: ${error}`);
+        throw new Error(
+          `Failed to parse AI Impact Tracker JSON data: ${error}`
+        );
       }
     } else if (typeof raw === 'object' && raw !== null) {
       input = raw;
@@ -105,16 +107,24 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
     }
 
     // Extract prompt and completion tokens (optional but validate if present)
-    const tokensPrompt = tokens.prompt !== undefined ? Number(tokens.prompt) : 0;
-    const tokensCompletion = tokens.completion !== undefined ? Number(tokens.completion) : 0;
+    const tokensPrompt =
+      tokens.prompt !== undefined ? Number(tokens.prompt) : 0;
+    const tokensCompletion =
+      tokens.completion !== undefined ? Number(tokens.completion) : 0;
 
-    if (tokens.prompt !== undefined && (isNaN(tokensPrompt) || tokensPrompt < 0)) {
+    if (
+      tokens.prompt !== undefined &&
+      (isNaN(tokensPrompt) || tokensPrompt < 0)
+    ) {
       throw new Error(
         'AI Impact Tracker "tokens.prompt" must be a valid non-negative number'
       );
     }
 
-    if (tokens.completion !== undefined && (isNaN(tokensCompletion) || tokensCompletion < 0)) {
+    if (
+      tokens.completion !== undefined &&
+      (isNaN(tokensCompletion) || tokensCompletion < 0)
+    ) {
       throw new Error(
         'AI Impact Tracker "tokens.completion" must be a valid non-negative number'
       );
@@ -127,7 +137,9 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
       timestamp === null ||
       (typeof timestamp !== 'string' && typeof timestamp !== 'number')
     ) {
-      throw new Error('AI Impact Tracker "timestamp" must be a string or number');
+      throw new Error(
+        'AI Impact Tracker "timestamp" must be a string or number'
+      );
     }
 
     // Extract and validate energyPerToken
@@ -164,19 +176,19 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
       ) {
         const confLow = Number(input.confidence.low);
         const confHigh = Number(input.confidence.high);
-        
+
         if (isNaN(confLow) || isNaN(confHigh)) {
           throw new Error(
             'AI Impact Tracker "confidence.low" and "confidence.high" must be valid numbers'
           );
         }
-        
+
         if (confLow > confHigh) {
           throw new Error(
             'AI Impact Tracker "confidence.low" must be less than or equal to "confidence.high"'
           );
         }
-        
+
         confidence = { low: confLow, high: confHigh };
       } else {
         throw new Error(
@@ -237,9 +249,9 @@ class AIImpactTrackerAdapter implements EmissionAdapter {
 
 function testConfidenceFeature() {
   const adapter = new AIImpactTrackerAdapter();
-  
+
   console.log('🧪 Testing AIImpactTrackerAdapter confidence metadata...\n');
-  
+
   // Test 1: Default confidence (±20%)
   console.log('📋 Test 1: Default confidence calculation (±20%)');
   const input1 = {
@@ -248,18 +260,20 @@ function testConfidenceFeature() {
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
   };
-  
+
   try {
     const result1 = adapter.ingest(input1);
     console.log('   Input:', JSON.stringify(input1, null, 2));
     console.log('   Result:', JSON.stringify(result1, null, 2));
     console.log('   Expected emissions:', 0.1, '(100 * 0.001)');
     console.log('   Expected confidence: low=0.08, high=0.12 (±20%)');
-    
+
     // Validate results
-    if (result1.emissions === 0.1 && 
-        result1.confidence?.low === 0.08 && 
-        result1.confidence?.high === 0.12) {
+    if (
+      result1.emissions === 0.1 &&
+      result1.confidence?.low === 0.08 &&
+      result1.confidence?.high === 0.12
+    ) {
       console.log('   ✅ Test 1 PASSED\n');
     } else {
       console.log('   ❌ Test 1 FAILED - confidence values incorrect\n');
@@ -267,7 +281,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('   ❌ Test 1 FAILED:', error.message);
   }
-  
+
   // Test 2: Existing confidence passed through
   console.log('📋 Test 2: Existing confidence metadata');
   const input2 = {
@@ -275,25 +289,27 @@ function testConfidenceFeature() {
     tokens: { total: 200 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.002,
-    confidence: { low: 0.25, high: 0.75 }
+    confidence: { low: 0.25, high: 0.75 },
   };
-  
+
   try {
     const result2 = adapter.ingest(input2);
     console.log('   Input:', JSON.stringify(input2, null, 2));
     console.log('   Result:', JSON.stringify(result2, null, 2));
     console.log('   Expected confidence: low=0.25, high=0.75 (passed through)');
-    
+
     // Validate results
     if (result2.confidence?.low === 0.25 && result2.confidence?.high === 0.75) {
       console.log('   ✅ Test 2 PASSED\n');
     } else {
-      console.log('   ❌ Test 2 FAILED - confidence not passed through correctly\n');
+      console.log(
+        '   ❌ Test 2 FAILED - confidence not passed through correctly\n'
+      );
     }
   } catch (error) {
     console.error('   ❌ Test 2 FAILED:', error.message);
   }
-  
+
   // Test 3: String confidence values
   console.log('📋 Test 3: String confidence values');
   const input3 = {
@@ -301,15 +317,17 @@ function testConfidenceFeature() {
     tokens: { total: 150 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
-    confidence: { low: '0.1', high: '0.2' }
+    confidence: { low: '0.1', high: '0.2' },
   };
-  
+
   try {
     const result3 = adapter.ingest(input3);
     console.log('   Input:', JSON.stringify(input3, null, 2));
     console.log('   Result:', JSON.stringify(result3, null, 2));
-    console.log('   Expected confidence: low=0.1, high=0.2 (converted from strings)');
-    
+    console.log(
+      '   Expected confidence: low=0.1, high=0.2 (converted from strings)'
+    );
+
     // Validate results
     if (result3.confidence?.low === 0.1 && result3.confidence?.high === 0.2) {
       console.log('   ✅ Test 3 PASSED\n');
@@ -319,7 +337,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('   ❌ Test 3 FAILED:', error.message);
   }
-  
+
   // Test 4: Invalid confidence validation
   console.log('📋 Test 4: Invalid confidence validation');
   const input4 = {
@@ -327,9 +345,9 @@ function testConfidenceFeature() {
     tokens: { total: 100 },
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
-    confidence: { low: 0.8, high: 0.2 } // low > high, should fail
+    confidence: { low: 0.8, high: 0.2 }, // low > high, should fail
   };
-  
+
   try {
     const result4 = adapter.ingest(input4);
     console.error('   ❌ Test 4 FAILED: Should have thrown an error');
@@ -343,7 +361,7 @@ function testConfidenceFeature() {
       console.log('   ❌ Test 4 FAILED - wrong error message\n');
     }
   }
-  
+
   // Test 5: Zero emissions edge case
   console.log('📋 Test 5: Zero emissions with confidence');
   const input5 = {
@@ -352,17 +370,19 @@ function testConfidenceFeature() {
     timestamp: '2023-01-01T00:00:00Z',
     energyPerToken: 0.001,
   };
-  
+
   try {
     const result5 = adapter.ingest(input5);
     console.log('   Input:', JSON.stringify(input5, null, 2));
     console.log('   Result:', JSON.stringify(result5, null, 2));
     console.log('   Expected emissions: 0, confidence: low=0, high=0');
-    
+
     // Validate results
-    if (result5.emissions === 0 && 
-        result5.confidence?.low === 0 && 
-        result5.confidence?.high === 0) {
+    if (
+      result5.emissions === 0 &&
+      result5.confidence?.low === 0 &&
+      result5.confidence?.high === 0
+    ) {
       console.log('   ✅ Test 5 PASSED\n');
     } else {
       console.log('   ❌ Test 5 FAILED - zero case handling incorrect\n');
@@ -370,7 +390,7 @@ function testConfidenceFeature() {
   } catch (error) {
     console.error('   ❌ Test 5 FAILED:', error.message);
   }
-  
+
   console.log('🎯 All confidence tests completed!');
 }
 

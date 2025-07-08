@@ -1,19 +1,19 @@
 /**
  * Chrome API Integration Tests
- * 
+ *
  * Tests Chrome extension APIs using jest-webextension-mock
  * Validates storage, messaging, and background script functionality
  */
 
-import { parseOpenAI } from "../src/tokenExtractors";
+import { parseOpenAI } from '../src/tokenExtractors';
 
 // Mock Chrome APIs are automatically available via jest-webextension-mock setup
 
-describe("Chrome API Integration", () => {
+describe('Chrome API Integration', () => {
   beforeEach(() => {
     // Reset all mocks before each test
     jest.clearAllMocks();
-    
+
     // Reset Chrome storage
     (chrome.storage.local.get as jest.Mock).mockResolvedValue({});
     (chrome.storage.local.set as jest.Mock).mockResolvedValue(undefined);
@@ -21,10 +21,10 @@ describe("Chrome API Integration", () => {
     (chrome.storage.sync.set as jest.Mock).mockResolvedValue(undefined);
   });
 
-  describe("Token Storage", () => {
-    test("stores token usage data in Chrome storage", async () => {
+  describe('Token Storage', () => {
+    test('stores token usage data in Chrome storage', async () => {
       const tokenData = {
-        model: "gpt-4",
+        model: 'gpt-4',
         tokens: { prompt: 10, completion: 5, total: 15 },
         timestamp: Date.now(),
       };
@@ -37,10 +37,10 @@ describe("Chrome API Integration", () => {
       });
     });
 
-    test("retrieves stored token usage data", async () => {
+    test('retrieves stored token usage data', async () => {
       const mockTokenData = {
         tokenUsage: {
-          model: "claude-3",
+          model: 'claude-3',
           tokens: { prompt: 20, completion: 15, total: 35 },
           timestamp: Date.now(),
         },
@@ -48,14 +48,14 @@ describe("Chrome API Integration", () => {
 
       (chrome.storage.local.get as jest.Mock).mockResolvedValue(mockTokenData);
 
-      const result = await chrome.storage.local.get("tokenUsage");
+      const result = await chrome.storage.local.get('tokenUsage');
 
-      expect(chrome.storage.local.get).toHaveBeenCalledWith("tokenUsage");
-      expect(result.tokenUsage.model).toBe("claude-3");
+      expect(chrome.storage.local.get).toHaveBeenCalledWith('tokenUsage');
+      expect(result.tokenUsage.model).toBe('claude-3');
       expect(result.tokenUsage.tokens.total).toBe(35);
     });
 
-    test("accumulates token usage over multiple API calls", async () => {
+    test('accumulates token usage over multiple API calls', async () => {
       const existingData = {
         totalTokens: 100,
         sessions: 5,
@@ -78,12 +78,12 @@ describe("Chrome API Integration", () => {
     });
   });
 
-  describe("Background Script Communication", () => {
-    test("sends token data to background script", async () => {
+  describe('Background Script Communication', () => {
+    test('sends token data to background script', async () => {
       const tokenData = {
-        type: "TOKEN_USAGE",
+        type: 'TOKEN_USAGE',
         data: {
-          model: "gpt-4",
+          model: 'gpt-4',
           tokens: { total: 50 },
           timestamp: Date.now(),
         },
@@ -100,44 +100,49 @@ describe("Chrome API Integration", () => {
       expect(response.success).toBe(true);
     });
 
-    test("handles background script errors gracefully", async () => {
+    test('handles background script errors gracefully', async () => {
       const tokenData = {
-        type: "TOKEN_USAGE",
-        data: { model: "gpt-4", tokens: { total: 30 } },
+        type: 'TOKEN_USAGE',
+        data: { model: 'gpt-4', tokens: { total: 30 } },
       };
 
       // Mock error response
       (chrome.runtime.sendMessage as jest.Mock).mockRejectedValue(
-        new Error("Background script not available")
+        new Error('Background script not available')
       );
 
       try {
         await chrome.runtime.sendMessage(tokenData);
       } catch (error) {
-        expect(error.message).toBe("Background script not available");
+        expect(error.message).toBe('Background script not available');
       }
 
       expect(chrome.runtime.sendMessage).toHaveBeenCalledWith(tokenData);
     });
   });
 
-  describe("Tab Messaging", () => {
-    test("sends token extraction results to active tab", async () => {
+  describe('Tab Messaging', () => {
+    test('sends token extraction results to active tab', async () => {
       const mockTabs = [
-        { id: 1, active: true, url: "https://chatgpt.com" },
-        { id: 2, active: false, url: "https://claude.ai" },
+        { id: 1, active: true, url: 'https://chatgpt.com' },
+        { id: 2, active: false, url: 'https://claude.ai' },
       ];
 
       (chrome.tabs.query as jest.Mock).mockResolvedValue(mockTabs);
-      (chrome.tabs.sendMessage as jest.Mock).mockResolvedValue({ received: true });
+      (chrome.tabs.sendMessage as jest.Mock).mockResolvedValue({
+        received: true,
+      });
 
       const tokenData = {
-        type: "EXTRACTED_TOKENS",
+        type: 'EXTRACTED_TOKENS',
         tokens: { total: 75 },
       };
 
       // Query for active tab
-      const activeTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
       if (activeTabs.length > 0) {
         await chrome.tabs.sendMessage(activeTabs[0].id!, tokenData);
       }
@@ -149,33 +154,38 @@ describe("Chrome API Integration", () => {
       expect(chrome.tabs.sendMessage).toHaveBeenCalledWith(1, tokenData);
     });
 
-    test("handles tab communication errors", async () => {
+    test('handles tab communication errors', async () => {
       (chrome.tabs.query as jest.Mock).mockResolvedValue([]);
 
-      const activeTabs = await chrome.tabs.query({ active: true, currentWindow: true });
+      const activeTabs = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
 
       expect(activeTabs).toHaveLength(0);
       expect(chrome.tabs.sendMessage).not.toHaveBeenCalled();
     });
   });
 
-  describe("Extension Resource URLs", () => {
-    test("generates correct extension URLs", () => {
-      const popupUrl = chrome.runtime.getURL("popup.html");
-      const iconUrl = chrome.runtime.getURL("icons/icon-48.png");
+  describe('Extension Resource URLs', () => {
+    test('generates correct extension URLs', () => {
+      const popupUrl = chrome.runtime.getURL('popup.html');
+      const iconUrl = chrome.runtime.getURL('icons/icon-48.png');
 
-      expect(popupUrl).toBe("chrome-extension://test-extension-id/popup.html");
-      expect(iconUrl).toBe("chrome-extension://test-extension-id/icons/icon-48.png");
+      expect(popupUrl).toBe('chrome-extension://test-extension-id/popup.html');
+      expect(iconUrl).toBe(
+        'chrome-extension://test-extension-id/icons/icon-48.png'
+      );
     });
   });
 
-  describe("Settings Management", () => {
-    test("stores and retrieves user preferences", async () => {
+  describe('Settings Management', () => {
+    test('stores and retrieves user preferences', async () => {
       const settings = {
         trackingEnabled: true,
         showNotifications: false,
         dataRetentionDays: 30,
-        providers: ["openai", "anthropic", "google"],
+        providers: ['openai', 'anthropic', 'google'],
       };
 
       await chrome.storage.sync.set({ userSettings: settings });
@@ -184,29 +194,29 @@ describe("Chrome API Integration", () => {
         userSettings: settings,
       });
 
-      const result = await chrome.storage.sync.get("userSettings");
+      const result = await chrome.storage.sync.get('userSettings');
 
       expect(chrome.storage.sync.set).toHaveBeenCalledWith({
         userSettings: settings,
       });
       expect(result.userSettings.trackingEnabled).toBe(true);
-      expect(result.userSettings.providers).toContain("openai");
+      expect(result.userSettings.providers).toContain('openai');
     });
 
-    test("handles default settings when none exist", async () => {
+    test('handles default settings when none exist', async () => {
       (chrome.storage.sync.get as jest.Mock).mockResolvedValue({});
 
-      const result = await chrome.storage.sync.get("userSettings");
+      const result = await chrome.storage.sync.get('userSettings');
 
       expect(result.userSettings).toBeUndefined();
     });
   });
 
-  describe("Token Extraction Workflow Integration", () => {
-    test("full workflow: extract, normalize, store, and notify", async () => {
+  describe('Token Extraction Workflow Integration', () => {
+    test('full workflow: extract, normalize, store, and notify', async () => {
       // Step 1: Extract tokens from API response
       const apiResponse = {
-        model: "gpt-4-0613",
+        model: 'gpt-4-0613',
         usage: {
           prompt_tokens: 25,
           completion_tokens: 15,
@@ -221,8 +231,8 @@ describe("Chrome API Integration", () => {
         model: extractedTokens.model,
         tokens: extractedTokens.tokens,
         timestamp: new Date().toISOString(),
-        provider: "openai",
-        url: "https://api.openai.com/v1/chat/completions",
+        provider: 'openai',
+        url: 'https://api.openai.com/v1/chat/completions',
       };
 
       // Step 3: Store in Chrome storage
@@ -236,31 +246,31 @@ describe("Chrome API Integration", () => {
       });
 
       const bgResponse = await chrome.runtime.sendMessage({
-        type: "PROCESS_TOKENS",
+        type: 'PROCESS_TOKENS',
         data: normalizedData,
       });
 
       // Verify all steps
-      expect(extractedTokens.model).toBe("gpt-4-0613");
+      expect(extractedTokens.model).toBe('gpt-4-0613');
       expect(extractedTokens.tokens.total).toBe(40);
       expect(chrome.storage.local.set).toHaveBeenCalledWith({
         latestToken: normalizedData,
       });
       expect(chrome.runtime.sendMessage).toHaveBeenCalledWith({
-        type: "PROCESS_TOKENS",
+        type: 'PROCESS_TOKENS',
         data: normalizedData,
       });
       expect(bgResponse.processed).toBe(true);
     });
 
-    test("handles workflow errors gracefully", async () => {
+    test('handles workflow errors gracefully', async () => {
       // Simulate storage error
       (chrome.storage.local.set as jest.Mock).mockRejectedValue(
-        new Error("Storage quota exceeded")
+        new Error('Storage quota exceeded')
       );
 
       const tokenData = {
-        model: "test-model",
+        model: 'test-model',
         tokens: { total: 100 },
         timestamp: new Date().toISOString(),
       };
@@ -268,13 +278,13 @@ describe("Chrome API Integration", () => {
       try {
         await chrome.storage.local.set({ latestToken: tokenData });
       } catch (error) {
-        expect(error.message).toBe("Storage quota exceeded");
+        expect(error.message).toBe('Storage quota exceeded');
       }
     });
   });
 
-  describe("Performance and Memory Management", () => {
-    test("limits stored token history size", async () => {
+  describe('Performance and Memory Management', () => {
+    test('limits stored token history size', async () => {
       const maxHistorySize = 100;
       const existingHistory = Array.from({ length: 95 }, (_, i) => ({
         id: i,
@@ -309,7 +319,7 @@ describe("Chrome API Integration", () => {
       });
     });
 
-    test("clears old data based on retention policy", async () => {
+    test('clears old data based on retention policy', async () => {
       const retentionDays = 7;
       const cutoffDate = Date.now() - retentionDays * 24 * 60 * 60 * 1000;
 
@@ -319,11 +329,13 @@ describe("Chrome API Integration", () => {
         { id: 3, timestamp: Date.now(), tokens: { total: 30 } }, // Keep
       ];
 
-      (chrome.storage.local.get as jest.Mock).mockResolvedValue({ tokenHistory });
+      (chrome.storage.local.get as jest.Mock).mockResolvedValue({
+        tokenHistory,
+      });
 
       // Filter out old data
       const filteredHistory = tokenHistory.filter(
-        (item) => item.timestamp > cutoffDate
+        item => item.timestamp > cutoffDate
       );
 
       await chrome.storage.local.set({ tokenHistory: filteredHistory });

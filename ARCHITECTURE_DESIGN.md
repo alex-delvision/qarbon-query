@@ -1,7 +1,10 @@
 # Qarbon Query - Updated Architecture Design
 
 ## Overview
-This document outlines the updated architecture for the qarbon-query system, incorporating new feature areas (adapters, grid manager, optimizations, uncertainty) while maintaining backward compatibility with existing APIs.
+
+This document outlines the updated architecture for the qarbon-query system, incorporating new
+feature areas (adapters, grid manager, optimizations, uncertainty) while maintaining backward
+compatibility with existing APIs.
 
 ## Folder Structure
 
@@ -15,7 +18,7 @@ This document outlines the updated architecture for the qarbon-query system, inc
         - factors.ts                    # Emission factors and constants
         - methodologies.ts              # Calculation methodologies
         - compatibility.ts              # Legacy API compatibility wrappers
-    
+
     /tracker-adapters                   # Input format adapters (existing)
       /src
         /adapters
@@ -28,7 +31,7 @@ This document outlines the updated architecture for the qarbon-query system, inc
           - XmlAdapter.ts
         - UniversalTrackerRegistry.ts
         - index.ts
-    
+
     /grid-manager                       # NEW: Grid electricity management
       /src
         - index.ts                      # Public API exports
@@ -36,7 +39,7 @@ This document outlines the updated architecture for the qarbon-query system, inc
         - regionMapper.ts               # Regional grid mapping
         - carbonIntensity.ts            # Carbon intensity data
         - types.ts                      # Grid-related types
-    
+
     /optimizations                      # NEW: Performance optimizations
       /src
         - index.ts                      # Public API exports
@@ -44,7 +47,7 @@ This document outlines the updated architecture for the qarbon-query system, inc
         - batchProcessor.ts             # Batch processing
         - memoryOptimizer.ts            # Memory management
         - types.ts                      # Optimization types
-    
+
     /uncertainty                        # NEW: Uncertainty quantification
       /src
         - index.ts                      # Public API exports
@@ -52,14 +55,14 @@ This document outlines the updated architecture for the qarbon-query system, inc
         - confidenceRanges.ts           # Confidence interval calculations
         - monteCarloSimulation.ts       # Monte Carlo methods
         - types.ts                      # Uncertainty types
-    
+
     /shared                            # Shared types and utilities (existing)
       /src
         - index.ts
         - types.ts                      # Core emission data types
         - utils.ts                      # Utility functions
         - pipeline.ts                   # NEW: Pipeline orchestration
-    
+
     /core                              # NEW: Core pipeline orchestration
       /src
         - index.ts                      # Public API exports
@@ -137,6 +140,7 @@ This document outlines the updated architecture for the qarbon-query system, inc
 ## Core Types
 
 ### Enhanced EmissionData
+
 ```typescript
 interface EmissionData {
   id: string;
@@ -154,6 +158,7 @@ interface EmissionData {
 ```
 
 ### Pipeline Configuration
+
 ```typescript
 interface PipelineConfig {
   adapters: AdapterConfig[];
@@ -167,13 +172,16 @@ interface PipelineConfig {
 ## Compatibility Layer
 
 ### Existing API Preservation
+
 All existing APIs continue to work unchanged:
+
 - `calculateAIEmissions(tokens, model)`
 - `calculateDigitalEmissions(dataTransfer, timeSpent, deviceType)`
 - `calculateTransportEmissions(distance, mode)`
 - `calculateEnergyEmissions(consumption, source)`
 
 ### Implementation Strategy
+
 ```typescript
 // Legacy API wrapper
 export function calculateAIEmissions(tokens: number, model: string): EmissionData {
@@ -188,7 +196,7 @@ export function calculateAIEmissionsEnhanced(
 ): Promise<EmissionResult> {
   return pipeline.process(input, {
     category: 'ai',
-    ...options
+    ...options,
   });
 }
 ```
@@ -196,17 +204,20 @@ export function calculateAIEmissionsEnhanced(
 ## Migration Path
 
 ### Phase 1: Backward Compatibility (Immediate)
+
 - All existing APIs continue to work
 - No breaking changes
 - Legacy tests pass unchanged
 
 ### Phase 2: Enhanced Features (Optional)
+
 - New pipeline available through enhanced APIs
 - Adapter-based input processing
 - Grid-aware calculations
 - Uncertainty quantification
 
 ### Phase 3: Full Migration (Future)
+
 - Legacy APIs delegate to new pipeline
 - Seamless feature enhancement
 - Performance optimizations applied

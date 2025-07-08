@@ -20,116 +20,124 @@ const srcDir = path.join(__dirname, '..', 'src');
 
 function minifyJsonData() {
   console.log('🗜️  Minifying JSON data files...');
-  
+
   const dataFiles = [
     'data/ai-factors.json',
     'data/cloud-factors.json',
     'data/crypto-factors.json',
-    'data/grid-factors.json'
+    'data/grid-factors.json',
   ];
-  
+
   dataFiles.forEach(file => {
     const filePath = path.join(srcDir, file);
     if (fs.existsSync(filePath)) {
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
       const minified = JSON.stringify(data, null, 0);
-      
+
       // Create a backup of the original
       const backupPath = filePath + '.bak';
       if (!fs.existsSync(backupPath)) {
         fs.copyFileSync(filePath, backupPath);
       }
-      
+
       // Write minified version
       fs.writeFileSync(filePath, minified);
-      
+
       const originalSize = fs.statSync(filePath + '.bak').size;
       const minifiedSize = fs.statSync(filePath).size;
-      const savings = ((originalSize - minifiedSize) / originalSize * 100).toFixed(1);
-      
-      console.log(`  ${file}: ${originalSize} → ${minifiedSize} bytes (${savings}% reduction)`);
+      const savings = (
+        ((originalSize - minifiedSize) / originalSize) *
+        100
+      ).toFixed(1);
+
+      console.log(
+        `  ${file}: ${originalSize} → ${minifiedSize} bytes (${savings}% reduction)`
+      );
     }
   });
 }
 
 function analyzeBundleSizes() {
   console.log('📊 Analyzing bundle sizes...');
-  
+
   if (!fs.existsSync(distDir)) {
     console.log('❌ dist directory not found. Run `npm run build` first.');
     return;
   }
-  
+
   const files = fs.readdirSync(distDir).filter(f => f.endsWith('.js'));
   const results = [];
-  
+
   files.forEach(file => {
     const filePath = path.join(distDir, file);
     const stat = fs.statSync(filePath);
     const content = fs.readFileSync(filePath);
     const gzipped = gzipSync(content);
-    
+
     results.push({
       file,
       size: stat.size,
       gzipped: gzipped.length,
-      ratio: (gzipped.length / stat.size * 100).toFixed(1)
+      ratio: ((gzipped.length / stat.size) * 100).toFixed(1),
     });
   });
-  
+
   // Sort by size (largest first)
   results.sort((a, b) => b.size - a.size);
-  
+
   console.log('\n📦 Bundle sizes:');
-  console.log('File'.padEnd(25) + 'Size'.padEnd(10) + 'Gzipped'.padEnd(10) + 'Ratio');
+  console.log(
+    'File'.padEnd(25) + 'Size'.padEnd(10) + 'Gzipped'.padEnd(10) + 'Ratio'
+  );
   console.log('-'.repeat(50));
-  
+
   results.forEach(({ file, size, gzipped, ratio }) => {
     const sizeStr = (size / 1024).toFixed(1) + 'KB';
     const gzippedStr = (gzipped / 1024).toFixed(1) + 'KB';
     console.log(
-      file.padEnd(25) + 
-      sizeStr.padEnd(10) + 
-      gzippedStr.padEnd(10) + 
-      ratio + '%'
+      file.padEnd(25) + sizeStr.padEnd(10) + gzippedStr.padEnd(10) + ratio + '%'
     );
   });
-  
+
   return results;
 }
 
 function generateOptimizationReport(results) {
   console.log('\n🚀 Optimization recommendations:');
-  
+
   const mainBundle = results.find(r => r.file === 'index.js');
   const aiBundle = results.find(r => r.file === 'ai.js');
   const cloudBundle = results.find(r => r.file === 'cloud.js');
   const cryptoBundle = results.find(r => r.file === 'crypto.js');
-  
+
   if (mainBundle && mainBundle.size > 500 * 1024) {
     console.log('⚠️  Main bundle is large (>500KB). Consider:');
-    console.log('   - Using specific entry points (ai.js, cloud.js, crypto.js)');
+    console.log(
+      '   - Using specific entry points (ai.js, cloud.js, crypto.js)'
+    );
     console.log('   - Lazy loading heavy features');
     console.log('   - Code splitting');
   }
-  
+
   if (aiBundle && aiBundle.size < 50 * 1024) {
     console.log('✅ AI bundle is optimized (<50KB)');
   }
-  
+
   if (cloudBundle && cloudBundle.size < 50 * 1024) {
     console.log('✅ Cloud bundle is optimized (<50KB)');
   }
-  
+
   if (cryptoBundle && cryptoBundle.size < 50 * 1024) {
     console.log('✅ Crypto bundle is optimized (<50KB)');
   }
-  
+
   const totalSize = results.reduce((sum, r) => sum + r.size, 0);
   const totalGzipped = results.reduce((sum, r) => sum + r.gzipped, 0);
-  
-  console.log(`\n📈 Total: ${(totalSize / 1024).toFixed(1)}KB (${(totalGzipped / 1024).toFixed(1)}KB gzipped)`);
-  
+
+  console.log(
+    `\n📈 Total: ${(totalSize / 1024).toFixed(1)}KB (${(totalGzipped / 1024).toFixed(1)}KB gzipped)`
+  );
+
   // Usage examples
   console.log('\n💡 Usage examples:');
   console.log('');
@@ -149,11 +157,11 @@ function generateOptimizationReport(results) {
 function createLazyLoadingExample() {
   const examplePath = path.join(__dirname, '..', 'examples', 'lazy-loading.js');
   const exampleDir = path.dirname(examplePath);
-  
+
   if (!fs.existsSync(exampleDir)) {
     fs.mkdirSync(exampleDir, { recursive: true });
   }
-  
+
   const content = `/**
  * Lazy Loading Example
  * Demonstrates how to load specific calculators only when needed
@@ -217,28 +225,28 @@ console.log('Cloud Emission:', cloudEmission);
 
 export { LazyEmissionsCalculator };
 `;
-  
+
   fs.writeFileSync(examplePath, content);
   console.log(`\n📝 Created lazy loading example: ${examplePath}`);
 }
 
 function main() {
   console.log('🔧 Optimizing qarbon-emissions bundle...');
-  
+
   // Step 1: Minify JSON data
   minifyJsonData();
-  
+
   // Step 2: Analyze bundle sizes
   const results = analyzeBundleSizes();
-  
+
   if (results && results.length > 0) {
     // Step 3: Generate optimization report
     generateOptimizationReport(results);
-    
+
     // Step 4: Create lazy loading example
     createLazyLoadingExample();
   }
-  
+
   console.log('\n✅ Bundle optimization complete!');
 }
 

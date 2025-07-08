@@ -1,13 +1,13 @@
 /**
  * Webhook Stream Adapter
- * 
- * Handles streaming data from webhooks in NDJSON (Newline Delimited JSON) and 
+ *
+ * Handles streaming data from webhooks in NDJSON (Newline Delimited JSON) and
  * SSE (Server-Sent Events) formats for real-time emissions monitoring.
- * 
+ *
  * @example
  * ```typescript
  * import { WebhookStreamAdapter } from './WebhookStreamAdapter';
- * 
+ *
  * const adapter = new WebhookStreamAdapter({
  *   format: 'ndjson',
  *   fieldMapping: {
@@ -16,26 +16,26 @@
  *     source: 'device_id'
  *   }
  * });
- * 
+ *
  * const result = adapter.normalize(streamData);
  * ```
- * 
+ *
  * @example NDJSON format:
  * ```
  * {"ts":"2023-07-15T10:30:00Z","co2_kg":0.125,"energy_kwh":0.25,"device_id":"sensor_01"}
  * {"ts":"2023-07-15T10:31:00Z","co2_kg":0.130,"energy_kwh":0.26,"device_id":"sensor_01"}
  * {"ts":"2023-07-15T10:32:00Z","co2_kg":0.128,"energy_kwh":0.24,"device_id":"sensor_02"}
  * ```
- * 
+ *
  * @example SSE format:
  * ```
  * event: emission_data
  * data: {"timestamp":"2023-07-15T10:30:00Z","emissions":125.5,"energy":250,"source":"ml_cluster"}
- * 
- * event: emission_data  
+ *
+ * event: emission_data
  * data: {"timestamp":"2023-07-15T10:31:00Z","emissions":130.2,"energy":260,"source":"ml_cluster"}
  * ```
- * 
+ *
  * @example Webhook payload format:
  * ```json
  * {
@@ -54,7 +54,13 @@
  * ```
  */
 
-import { BaseAdapter, ValidationResult, NormalizedData, AdapterMetadata, DetectionHeuristic } from './index';
+import {
+  BaseAdapter,
+  ValidationResult,
+  NormalizedData,
+  AdapterMetadata,
+  DetectionHeuristic,
+} from './index';
 import { adapterRegistry } from './index';
 
 export type StreamFormat = 'ndjson' | 'sse' | 'json_array';
@@ -97,11 +103,12 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     super({
       name: 'WebhookStreamAdapter',
       version: '1.0.0',
-      description: 'Adapter for webhook streaming data in NDJSON and SSE formats',
+      description:
+        'Adapter for webhook streaming data in NDJSON and SSE formats',
       supportedFormats: ['ndjson', 'sse', 'webhook'],
-      confidence: 0.80
+      confidence: 0.8,
     });
-    
+
     this.config = {
       format: 'ndjson',
       emissionsUnit: 'kg',
@@ -110,7 +117,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
       batchSize: 100,
       aggregationWindow: 60,
       fieldMapping: {},
-      ...config
+      ...config,
     };
   }
 
@@ -137,7 +144,9 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     // Validate format
     const validFormats: StreamFormat[] = ['ndjson', 'sse', 'json_array'];
     if (input.format && !validFormats.includes(input.format)) {
-      errors.push(`Invalid format: ${input.format}. Must be one of: ${validFormats.join(', ')}`);
+      errors.push(
+        `Invalid format: ${input.format}. Must be one of: ${validFormats.join(', ')}`
+      );
     }
 
     // Validate configuration
@@ -162,27 +171,29 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     return {
       isValid: errors.length === 0,
       errors: errors.length > 0 ? errors : undefined,
-      warnings: warnings.length > 0 ? warnings : undefined
+      warnings: warnings.length > 0 ? warnings : undefined,
     };
   }
 
   normalize(input: WebhookStreamData): NormalizedData {
     const validation = this.validate(input);
     if (!validation.isValid) {
-      throw new Error(`Invalid webhook stream data: ${validation.errors?.join(', ')}`);
+      throw new Error(
+        `Invalid webhook stream data: ${validation.errors?.join(', ')}`
+      );
     }
 
     const config = { ...this.config, ...input.config };
-    
+
     // Parse stream data
     const parsedEntries = this.parseStreamData(input.data, input.format);
-    
+
     if (parsedEntries.length === 0) {
       throw new Error('No valid entries found in stream data');
     }
 
     // Process entries
-    const normalizedEntries = parsedEntries.map((entry, index) => 
+    const normalizedEntries = parsedEntries.map((entry, index) =>
       this.normalizeEntry(entry, config, index)
     );
 
@@ -200,13 +211,13 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     switch (format) {
       case 'ndjson':
         return this.parseNDJSON(data);
-      
+
       case 'sse':
         return this.parseSSE(data);
-      
+
       case 'json_array':
         return this.parseJSONArray(data);
-      
+
       default:
         throw new Error(`Unsupported format: ${format}`);
     }
@@ -215,7 +226,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
   private parseNDJSON(data: string): any[] {
     const entries: any[] = [];
     const lines = data.split('\n').filter(line => line.trim());
-    
+
     for (const line of lines) {
       try {
         const parsed = JSON.parse(line);
@@ -224,20 +235,20 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
         console.warn(`Failed to parse NDJSON line: ${line}`, error);
       }
     }
-    
+
     return entries;
   }
 
   private parseSSE(data: string): any[] {
     const entries: any[] = [];
     const events = data.split('\n\n').filter(event => event.trim());
-    
+
     for (const event of events) {
       try {
         const lines = event.split('\n');
         let eventType = '';
         let eventData = '';
-        
+
         for (const line of lines) {
           if (line.startsWith('event:')) {
             eventType = line.substring(6).trim();
@@ -245,7 +256,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
             eventData = line.substring(5).trim();
           }
         }
-        
+
         if (eventData) {
           const parsed = JSON.parse(eventData);
           parsed._sse_event = eventType;
@@ -255,7 +266,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
         console.warn(`Failed to parse SSE event: ${event}`, error);
       }
     }
-    
+
     return entries;
   }
 
@@ -268,7 +279,11 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     }
   }
 
-  private normalizeEntry(entry: any, config: WebhookStreamConfig, index: number): NormalizedData {
+  private normalizeEntry(
+    entry: any,
+    config: WebhookStreamConfig,
+    index: number
+  ): NormalizedData {
     // Extract mapped values
     const getValue = (field: string): any => {
       const mappedField = config.fieldMapping?.[field] || field;
@@ -279,7 +294,8 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
     const emissionsValue = this.parseNumber(getValue('emissions'));
     const energyValue = this.parseNumber(getValue('energy'));
     const powerValue = this.parseNumber(getValue('power'));
-    const sourceValue = getValue('source') || getValue('device_id') || 'webhook_stream';
+    const sourceValue =
+      getValue('source') || getValue('device_id') || 'webhook_stream';
 
     // Convert timestamp
     const timestamp = this.parseTimestamp(timestampValue);
@@ -292,45 +308,55 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
       timestamp: timestamp.toISOString(),
       source: sourceValue,
       category: 'webhook_stream',
-      
+
       // Core emissions data
-      emissions: emissionsValue ? {
-        total: emissionsValue,
-        unit: config.emissionsUnit || 'kg',
-        scope: 'scope2' // Default assumption
-      } : undefined,
-      
+      emissions: emissionsValue
+        ? {
+            total: emissionsValue,
+            unit: config.emissionsUnit || 'kg',
+            scope: 'scope2', // Default assumption
+          }
+        : undefined,
+
       // Energy data
-      energy: energyValue ? {
-        total: energyValue,
-        unit: config.energyUnit || 'kWh'
-      } : undefined,
-      
+      energy: energyValue
+        ? {
+            total: energyValue,
+            unit: config.energyUnit || 'kWh',
+          }
+        : undefined,
+
       // Power data
-      power: powerValue ? {
-        instantaneous: powerValue,
-        unit: config.powerUnit || 'W'
-      } : undefined,
-      
+      power: powerValue
+        ? {
+            instantaneous: powerValue,
+            unit: config.powerUnit || 'W',
+          }
+        : undefined,
+
       // Stream metadata
       stream_metadata: {
         entry_index: index,
-        sse_event: entry._sse_event
+        sse_event: entry._sse_event,
       },
-      
+
       // Raw entry data
       raw_entry: entry,
-      
+
       // Metadata
       metadata: {
         adapter: 'WebhookStreamAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.80
-      }
+        confidence: 0.8,
+      },
     };
   }
 
-  private aggregateEntries(entries: NormalizedData[], webhookData: WebhookStreamData, config: WebhookStreamConfig): NormalizedData {
+  private aggregateEntries(
+    entries: NormalizedData[],
+    webhookData: WebhookStreamData,
+    config: WebhookStreamConfig
+  ): NormalizedData {
     // Calculate totals and averages
     const totalEmissions = entries.reduce((sum, entry) => {
       return sum + (entry.emissions?.total || 0);
@@ -355,23 +381,32 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
       timestamp: new Date(webhookData.timestamp).toISOString(),
       source: 'webhook_stream',
       category: 'webhook_aggregate',
-      
-      emissions: totalEmissions > 0 ? {
-        total: totalEmissions,
-        unit: config.emissionsUnit || 'kg',
-        scope: 'scope2'
-      } : undefined,
-      
-      energy: totalEnergy > 0 ? {
-        total: totalEnergy,
-        unit: config.energyUnit || 'kWh'
-      } : undefined,
-      
-      power: avgPower > 0 ? {
-        average: avgPower,
-        unit: config.powerUnit || 'W'
-      } : undefined,
-      
+
+      emissions:
+        totalEmissions > 0
+          ? {
+              total: totalEmissions,
+              unit: config.emissionsUnit || 'kg',
+              scope: 'scope2',
+            }
+          : undefined,
+
+      energy:
+        totalEnergy > 0
+          ? {
+              total: totalEnergy,
+              unit: config.energyUnit || 'kWh',
+            }
+          : undefined,
+
+      power:
+        avgPower > 0
+          ? {
+              average: avgPower,
+              unit: config.powerUnit || 'W',
+            }
+          : undefined,
+
       // Stream aggregation data
       stream_aggregation: {
         entry_count: entries.length,
@@ -379,25 +414,28 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
         time_range: {
           start: startTime.toISOString(),
           end: endTime.toISOString(),
-          duration_seconds: durationSeconds
+          duration_seconds: durationSeconds,
         },
-        data_rate: entries.length / Math.max(durationSeconds, 1) // entries per second
+        data_rate: entries.length / Math.max(durationSeconds, 1), // entries per second
       },
-      
+
       // Webhook source information
       webhook_source: webhookData.source,
-      
+
       metadata: {
         adapter: 'WebhookStreamAdapter',
         adapter_version: '1.0.0',
-        confidence: 0.80
-      }
+        confidence: 0.8,
+      },
     };
 
     return this.addWebhookMetadata(aggregated, webhookData);
   }
 
-  private addWebhookMetadata(data: NormalizedData, webhookData: WebhookStreamData): NormalizedData {
+  private addWebhookMetadata(
+    data: NormalizedData,
+    webhookData: WebhookStreamData
+  ): NormalizedData {
     return {
       ...data,
       webhook_metadata: {
@@ -406,8 +444,8 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
         format: webhookData.format,
         source_url: webhookData.source?.url,
         source_method: webhookData.source?.method,
-        content_type: webhookData.source?.headers?.['content-type']
-      }
+        content_type: webhookData.source?.headers?.['content-type'],
+      },
     };
   }
 
@@ -422,9 +460,10 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
         test: (data: any) => {
           // Check for webhook stream structure
           if (typeof data !== 'object' || data === null) return false;
-          const hasRequiredFields = 'format' in data && 'data' in data && 'timestamp' in data;
+          const hasRequiredFields =
+            'format' in data && 'data' in data && 'timestamp' in data;
           return hasRequiredFields;
-        }
+        },
       },
       {
         weight: 0.3,
@@ -433,7 +472,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
           if (typeof data !== 'object' || data === null) return false;
           const validFormats = ['ndjson', 'sse', 'json_array'];
           return validFormats.includes(data.format);
-        }
+        },
       },
       {
         weight: 0.2,
@@ -442,7 +481,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
           if (typeof data !== 'object' || data === null) return false;
           const webhookFields = ['webhook_id', 'source'];
           return webhookFields.some(field => field in data);
-        }
+        },
       },
       {
         weight: 0.1,
@@ -450,7 +489,7 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
           // Check if data field contains stream-like content
           if (typeof data !== 'object' || data === null) return false;
           if (typeof data.data !== 'string') return false;
-          
+
           // Check for NDJSON pattern (multiple lines with JSON)
           const lines = data.data.split('\n').filter(l => l.trim());
           if (lines.length > 1) {
@@ -463,11 +502,11 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
               }
             });
           }
-          
+
           // Check for SSE pattern
           return data.data.includes('event:') && data.data.includes('data:');
-        }
-      }
+        },
+      },
     ];
   }
 
@@ -509,20 +548,24 @@ export class WebhookStreamAdapter extends BaseAdapter<WebhookStreamData> {
   /**
    * Create a WebhookStreamAdapter for NDJSON format
    */
-  static forNDJSON(fieldMapping?: { [key: string]: string }): WebhookStreamAdapter {
+  static forNDJSON(fieldMapping?: {
+    [key: string]: string;
+  }): WebhookStreamAdapter {
     return new WebhookStreamAdapter({
       format: 'ndjson',
-      fieldMapping
+      fieldMapping,
     });
   }
 
   /**
    * Create a WebhookStreamAdapter for SSE format
    */
-  static forSSE(fieldMapping?: { [key: string]: string }): WebhookStreamAdapter {
+  static forSSE(fieldMapping?: {
+    [key: string]: string;
+  }): WebhookStreamAdapter {
     return new WebhookStreamAdapter({
       format: 'sse',
-      fieldMapping
+      fieldMapping,
     });
   }
 }

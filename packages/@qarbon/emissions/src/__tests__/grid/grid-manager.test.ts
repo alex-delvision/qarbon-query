@@ -1,5 +1,8 @@
 import { describe, it, expect, beforeEach, vi, Mock } from 'vitest';
-import { GridIntensityManager, IntensityProvider } from '../../grid/intensity-manager';
+import {
+  GridIntensityManager,
+  IntensityProvider,
+} from '../../grid/intensity-manager';
 
 // Mock external API calls
 const mockElectricityMapAPI = vi.fn();
@@ -17,7 +20,7 @@ describe('Grid Intensity Manager', () => {
   beforeEach(() => {
     gridManager = new GridIntensityManager();
     vi.clearAllMocks();
-    
+
     // Reset fetch mock
     (global.fetch as Mock).mockReset();
   });
@@ -29,8 +32,8 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
@@ -48,8 +51,8 @@ describe('Grid Intensity Manager', () => {
           ok: true,
           json: async () => ({
             value: 380,
-            confidence: 0.85
-          })
+            confidence: 0.85,
+          }),
         });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
@@ -68,8 +71,8 @@ describe('Grid Intensity Manager', () => {
           ok: true,
           json: async () => ({
             intensity: 400,
-            source: 'historical_daily'
-          })
+            source: 'historical_daily',
+          }),
         });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
@@ -89,8 +92,8 @@ describe('Grid Intensity Manager', () => {
           ok: true,
           json: async () => ({
             intensity: 420,
-            source: 'historical_monthly'
-          })
+            source: 'historical_monthly',
+          }),
         });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
@@ -115,7 +118,10 @@ describe('Grid Intensity Manager', () => {
       // Mock all API failures
       (global.fetch as Mock).mockRejectedValue(new Error('API error'));
 
-      const result = await gridManager.getIntensity('unknown-region', testTimestamp);
+      const result = await gridManager.getIntensity(
+        'unknown-region',
+        testTimestamp
+      );
 
       expect(result.intensity).toBe(475); // Global default
       expect(result.source).toBe('annual_default');
@@ -129,13 +135,24 @@ describe('Grid Intensity Manager', () => {
       (global.fetch as Mock).mockRejectedValue(new Error('API error'));
 
       const testCases = [
-        { code: 'us-east-1', expectedRegion: 'virginia', expectedIntensity: 396 },
+        {
+          code: 'us-east-1',
+          expectedRegion: 'virginia',
+          expectedIntensity: 396,
+        },
         { code: 'us-west-2', expectedRegion: 'oregon', expectedIntensity: 285 },
-        { code: 'eu-west-1', expectedRegion: 'ireland', expectedIntensity: 316 }
+        {
+          code: 'eu-west-1',
+          expectedRegion: 'ireland',
+          expectedIntensity: 316,
+        },
       ];
 
       for (const { code, expectedIntensity } of testCases) {
-        const result = await gridManager.getIntensityByDatacenter(code, testTimestamp);
+        const result = await gridManager.getIntensityByDatacenter(
+          code,
+          testTimestamp
+        );
         expect(result.intensity).toBe(expectedIntensity);
       }
     });
@@ -146,11 +163,14 @@ describe('Grid Intensity Manager', () => {
       const testCases = [
         { code: 'eastus', expectedIntensity: 396 }, // Virginia
         { code: 'westus2', expectedIntensity: 285 }, // Washington
-        { code: 'northeurope', expectedIntensity: 316 } // Ireland
+        { code: 'northeurope', expectedIntensity: 316 }, // Ireland
       ];
 
       for (const { code, expectedIntensity } of testCases) {
-        const result = await gridManager.getIntensityByDatacenter(code, testTimestamp);
+        const result = await gridManager.getIntensityByDatacenter(
+          code,
+          testTimestamp
+        );
         expect(result.intensity).toBe(expectedIntensity);
       }
     });
@@ -161,18 +181,24 @@ describe('Grid Intensity Manager', () => {
       const testCases = [
         { code: 'us-central1', expectedIntensity: 462 }, // Iowa
         { code: 'us-west1', expectedIntensity: 285 }, // Oregon
-        { code: 'europe-west1', expectedIntensity: 165 } // Belgium
+        { code: 'europe-west1', expectedIntensity: 165 }, // Belgium
       ];
 
       for (const { code, expectedIntensity } of testCases) {
-        const result = await gridManager.getIntensityByDatacenter(code, testTimestamp);
+        const result = await gridManager.getIntensityByDatacenter(
+          code,
+          testTimestamp
+        );
         expect(result.intensity).toBe(expectedIntensity);
       }
     });
 
     it('should throw error for unknown datacenter codes', async () => {
       await expect(
-        gridManager.getIntensityByDatacenter('unknown-datacenter', testTimestamp)
+        gridManager.getIntensityByDatacenter(
+          'unknown-datacenter',
+          testTimestamp
+        )
       ).rejects.toThrow('Unknown datacenter code: unknown-datacenter');
     });
   });
@@ -184,8 +210,8 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       // First call should hit the API
@@ -195,7 +221,7 @@ describe('Grid Intensity Manager', () => {
       // Second call should use cache
       const result2 = await gridManager.getIntensity('virginia', testTimestamp);
       expect(global.fetch).toHaveBeenCalledTimes(1); // Still only one API call
-      
+
       expect(result1.intensity).toBe(result2.intensity);
       expect(result1.source).toBe(result2.source);
     });
@@ -204,18 +230,18 @@ describe('Grid Intensity Manager', () => {
       // This test would need to manipulate time to test TTL
       // For now, we'll test that the caching mechanism is in place
       const cacheKey = 'virginia-2023-07-15';
-      
+
       // Mock real-time data
       (global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       // Verify cache was used on second call
       await gridManager.getIntensity('virginia', testTimestamp);
       expect(global.fetch).toHaveBeenCalledTimes(1);
@@ -227,8 +253,11 @@ describe('Grid Intensity Manager', () => {
       // Mock API failure to use defaults
       (global.fetch as Mock).mockRejectedValue(new Error('API error'));
 
-      const result = await gridManager.getIntensityByDatacenter('us-east-1', testTimestamp);
-      
+      const result = await gridManager.getIntensityByDatacenter(
+        'us-east-1',
+        testTimestamp
+      );
+
       // us-east-1 has PUE of 1.2, so intensity should be adjusted
       // Base Virginia intensity: 396, with PUE 1.2 = 396 * 1.2 = 475.2
       expect(result.intensity).toBeGreaterThan(396);
@@ -239,8 +268,11 @@ describe('Grid Intensity Manager', () => {
       (global.fetch as Mock).mockRejectedValue(new Error('API error'));
 
       // Test high renewable region (us-west-2 has 85% renewable)
-      const result = await gridManager.getIntensityByDatacenter('us-west-2', testTimestamp);
-      
+      const result = await gridManager.getIntensityByDatacenter(
+        'us-west-2',
+        testTimestamp
+      );
+
       // Base Oregon intensity: 285, with 85% renewable should be lower
       expect(result.intensity).toBeLessThan(285);
     });
@@ -249,14 +281,15 @@ describe('Grid Intensity Manager', () => {
   describe('Error Handling and Resilience', () => {
     it('should handle API timeouts gracefully', async () => {
       // Mock timeout
-      (global.fetch as Mock).mockImplementation(() => 
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout')), 100)
-        )
+      (global.fetch as Mock).mockImplementation(
+        () =>
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout')), 100)
+          )
       );
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       // Should fallback to default
       expect(result.intensity).toBe(396);
       expect(result.source).toBe('annual_default');
@@ -267,12 +300,12 @@ describe('Grid Intensity Manager', () => {
       (global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => ({
-          invalidField: 'bad data'
-        })
+          invalidField: 'bad data',
+        }),
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       // Should fallback to default when data is malformed
       expect(result.intensity).toBe(396);
       expect(result.source).toBe('annual_default');
@@ -283,11 +316,11 @@ describe('Grid Intensity Manager', () => {
       (global.fetch as Mock).mockResolvedValueOnce({
         ok: false,
         status: 404,
-        statusText: 'Not Found'
+        statusText: 'Not Found',
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       // Should fallback to default
       expect(result.intensity).toBe(396);
       expect(result.source).toBe('annual_default');
@@ -301,17 +334,17 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       // Make multiple concurrent requests
-      const promises = Array.from({ length: 10 }, () => 
+      const promises = Array.from({ length: 10 }, () =>
         gridManager.getIntensity('virginia', testTimestamp)
       );
 
       const results = await Promise.all(promises);
-      
+
       // All should return the same result
       results.forEach(result => {
         expect(result.intensity).toBe(350);
@@ -328,8 +361,8 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
@@ -344,12 +377,12 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: -100, // Invalid negative value
-          confidence: 0.9
-        })
+          confidence: 0.9,
+        }),
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       // Should fallback when data is invalid
       expect(result.intensity).toBeGreaterThan(0);
       expect(result.intensity).toBeLessThan(2000); // Reasonable upper bound
@@ -360,12 +393,12 @@ describe('Grid Intensity Manager', () => {
         ok: true,
         json: async () => ({
           carbonIntensity: 350,
-          confidence: 1.5 // Invalid confidence > 1
-        })
+          confidence: 1.5, // Invalid confidence > 1
+        }),
       });
 
       const result = await gridManager.getIntensity('virginia', testTimestamp);
-      
+
       expect(result.confidence).toBeGreaterThanOrEqual(0);
       expect(result.confidence).toBeLessThanOrEqual(1);
     });

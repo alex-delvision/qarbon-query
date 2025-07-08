@@ -5,6 +5,7 @@
 ### 📚 Documentation & Methodology
 
 #### Enhanced API Interception Documentation
+
 - **Updated `API_INTERCEPTION.md`** with comprehensive methodology details
 - **Added detailed accuracy metrics** for token counting across different provider types:
   - API-based providers: 85-95% confidence
@@ -14,6 +15,7 @@
 - **Added carbon intensity calculations** for different regions and data center types
 
 #### New AI Emissions Documentation
+
 - **Created `AI_EMISSIONS.md`** in `@qarbon/emissions` package
 - **Detailed methodology overview** explaining energy per token calculations
 - **Model-specific energy factors** with confidence ranges:
@@ -27,11 +29,13 @@
 ### 🔄 Version Updates
 
 #### @qarbon/emissions v0.3.0 (Minor)
+
 - Enhanced methodology documentation
 - Improved confidence range specifications
 - Better factor organization and explanation
 
 #### @qarbon/chrome-extension v0.1.1 (Patch)
+
 - Updated documentation
 - Synchronized manifest version
 - Improved accuracy documentation
@@ -46,6 +50,7 @@
 ### 🔬 Scientific References
 
 The methodology is based on:
+
 - Patterson et al. (2021): "Carbon Emissions and Large Neural Network Training"
 - OpenAI Sustainability Report (2023)
 - Anthropic Constitutional AI Paper (2022)

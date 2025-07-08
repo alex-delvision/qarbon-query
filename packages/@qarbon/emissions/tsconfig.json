@@ -19,9 +19,9 @@
   },
   "include": ["src/**/*"],
   "exclude": [
-    "dist", 
-    "node_modules", 
-    "**/*.test.*", 
+    "dist",
+    "node_modules",
+    "**/*.test.*",
     "**/*.spec.*",
     "../tracker-adapters/**/*",
     "../core/**/*",

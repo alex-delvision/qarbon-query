@@ -1,6 +1,7 @@
 # CSV Adapter
 
-The `CsvAdapter` processes CSV (Comma-Separated Values) files containing emissions and energy data with configurable column mapping.
+The `CsvAdapter` processes CSV (Comma-Separated Values) files containing emissions and energy data
+with configurable column mapping.
 
 ## Features
 
@@ -19,14 +20,14 @@ Map CSV columns to standard fields:
 
 ```typescript
 const columnMapping = {
-  timestamp: 'date',           // Timestamp column
-  emissions: 'co2_kg',         // Emissions amount column
-  energy: 'energy_kwh',        // Energy consumption column
-  power: 'power_w',            // Power usage column
-  duration: 'duration_h',      // Duration column
+  timestamp: 'date', // Timestamp column
+  emissions: 'co2_kg', // Emissions amount column
+  energy: 'energy_kwh', // Energy consumption column
+  power: 'power_w', // Power usage column
+  duration: 'duration_h', // Duration column
   source: 'measurement_source', // Data source column
-  device_id: 'device_id',      // Device identifier column
-  location: 'location'         // Location/facility column
+  device_id: 'device_id', // Device identifier column
+  location: 'location', // Location/facility column
 };
 ```
 
@@ -35,13 +36,13 @@ const columnMapping = {
 ```typescript
 const config = {
   columnMapping: columnMapping,
-  delimiter: ',',              // CSV delimiter (default: comma)
-  hasHeader: true,             // CSV has header row (default: true)
-  emissionsUnit: 'kg',         // Emissions unit (kg, g, tonnes)
-  energyUnit: 'kWh',           // Energy unit (kWh, Wh, MWh)
-  powerUnit: 'W',              // Power unit (W, kW, MW)
-  durationUnit: 'hours',       // Duration unit (hours, minutes, seconds)
-  skipRows: 0                  // Number of rows to skip (default: 0)
+  delimiter: ',', // CSV delimiter (default: comma)
+  hasHeader: true, // CSV has header row (default: true)
+  emissionsUnit: 'kg', // Emissions unit (kg, g, tonnes)
+  energyUnit: 'kWh', // Energy unit (kWh, Wh, MWh)
+  powerUnit: 'W', // Power unit (W, kW, MW)
+  durationUnit: 'hours', // Duration unit (hours, minutes, seconds)
+  skipRows: 0, // Number of rows to skip (default: 0)
 };
 ```
 
@@ -57,17 +58,17 @@ const adapter = new CsvAdapter({
     timestamp: 'date',
     emissions: 'co2_kg',
     energy: 'energy_kwh',
-    source: 'measurement_source'
-  }
+    source: 'measurement_source',
+  },
 });
 
 const csvData = {
   headers: ['date', 'co2_kg', 'energy_kwh', 'measurement_source'],
   rows: [
     ['2023-07-15T10:30:00Z', '0.125', '0.25', 'ml_training'],
-    ['2023-07-15T12:30:00Z', '0.089', '0.18', 'web_server']
+    ['2023-07-15T12:30:00Z', '0.089', '0.18', 'web_server'],
   ],
-  config: adapter.getMetadata()
+  config: adapter.getMetadata(),
 };
 
 // Validate CSV data
@@ -90,13 +91,13 @@ const advancedAdapter = new CsvAdapter({
     emissions: 'carbon_emissions_g',
     energy: 'power_consumption_w',
     device_id: 'sensor_id',
-    location: 'facility_name'
+    location: 'facility_name',
   },
-  delimiter: ';',              // Semicolon-separated
+  delimiter: ';', // Semicolon-separated
   hasHeader: true,
-  emissionsUnit: 'g',          // Grams instead of kg
-  energyUnit: 'W',             // Watts instead of kWh
-  skipRows: 2                  // Skip first 2 rows (metadata)
+  emissionsUnit: 'g', // Grams instead of kg
+  energyUnit: 'W', // Watts instead of kWh
+  skipRows: 2, // Skip first 2 rows (metadata)
 });
 ```
 
@@ -114,7 +115,7 @@ const rows = lines.slice(1).map(line => line.split(','));
 const csvData = {
   headers,
   rows,
-  config: adapter.getMetadata()
+  config: adapter.getMetadata(),
 };
 
 const normalized = await adapter.normalize(csvData);
@@ -165,16 +166,19 @@ The adapter normalizes CSV data into a standard format:
 ## Validation Rules
 
 ### Required Fields
+
 - At least one of: `emissions` or `energy` mapping
 - Valid CSV structure with consistent column counts
 
 ### Optional Fields
+
 - `timestamp`: ISO 8601 format recommended
 - `source`: String identifier for data source
 - `device_id`: Unique device identifier
 - `location`: Facility or region identifier
 
 ### Warnings
+
 - Missing timestamp mapping
 - Inconsistent row lengths
 - Missing mapped columns in headers
@@ -182,12 +186,14 @@ The adapter normalizes CSV data into a standard format:
 ## Error Handling
 
 ### Common Errors
+
 - **Missing rows**: CSV data contains no rows
 - **Invalid column mapping**: Mapped columns not found in headers
 - **Inconsistent columns**: Rows have different column counts
 - **Invalid configuration**: Missing required configuration options
 
 ### Error Response
+
 ```typescript
 {
   isValid: false,
@@ -204,12 +210,14 @@ The adapter normalizes CSV data into a standard format:
 ## Performance Considerations
 
 ### Optimization Tips
+
 1. **Batch Processing**: Process multiple CSV files in batches
 2. **Memory Management**: Use streaming for very large CSV files
 3. **Column Validation**: Pre-validate column mappings to avoid runtime errors
 4. **Data Types**: Use appropriate numeric types for calculations
 
 ### Limitations
+
 - **Memory Usage**: Entire CSV is loaded into memory
 - **File Size**: Recommended maximum ~100MB per file
 - **Row Count**: Optimal performance with <100,000 rows per batch
@@ -223,21 +231,23 @@ const adapter = new CsvAdapter({
   columnMapping: {
     timestamp: 'date',
     energy: 'energy_kwh',
-    source: 'source'
-  }
+    source: 'source',
+  },
 });
 
 const calculator = new EmissionsCalculator();
 
 // Process CSV and calculate emissions
-const csvData = { /* CSV data */ };
+const csvData = {
+  /* CSV data */
+};
 const normalized = await adapter.normalize(csvData);
 
 // Convert to calculation input
 const calculationInput = {
   type: 'energy',
   consumption: normalized.energy,
-  source: 'grid'
+  source: 'grid',
 };
 
 const result = await calculator.calculate(calculationInput);

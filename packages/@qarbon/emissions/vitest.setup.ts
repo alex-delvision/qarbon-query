@@ -5,15 +5,15 @@ vi.mock('@qarbon/shared', () => ({
   generateFootprint: vi.fn(() => ({
     total: 100,
     breakdown: { ai: 100 },
-    period: 'monthly'
-  }))
+    period: 'monthly',
+  })),
 }));
 
 // Global test setup
 beforeEach(() => {
   // Clear all mocks before each test
   vi.clearAllMocks();
-  
+
   // Reset Date.now mock if it was set
   vi.useRealTimers();
 });
@@ -24,7 +24,11 @@ global.createMockTimestamp = (date?: string) => {
 };
 
 // Helper for testing within tolerance
-global.expectWithinTolerance = (actual: number, expected: number, tolerance: number = 0.1) => {
+global.expectWithinTolerance = (
+  actual: number,
+  expected: number,
+  tolerance: number = 0.1
+) => {
   const diff = Math.abs(actual - expected);
   const threshold = expected * tolerance;
   expect(diff).toBeLessThanOrEqual(threshold);
@@ -40,6 +44,10 @@ global.expectFactorTolerance = (actual: number, published: number) => {
 // Declare global types
 declare global {
   var createMockTimestamp: (date?: string) => string;
-  var expectWithinTolerance: (actual: number, expected: number, tolerance?: number) => void;
+  var expectWithinTolerance: (
+    actual: number,
+    expected: number,
+    tolerance?: number
+  ) => void;
   var expectFactorTolerance: (actual: number, published: number) => void;
 }

@@ -2,7 +2,13 @@
  * Batch calculator with vectorized operations and SIMD support
  */
 
-import { EmissionInput, EmissionOutput, BatchCalculationOptions, BatchMetrics, SIMDOperations } from './types';
+import {
+  EmissionInput,
+  EmissionOutput,
+  BatchCalculationOptions,
+  BatchMetrics,
+  SIMDOperations,
+} from './types';
 import { getEmissionFactor, getAIFactor } from '../factors';
 import { emissionFactorCache } from './lru-cache';
 import { featureFlags } from './feature-flags';
@@ -23,23 +29,22 @@ class SIMDOperationsImpl implements SIMDOperations {
     if (typeof globalThis !== 'undefined' && globalThis.SIMD) {
       return true;
     }
-    
+
     // Check for WebAssembly SIMD support
     if (typeof WebAssembly !== 'undefined' && WebAssembly.validate) {
       try {
         // Simple SIMD test
         const simdTest = new Uint8Array([
-          0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00,
-          0x01, 0x05, 0x01, 0x60, 0x00, 0x01, 0x7b,
-          0x03, 0x02, 0x01, 0x00,
-          0x0a, 0x0a, 0x01, 0x08, 0x00, 0x41, 0x00, 0xfd, 0x0f, 0x0b
+          0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x05, 0x01,
+          0x60, 0x00, 0x01, 0x7b, 0x03, 0x02, 0x01, 0x00, 0x0a, 0x0a, 0x01,
+          0x08, 0x00, 0x41, 0x00, 0xfd, 0x0f, 0x0b,
         ]);
         return WebAssembly.validate(simdTest);
       } catch {
         return false;
       }
     }
-    
+
     return false;
   }
 
@@ -56,7 +61,7 @@ class SIMDOperationsImpl implements SIMDOperations {
     // Use SIMD operations when available
     const result = new Float64Array(a.length);
     const vectorSize = 4; // Process 4 elements at a time
-    
+
     let i = 0;
     for (; i < a.length - vectorSize + 1; i += vectorSize) {
       // Vectorized multiplication (would use actual SIMD instructions in real implementation)
@@ -64,12 +69,12 @@ class SIMDOperationsImpl implements SIMDOperations {
         result[i + j] = a[i + j] * b[i + j];
       }
     }
-    
+
     // Handle remaining elements
     for (; i < a.length; i++) {
       result[i] = a[i] * b[i];
     }
-    
+
     return result;
   }
 
@@ -86,18 +91,18 @@ class SIMDOperationsImpl implements SIMDOperations {
     // Use SIMD operations when available
     const result = new Float64Array(a.length);
     const vectorSize = 4;
-    
+
     let i = 0;
     for (; i < a.length - vectorSize + 1; i += vectorSize) {
       for (let j = 0; j < vectorSize; j++) {
         result[i + j] = a[i + j] + b[i + j];
       }
     }
-    
+
     for (; i < a.length; i++) {
       result[i] = a[i] + b[i];
     }
-    
+
     return result;
   }
 
@@ -114,18 +119,18 @@ class SIMDOperationsImpl implements SIMDOperations {
     // Use SIMD operations when available
     const result = new Float64Array(values.length);
     const vectorSize = 4;
-    
+
     let i = 0;
     for (; i < values.length - vectorSize + 1; i += vectorSize) {
       for (let j = 0; j < vectorSize; j++) {
         result[i + j] = values[i + j] * factor;
       }
     }
-    
+
     for (; i < values.length; i++) {
       result[i] = values[i] * factor;
     }
-    
+
     return result;
   }
 }
@@ -167,7 +172,8 @@ export class BatchCalculator {
     this.metrics.totalInputs = inputs.length;
 
     const flags = options.features || featureFlags.getFlags();
-    const useWasm = flags.enableWasmCalculations && inputs.length >= flags.wasmBatchThreshold;
+    const useWasm =
+      flags.enableWasmCalculations && inputs.length >= flags.wasmBatchThreshold;
     const useSIMD = flags.enableSIMDOperations && this.simdOps.isSupported;
     const useCache = flags.enableCache;
 
@@ -213,20 +219,29 @@ export class BatchCalculator {
     options: BatchCalculationOptions
   ): Promise<EmissionOutput[]> {
     const results: EmissionOutput[] = [];
-    
+
     // Group inputs by category for efficient processing
     const groupedInputs = this.groupInputsByCategory(inputs);
-    
+
     for (const [category, categoryInputs] of Object.entries(groupedInputs)) {
       try {
-        const wasmResult = await wasmHelper.calculateBatch(categoryInputs, category);
+        const wasmResult = await wasmHelper.calculateBatch(
+          categoryInputs,
+          category
+        );
         if (wasmResult.success) {
           // Convert WASM results to EmissionOutput format
-          const categoryResults = this.convertWasmResults(categoryInputs, wasmResult.results);
+          const categoryResults = this.convertWasmResults(
+            categoryInputs,
+            wasmResult.results
+          );
           results.push(...categoryResults);
         } else {
           // Fallback to regular calculation
-          const fallbackResults = this.calculateRegular(categoryInputs, options);
+          const fallbackResults = this.calculateRegular(
+            categoryInputs,
+            options
+          );
           results.push(...fallbackResults);
         }
       } catch (error) {
@@ -235,7 +250,7 @@ export class BatchCalculator {
         results.push(...fallbackResults);
       }
     }
-    
+
     return results;
   }
 
@@ -247,10 +262,10 @@ export class BatchCalculator {
     options: BatchCalculationOptions
   ): EmissionOutput[] {
     const results: EmissionOutput[] = [];
-    
+
     // Group inputs by category for vectorized operations
     const groupedInputs = this.groupInputsByCategory(inputs);
-    
+
     for (const [category, categoryInputs] of Object.entries(groupedInputs)) {
       if (category === 'ai') {
         // AI calculations need special handling
@@ -258,11 +273,15 @@ export class BatchCalculator {
         results.push(...aiResults);
       } else {
         // Vectorized calculations for other categories
-        const vectorResults = this.calculateVectorized(categoryInputs, category, options);
+        const vectorResults = this.calculateVectorized(
+          categoryInputs,
+          category,
+          options
+        );
         results.push(...vectorResults);
       }
     }
-    
+
     return results;
   }
 
@@ -275,7 +294,7 @@ export class BatchCalculator {
   ): EmissionOutput[] {
     const results: EmissionOutput[] = [];
     const flags = options.features || featureFlags.getFlags();
-    
+
     for (const input of inputs) {
       try {
         const result = this.calculateSingle(input, flags.enableCache);
@@ -287,23 +306,25 @@ export class BatchCalculator {
         // Continue processing other inputs
       }
     }
-    
+
     return results;
   }
 
   /**
    * Group inputs by category for efficient batch processing
    */
-  private groupInputsByCategory(inputs: EmissionInput[]): Record<string, EmissionInput[]> {
+  private groupInputsByCategory(
+    inputs: EmissionInput[]
+  ): Record<string, EmissionInput[]> {
     const grouped: Record<string, EmissionInput[]> = {};
-    
+
     for (const input of inputs) {
       if (!grouped[input.category]) {
         grouped[input.category] = [];
       }
       grouped[input.category].push(input);
     }
-    
+
     return grouped;
   }
 
@@ -317,15 +338,15 @@ export class BatchCalculator {
   ): EmissionOutput[] {
     const results: EmissionOutput[] = [];
     const flags = options.features || featureFlags.getFlags();
-    
+
     // Extract values and factors into typed arrays
     const values = new Float64Array(inputs.length);
     const factors = new Float64Array(inputs.length);
-    
+
     for (let i = 0; i < inputs.length; i++) {
       const input = inputs[i];
       values[i] = input.value;
-      
+
       // Get factor (with caching)
       let factor = null;
       if (flags.enableCache) {
@@ -336,7 +357,7 @@ export class BatchCalculator {
           this.metrics.cacheMisses++;
         }
       }
-      
+
       if (!factor) {
         try {
           factor = getEmissionFactor(category, input.type);
@@ -348,21 +369,21 @@ export class BatchCalculator {
           continue;
         }
       }
-      
+
       // Extract the appropriate factor value
       factors[i] = this.extractFactorValue(factor, category);
     }
-    
+
     // Vectorized multiplication
     const emissions = this.simdOps.vectorizedMultiply(values, factors);
-    
+
     // Convert results back to EmissionOutput format
     for (let i = 0; i < inputs.length; i++) {
       if (emissions[i] > 0) {
         results.push(this.createEmissionOutput(inputs[i], emissions[i]));
       }
     }
-    
+
     return results;
   }
 
@@ -375,11 +396,11 @@ export class BatchCalculator {
   ): EmissionOutput[] {
     const results: EmissionOutput[] = [];
     const flags = options.features || featureFlags.getFlags();
-    
+
     for (const input of inputs) {
       try {
         let factor = null;
-        
+
         if (flags.enableCache && input.model) {
           factor = emissionFactorCache.get(input.model, input.region);
           if (factor) {
@@ -388,19 +409,20 @@ export class BatchCalculator {
             this.metrics.cacheMisses++;
           }
         }
-        
+
         if (!factor && input.model) {
           factor = getAIFactor(input.model);
           if (factor && flags.enableCache) {
             emissionFactorCache.set(input.model, factor, input.region);
           }
         }
-        
+
         if (factor) {
-          const amount = input.value > 0 
-            ? input.value * factor.co2PerToken
-            : factor.co2PerQuery || 0;
-          
+          const amount =
+            input.value > 0
+              ? input.value * factor.co2PerToken
+              : factor.co2PerQuery || 0;
+
           const result = this.createEmissionOutput(input, amount);
           result.confidence = factor.confidence;
           results.push(result);
@@ -409,14 +431,17 @@ export class BatchCalculator {
         this.metrics.failedInputs++;
       }
     }
-    
+
     return results;
   }
 
   /**
    * Calculate single emission
    */
-  private calculateSingle(input: EmissionInput, useCache: boolean): EmissionOutput | null {
+  private calculateSingle(
+    input: EmissionInput,
+    useCache: boolean
+  ): EmissionOutput | null {
     try {
       if (input.category === 'ai') {
         return this.calculateAISingle(input, useCache);
@@ -431,13 +456,16 @@ export class BatchCalculator {
   /**
    * Calculate single AI emission
    */
-  private calculateAISingle(input: EmissionInput, useCache: boolean): EmissionOutput | null {
+  private calculateAISingle(
+    input: EmissionInput,
+    useCache: boolean
+  ): EmissionOutput | null {
     if (!input.model) {
       return null;
     }
-    
+
     let factor = null;
-    
+
     if (useCache) {
       factor = emissionFactorCache.get(input.model, input.region);
       if (factor) {
@@ -446,22 +474,23 @@ export class BatchCalculator {
         this.metrics.cacheMisses++;
       }
     }
-    
+
     if (!factor) {
       factor = getAIFactor(input.model);
       if (factor && useCache) {
         emissionFactorCache.set(input.model, factor, input.region);
       }
     }
-    
+
     if (!factor) {
       return null;
     }
-    
-    const amount = input.value > 0 
-      ? input.value * factor.co2PerToken
-      : factor.co2PerQuery || 0;
-    
+
+    const amount =
+      input.value > 0
+        ? input.value * factor.co2PerToken
+        : factor.co2PerQuery || 0;
+
     const result = this.createEmissionOutput(input, amount);
     result.confidence = factor.confidence;
     return result;
@@ -470,9 +499,12 @@ export class BatchCalculator {
   /**
    * Calculate single regular emission
    */
-  private calculateRegularSingle(input: EmissionInput, useCache: boolean): EmissionOutput | null {
+  private calculateRegularSingle(
+    input: EmissionInput,
+    useCache: boolean
+  ): EmissionOutput | null {
     let factor = null;
-    
+
     if (useCache) {
       factor = emissionFactorCache.get(input.type, input.region);
       if (factor) {
@@ -481,17 +513,17 @@ export class BatchCalculator {
         this.metrics.cacheMisses++;
       }
     }
-    
+
     if (!factor) {
       factor = getEmissionFactor(input.category, input.type);
       if (factor && useCache) {
         emissionFactorCache.set(input.type, factor, input.region);
       }
     }
-    
+
     const factorValue = this.extractFactorValue(factor, input.category);
     const amount = input.value * factorValue;
-    
+
     return this.createEmissionOutput(input, amount);
   }
 
@@ -514,7 +546,10 @@ export class BatchCalculator {
   /**
    * Create emission output from input and calculated amount
    */
-  private createEmissionOutput(input: EmissionInput, amount: number): EmissionOutput {
+  private createEmissionOutput(
+    input: EmissionInput,
+    amount: number
+  ): EmissionOutput {
     return {
       id: input.id,
       amount: Math.round(amount * 100) / 100,
@@ -545,15 +580,18 @@ export class BatchCalculator {
   /**
    * Convert WASM results to EmissionOutput format
    */
-  private convertWasmResults(inputs: EmissionInput[], results: Float64Array): EmissionOutput[] {
+  private convertWasmResults(
+    inputs: EmissionInput[],
+    results: Float64Array
+  ): EmissionOutput[] {
     const outputs: EmissionOutput[] = [];
-    
+
     for (let i = 0; i < inputs.length && i < results.length; i++) {
       if (results[i] > 0) {
         outputs.push(this.createEmissionOutput(inputs[i], results[i]));
       }
     }
-    
+
     return outputs;
   }
 

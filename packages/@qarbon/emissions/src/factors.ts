@@ -145,12 +145,12 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
     co2PerToken: 0.0023,
     confidence: { low: 0.002, high: 0.0026 },
   },
-  'stablediffusion': {
+  stablediffusion: {
     energyPerToken: 0.0000029,
     co2PerToken: 0.0016,
     confidence: { low: 0.0014, high: 0.0018 },
   },
-  'whisper': {
+  whisper: {
     energyPerToken: 0.000002,
     co2PerToken: 0.0011,
     confidence: { low: 0.001, high: 0.0012 },
@@ -160,7 +160,7 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
     co2PerToken: 0.00176,
     confidence: { low: 0.0015, high: 0.002 },
   },
-  'midjourney': {
+  midjourney: {
     energyPerToken: 0.0000024,
     co2PerToken: 0.0013,
     confidence: { low: 0.0011, high: 0.0015 },
@@ -175,7 +175,7 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
     co2PerToken: 0.00009,
     confidence: { low: 0.00008, high: 0.0001 },
   },
-  'tinyllama': {
+  tinyllama: {
     energyPerToken: 0.0000002,
     co2PerToken: 0.00011,
     confidence: { low: 0.0001, high: 0.00012 },
@@ -194,7 +194,7 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
     energyPerToken: 0.0000026,
     co2PerToken: 0.0011,
     confidence: { low: 0.001, high: 0.0012 },
-  }
+  },
 };
 
 const ALL_FACTORS = {
@@ -250,36 +250,36 @@ export function getAvailableTypes(category: string): string[] {
  */
 export function getAIFactor(model: string): AIEmissionFactor | null {
   const normalizedModel = model.toLowerCase();
-  
+
   // Direct match first
   if (AI_FACTORS[normalizedModel]) {
-  return AI_FACTORS[normalizedModel] || null;
+    return AI_FACTORS[normalizedModel] || null;
   }
-  
+
   // Fuzzy matching patterns
   const patterns = [
     // GPT models
     { pattern: /gpt-?3\.?5/, key: 'gpt-3.5' },
     { pattern: /gpt-?4/, key: 'gpt-4' },
     { pattern: /gpt-?3/, key: 'gpt-3.5' }, // fallback for GPT-3
-    
+
     // Claude models
     { pattern: /claude-?2/, key: 'claude-2' },
     { pattern: /claude-?3/, key: 'claude-3' },
     { pattern: /claude(?!-[0-9])/, key: 'claude-3' }, // default to latest
-    
+
     // Gemini models
     { pattern: /gemini-?pro/, key: 'gemini-pro' },
     { pattern: /gemini/, key: 'gemini-pro' },
-    
+
     // Llama models
     { pattern: /llama-?2/, key: 'llama-2' },
     { pattern: /llama/, key: 'llama-2' },
-    
+
     // PaLM models
     { pattern: /palm-?2/, key: 'palm-2' },
     { pattern: /palm/, key: 'palm-2' },
-    
+
     // Mistral models
     { pattern: /mistral-?7b/, key: 'mistral-7b' },
     { pattern: /mistral/, key: 'mistral-7b' },
@@ -301,13 +301,13 @@ export function getAIFactor(model: string): AIEmissionFactor | null {
     { pattern: /gpt-?4-?eu/, key: 'gpt-4-eu' },
     { pattern: /gpt-?4-?asia/, key: 'gpt-4-asia' },
   ];
-  
+
   for (const { pattern, key } of patterns) {
     if (pattern.test(normalizedModel)) {
       return AI_FACTORS[key] || null;
     }
   }
-  
+
   return null;
 }
 
@@ -327,20 +327,20 @@ const CRYPTO_FACTORS_DATA: Record<string, any> = {
     co2PerTransaction: 707,
     co2PerHashPerHour: 0.0000015,
     confidence: { low: 600, high: 850 },
-    consensusMechanism: 'proof-of-work'
+    consensusMechanism: 'proof-of-work',
   },
   ethereum: {
     co2PerTransaction: 0.0212,
     co2PerStakedTokenPerHour: 0.000001,
-    confidence: { low: 0.015, high: 0.030 },
-    consensusMechanism: 'proof-of-stake'
+    confidence: { low: 0.015, high: 0.03 },
+    consensusMechanism: 'proof-of-stake',
   },
   litecoin: {
     co2PerTransaction: 18.5,
     co2PerHashPerHour: 0.00000025,
     confidence: { low: 15, high: 22 },
-    consensusMechanism: 'proof-of-work'
-  }
+    consensusMechanism: 'proof-of-work',
+  },
 };
 
 /**

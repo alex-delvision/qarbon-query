@@ -35,12 +35,12 @@ const copyDirectory = (src, dest) => {
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });
   }
-  
+
   const files = fs.readdirSync(src);
   files.forEach(file => {
     const srcPath = path.join(src, file);
     const destPath = path.join(dest, file);
-    
+
     if (fs.statSync(srcPath).isDirectory()) {
       copyDirectory(srcPath, destPath);
     } else {
@@ -65,7 +65,7 @@ const requiredFiles = [
   'icons/icon16.png',
   'icons/icon32.png',
   'icons/icon48.png',
-  'icons/icon128.png'
+  'icons/icon128.png',
 ];
 
 const missingFiles = [];
@@ -92,21 +92,21 @@ console.log('   3. Click "Load unpacked" and select the ./extension/ folder');
 console.log('\n📊 Extension size:');
 
 // Calculate extension size
-const getDirectorySize = (dirPath) => {
+const getDirectorySize = dirPath => {
   let totalSize = 0;
   const files = fs.readdirSync(dirPath);
-  
+
   files.forEach(file => {
     const filePath = path.join(dirPath, file);
     const stats = fs.statSync(filePath);
-    
+
     if (stats.isDirectory()) {
       totalSize += getDirectorySize(filePath);
     } else {
       totalSize += stats.size;
     }
   });
-  
+
   return totalSize;
 };
 

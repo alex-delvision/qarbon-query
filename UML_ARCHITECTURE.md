@@ -59,9 +59,9 @@ package "Input Layer" {
     +getFormat(): string
     +getMetadata(): Record<string, any>
   }
-  
+
   class FileInput implements InputSource
-  class StreamInput implements InputSource  
+  class StreamInput implements InputSource
   class APIInput implements InputSource
 }
 
@@ -71,13 +71,13 @@ package "Adapter Layer" {
     +detectConfidence(input: Buffer): FormatConfidence
     +ingest(raw: unknown): unknown
   }
-  
+
   class JsonAdapter implements EmissionAdapter
   class CsvAdapter implements EmissionAdapter
   class XmlAdapter implements EmissionAdapter
   class AIImpactTrackerAdapter implements EmissionAdapter
   class CodeCarbonAdapter implements EmissionAdapter
-  
+
   class UniversalTrackerRegistry {
     -adapters: Map<string, EmissionAdapter>
     +registerAdapter(name: string, adapter: EmissionAdapter): void
@@ -98,13 +98,13 @@ package "Core Types" {
     +region?: string
     +gridIntensity?: number
   }
-  
+
   interface EmissionResult {
     +emissions: EmissionData[]
     +footprint: CarbonFootprint
     +metadata: ResultMetadata
   }
-  
+
   interface PipelineExecutionResult extends EmissionResult {
     +stages: PipelineStageResult[]
     +totalDuration: number
@@ -129,7 +129,7 @@ package "Grid Manager" {
     +getCarbonIntensity(region: string, timestamp: Date): Promise<number>
     +enhanceWithGridData(data: EmissionData[]): Promise<EmissionData[]>
   }
-  
+
   class GridCalculator implements GridManager {
     -regionCache: Map<string, RegionData>
     -intensityCache: Map<string, number>
@@ -145,7 +145,7 @@ package "Optimization Layer" {
     +optimizeMemory(): void
     +getMetrics(): OptimizationMetrics
   }
-  
+
   class CacheManager {
     -cache: Map<string, any>
     -maxSize: number
@@ -153,7 +153,7 @@ package "Optimization Layer" {
     +set(key: string, value: any): void
     +clear(): void
   }
-  
+
   class BatchProcessor {
     -batchSize: number
     +addToBatch(item: any): void
@@ -168,7 +168,7 @@ package "Uncertainty Layer" {
     +runMonteCarloSimulation(data: EmissionData[], samples: number): UncertaintyMetrics
     +propagateErrors(stages: PipelineStageResult[]): ErrorPropagation
   }
-  
+
   class MonteCarloSimulation {
     -samples: number
     -confidenceLevel: number
@@ -190,7 +190,7 @@ package "Core Pipeline" {
     -calculateUncertainty(result: EmissionResult): Promise<EmissionResult>
     -applyOptimizations(result: EmissionResult): Promise<PipelineExecutionResult>
   }
-  
+
   interface PipelineProcessor {
     +process(input: any, options?: PipelineOptions): Promise<PipelineExecutionResult>
     +configure(config: Partial<PipelineConfig>): void
@@ -421,4 +421,5 @@ This comprehensive UML documentation provides:
 4. **Component Interaction**: System architecture and dependencies
 5. **State Diagram**: Pipeline processing states and transitions
 
-The diagrams show how the new architecture maintains backward compatibility while enabling enhanced features through the pipeline system.
+The diagrams show how the new architecture maintains backward compatibility while enabling enhanced
+features through the pipeline system.

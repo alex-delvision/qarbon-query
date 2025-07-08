@@ -32,17 +32,17 @@ function ensureDirectories() {
 
 function precompileFactorData() {
   console.log('🔧 Pre-compiling factor data...');
-  
+
   // Read factor files
   const factorFiles = [
     'data/ai-factors.json',
-    'data/cloud-factors.json', 
+    'data/cloud-factors.json',
     'data/crypto-factors.json',
-    'data/grid-factors.json'
+    'data/grid-factors.json',
   ];
-  
+
   const compiledFactors = {};
-  
+
   factorFiles.forEach(file => {
     const filePath = path.join(srcDir, file);
     if (fs.existsSync(filePath)) {
@@ -51,14 +51,14 @@ function precompileFactorData() {
       compiledFactors[baseName] = data;
     }
   });
-  
+
   // Generate optimized lookup maps
   const optimizedLookups = generateOptimizedLookups(compiledFactors);
-  
+
   // Write optimized factor file
   const optimizedFactorsPath = path.join(optimizedDir, 'factors.ts');
   fs.writeFileSync(optimizedFactorsPath, optimizedLookups);
-  
+
   console.log(`✅ Generated optimized factors: ${optimizedFactorsPath}`);
 }
 
@@ -158,7 +158,7 @@ export function calculateBatchCloud(inputs: Array<{hours: number, instanceType: 
   return results;
 }
 `;
-  
+
   return template;
 }
 
@@ -173,7 +173,7 @@ function generateMapEntries(obj, indent = '  ') {
 
 function generateFeatureFlagModule() {
   console.log('🚩 Generating feature flags...');
-  
+
   const featureFlagsPath = path.join(optimizedDir, 'feature-flags.ts');
   const content = `// Auto-generated feature flags
 // Generated at: ${new Date().toISOString()}
@@ -228,14 +228,14 @@ export class FeatureFlagManager {
 
 export const featureFlags = new FeatureFlagManager();
 `;
-  
+
   fs.writeFileSync(featureFlagsPath, content);
   console.log(`✅ Generated feature flags: ${featureFlagsPath}`);
 }
 
 function generatePerformanceModule() {
   console.log('📊 Generating performance monitoring...');
-  
+
   const performancePath = path.join(optimizedDir, 'performance.ts');
   const content = `// Auto-generated performance monitoring
 // Generated at: ${new Date().toISOString()}
@@ -355,47 +355,51 @@ export function measurePerformance(operationName: string) {
   };
 }
 `;
-  
+
   fs.writeFileSync(performancePath, content);
   console.log(`✅ Generated performance monitoring: ${performancePath}`);
 }
 
 function updateOptimizedEntryPoints() {
   console.log('🔄 Updating optimized entry points...');
-  
+
   // Check if optimized imports already exist and add them if needed
   const optimizedImports = `import { getOptimizedAIFactor, calculateBatchAI, getRegionMultiplier } from './optimized/factors';
 import { featureFlags } from './optimized/feature-flags';
 import { performanceTracker, measurePerformance } from './optimized/performance';
 `;
-  
+
   ['ai', 'cloud', 'crypto'].forEach(type => {
     const entryPath = path.join(srcDir, `${type}.ts`);
     if (fs.existsSync(entryPath)) {
       let content = fs.readFileSync(entryPath, 'utf8');
-      
+
       // Check if optimized imports already exist
       if (!content.includes('./optimized/factors')) {
         // Find the best place to insert the imports
         const importIndex = content.indexOf('import { get');
         if (importIndex !== -1) {
-          content = content.slice(0, importIndex) + optimizedImports + '\n' + content.slice(importIndex);
+          content =
+            content.slice(0, importIndex) +
+            optimizedImports +
+            '\n' +
+            content.slice(importIndex);
         } else {
           // Insert at the beginning if no other imports found
           content = optimizedImports + '\n' + content;
         }
-        
+
         fs.writeFileSync(entryPath, content);
       }
     }
   });
-  
+
   console.log('✅ Updated entry points with optimized imports');
 }
 
 function runRollupBuild() {
   console.log('📦 Running Rollup build...');
-  
+
   try {
     execSync('npm run build:rollup', { stdio: 'inherit' });
     console.log('✅ Rollup build completed');
@@ -407,7 +411,7 @@ function runRollupBuild() {
 
 function generateBuildMetadata() {
   console.log('📝 Generating build metadata...');
-  
+
   const metadata = {
     buildTime: new Date().toISOString(),
     nodeVersion: process.version,
@@ -418,11 +422,11 @@ function generateBuildMetadata() {
       mapBasedLookups: true,
       batchCalculations: true,
       featureFlags: true,
-      performanceMonitoring: true
+      performanceMonitoring: true,
     },
-    bundleSizes: {}
+    bundleSizes: {},
   };
-  
+
   // Calculate bundle sizes
   if (fs.existsSync(distDir)) {
     const files = fs.readdirSync(distDir).filter(f => f.endsWith('.js'));
@@ -431,14 +435,14 @@ function generateBuildMetadata() {
       const stats = fs.statSync(filePath);
       metadata.bundleSizes[file] = {
         size: stats.size,
-        sizeKB: Math.round(stats.size / 1024 * 100) / 100
+        sizeKB: Math.round((stats.size / 1024) * 100) / 100,
       };
     });
   }
-  
+
   const metadataPath = path.join(distDir, 'build-metadata.json');
   fs.writeFileSync(metadataPath, JSON.stringify(metadata, null, 2));
-  
+
   console.log(`✅ Generated build metadata: ${metadataPath}`);
   return metadata;
 }
@@ -462,22 +466,22 @@ function printBuildSummary(metadata) {
 
 function main() {
   console.log('🚀 Starting optimized build process...');
-  
+
   // Step 1: Ensure directories exist
   ensureDirectories();
-  
+
   // Step 2: Pre-compile factor data
   precompileFactorData();
-  
+
   // Step 3: Generate feature flags
   generateFeatureFlagModule();
-  
+
   // Step 4: Generate performance monitoring
   generatePerformanceModule();
-  
+
   // Step 5: Update entry points with optimizations
   updateOptimizedEntryPoints();
-  
+
   // Step 6: Run TypeScript compilation
   console.log('🔧 Compiling TypeScript...');
   try {
@@ -487,13 +491,13 @@ function main() {
     console.error('❌ TypeScript compilation failed:', error.message);
     process.exit(1);
   }
-  
+
   // Step 7: Run Rollup build
   runRollupBuild();
-  
+
   // Step 8: Generate build metadata
   const metadata = generateBuildMetadata();
-  
+
   // Step 9: Print summary
   printBuildSummary(metadata);
 }
@@ -507,5 +511,5 @@ export {
   generateOptimizedLookups,
   generateFeatureFlagModule,
   generatePerformanceModule,
-  generateBuildMetadata
+  generateBuildMetadata,
 };

@@ -24,7 +24,7 @@ export const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_ID;
  */
 export const initGA = () => {
   if (!GA_MEASUREMENT_ID) return;
-  
+
   // Safe window check for SSR
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('config', GA_MEASUREMENT_ID, {
@@ -63,9 +63,11 @@ export const trackEvent = (
  * Track extension install button click
  * @param extensionType - Type of extension (chrome, firefox, etc.)
  */
-export const trackExtensionInstallClick = (extensionType: string = 'chrome') => {
+export const trackExtensionInstallClick = (
+  extensionType: string = 'chrome'
+) => {
   trackEvent('extension_install_click', 'engagement', extensionType);
-  
+
   // Also track as a custom event for better analytics
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'extension_install_click', {
@@ -81,7 +83,7 @@ export const trackExtensionInstallClick = (extensionType: string = 'chrome') => 
  */
 export const trackNpmCopyClick = (packageName: string = 'qarbon-query') => {
   trackEvent('npm_copy_click', 'engagement', packageName);
-  
+
   // Also track as a custom event for better analytics
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'npm_copy_click', {
@@ -96,9 +98,12 @@ export const trackNpmCopyClick = (packageName: string = 'qarbon-query') => {
  * @param email - The email address (optional, for privacy we might not want to track this)
  * @param source - Where the subscription came from (header, footer, modal, etc.)
  */
-export const trackNewsletterSubmitted = (source: string = 'unknown', email?: string) => {
+export const trackNewsletterSubmitted = (
+  source: string = 'unknown',
+  email?: string
+) => {
   trackEvent('newsletter_submitted', 'conversion', source);
-  
+
   // Also track as a custom event for better analytics
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', 'newsletter_submitted', {
@@ -154,9 +159,7 @@ export const trackConversion = (
  * Utility function to check if analytics is properly initialized
  */
 export const isAnalyticsReady = (): boolean => {
-  return typeof window !== 'undefined' && 
-         !!window.gtag && 
-         !!GA_MEASUREMENT_ID;
+  return typeof window !== 'undefined' && !!window.gtag && !!GA_MEASUREMENT_ID;
 };
 
 /**

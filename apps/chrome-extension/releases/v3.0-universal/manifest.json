@@ -2,12 +2,7 @@
   "manifest_version": 3,
   "name": "QarbonQuery",
   "version": "2.7.0",
-  "permissions": [
-    "storage",
-    "scripting",
-    "activeTab",
-    "webRequest"
-  ],
+  "permissions": ["storage", "scripting", "activeTab", "webRequest"],
   "host_permissions": [
     "https://*.claude.ai/*",
     "https://*.openai.com/*",

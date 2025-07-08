@@ -1,11 +1,14 @@
 # Migration Guide - Qarbon Query Pipeline Architecture
 
 ## Overview
-This guide helps you migrate from the legacy qarbon-query calculator APIs to the new enhanced pipeline architecture while maintaining full backward compatibility.
+
+This guide helps you migrate from the legacy qarbon-query calculator APIs to the new enhanced
+pipeline architecture while maintaining full backward compatibility.
 
 ## Migration Phases
 
 ### Phase 1: No Changes Required (Current)
+
 Your existing code continues to work unchanged. No migration needed.
 
 ```typescript
@@ -17,6 +20,7 @@ console.log(emission); // Same EmissionData structure
 ```
 
 ### Phase 2: Optional Enhanced Features (Future)
+
 You can gradually adopt new features while keeping legacy APIs.
 
 ```typescript
@@ -33,6 +37,7 @@ const result = await calculateAIEmissionsEnhanced(
 ```
 
 ### Phase 3: Full Pipeline Integration (Optional)
+
 Use the universal pipeline for maximum flexibility.
 
 ```typescript
@@ -43,18 +48,19 @@ const result = await pipeline.process(csvData, {
   category: 'ai',
   useGrid: true,
   useOptimizations: true,
-  useUncertainty: true
+  useUncertainty: true,
 });
 ```
 
 ## API Comparison
 
 ### Legacy APIs (Unchanged)
+
 ```typescript
 // AI Emissions
 calculateAIEmissions(tokens: number, model: string): EmissionData
 
-// Digital Emissions  
+// Digital Emissions
 calculateDigitalEmissions(dataTransfer: number, timeSpent: number, deviceType?: string): EmissionData
 
 // Transport Emissions
@@ -65,6 +71,7 @@ calculateEnergyEmissions(consumption: number, source?: string): EmissionData
 ```
 
 ### Enhanced APIs (New)
+
 ```typescript
 // Enhanced AI Emissions
 calculateAIEmissionsEnhanced(input: any, options?: PipelineOptions): Promise<EmissionResult>
@@ -72,7 +79,7 @@ calculateAIEmissionsEnhanced(input: any, options?: PipelineOptions): Promise<Emi
 // Enhanced Digital Emissions
 calculateDigitalEmissionsEnhanced(input: any, options?: PipelineOptions): Promise<EmissionResult>
 
-// Enhanced Transport Emissions  
+// Enhanced Transport Emissions
 calculateTransportEmissionsEnhanced(input: any, options?: PipelineOptions): Promise<EmissionResult>
 
 // Enhanced Energy Emissions
@@ -84,29 +91,31 @@ processEmissions(input: any, options?: PipelineOptions): Promise<EmissionResult>
 
 ## Feature Comparison
 
-| Feature | Legacy API | Enhanced API | Pipeline API |
-|---------|------------|--------------|--------------|
-| Input Format | Fixed parameters | Flexible objects | Any format via adapters |
-| Grid Awareness | No | Optional | Yes |
-| Uncertainty | Basic confidence | Quantified ranges | Monte Carlo simulation |
-| Optimizations | None | Optional | Caching, batching |
-| Adapters | No | Limited | Full adapter support |
-| Result Type | EmissionData | EmissionResult | PipelineExecutionResult |
+| Feature        | Legacy API       | Enhanced API      | Pipeline API            |
+| -------------- | ---------------- | ----------------- | ----------------------- |
+| Input Format   | Fixed parameters | Flexible objects  | Any format via adapters |
+| Grid Awareness | No               | Optional          | Yes                     |
+| Uncertainty    | Basic confidence | Quantified ranges | Monte Carlo simulation  |
+| Optimizations  | None             | Optional          | Caching, batching       |
+| Adapters       | No               | Limited           | Full adapter support    |
+| Result Type    | EmissionData     | EmissionResult    | PipelineExecutionResult |
 
 ## Input Format Examples
 
 ### Legacy (Unchanged)
+
 ```typescript
 const emission = calculateAIEmissions(1000, 'gpt-4');
 ```
 
 ### Enhanced (Flexible Input)
+
 ```typescript
 // Object input
 const result = await calculateAIEmissionsEnhanced({
   tokens: 1000,
   model: 'gpt-4',
-  region: 'US-CA'
+  region: 'US-CA',
 });
 
 // With options
@@ -117,6 +126,7 @@ const result = await calculateAIEmissionsEnhanced(
 ```
 
 ### Pipeline (Any Input Format)
+
 ```typescript
 // JSON input
 const jsonData = { tokens: 1000, model: 'gpt-4' };
@@ -134,6 +144,7 @@ const result = await pipeline.process(xmlData, { category: 'ai' });
 ## Result Structure Evolution
 
 ### Legacy Result (EmissionData)
+
 ```typescript
 interface EmissionData {
   id: string;
@@ -147,6 +158,7 @@ interface EmissionData {
 ```
 
 ### Enhanced Result (EmissionResult)
+
 ```typescript
 interface EmissionResult {
   emissions: EmissionData[];
@@ -162,6 +174,7 @@ interface EmissionResult {
 ```
 
 ### Pipeline Result (PipelineExecutionResult)
+
 ```typescript
 interface PipelineExecutionResult extends EmissionResult {
   stages: PipelineStageResult[];
@@ -174,6 +187,7 @@ interface PipelineExecutionResult extends EmissionResult {
 ## Migration Strategies
 
 ### Strategy 1: Gradual Enhancement
+
 Replace legacy calls one by one with enhanced versions:
 
 ```typescript
@@ -191,6 +205,7 @@ const emission = result.emissions[0]; // Same structure
 ```
 
 ### Strategy 2: Adapter Integration
+
 Add adapter support for new input formats:
 
 ```typescript
@@ -200,11 +215,12 @@ import { pipeline } from '@qarbon/core';
 const csvContent = await fs.readFile('emissions.csv', 'utf8');
 const result = await pipeline.process(csvContent, {
   category: 'ai',
-  useOptimizations: true
+  useOptimizations: true,
 });
 ```
 
 ### Strategy 3: Full Pipeline Adoption
+
 Use pipeline for all emission calculations:
 
 ```typescript
@@ -214,7 +230,7 @@ import { pipeline } from '@qarbon/core';
 pipeline.configure({
   gridManager: { enabled: true, defaultRegion: 'US-CA' },
   optimizations: { enabled: true, caching: true },
-  uncertainty: { enabled: true, confidenceLevel: 0.95 }
+  uncertainty: { enabled: true, confidenceLevel: 0.95 },
 });
 
 // Process any input
@@ -222,9 +238,11 @@ const result = await pipeline.process(input, { category: 'ai' });
 ```
 
 ## Breaking Changes
+
 **None.** All existing APIs remain unchanged and will continue to work.
 
 ## Feature Detection
+
 Check if enhanced features are available:
 
 ```typescript
@@ -242,39 +260,48 @@ if (await isEnhancedPipelineAvailable()) {
 ## Best Practices
 
 ### 1. Start with Enhanced APIs
+
 For new code, prefer enhanced APIs for additional features:
+
 ```typescript
 // Preferred for new code
 const result = await calculateAIEmissionsEnhanced(input, options);
 ```
 
 ### 2. Use Pipeline for Multiple Formats
+
 When dealing with various input formats:
+
 ```typescript
 const result = await pipeline.process(unknownFormatData);
 ```
 
 ### 3. Enable Grid Awareness for Energy
+
 For energy calculations, enable grid features:
+
 ```typescript
 const result = await calculateEnergyEmissionsEnhanced(input, {
   useGrid: true,
-  region: 'US-CA'
+  region: 'US-CA',
 });
 ```
 
 ### 4. Add Uncertainty for Critical Applications
+
 For applications requiring uncertainty quantification:
+
 ```typescript
 const result = await pipeline.process(input, {
   useUncertainty: true,
-  useGrid: true
+  useGrid: true,
 });
 ```
 
 ## Error Handling
 
 ### Legacy APIs
+
 ```typescript
 try {
   const emission = calculateAIEmissions(1000, 'unknown-model');
@@ -284,6 +311,7 @@ try {
 ```
 
 ### Enhanced APIs
+
 ```typescript
 try {
   const result = await calculateAIEmissionsEnhanced(input, options);
@@ -294,15 +322,16 @@ try {
 ```
 
 ### Pipeline APIs
+
 ```typescript
 try {
   const result = await pipeline.process(input, options);
-  
+
   // Check for stage-level errors
   const errors = result.stages
     .filter(stage => stage.errors?.length > 0)
     .flatMap(stage => stage.errors);
-    
+
   if (errors.length > 0) {
     console.warn('Pipeline stage warnings:', errors);
   }
@@ -314,16 +343,19 @@ try {
 ## Performance Considerations
 
 ### Legacy APIs
+
 - Synchronous operation
 - No caching
 - Single calculation per call
 
 ### Enhanced APIs
+
 - Asynchronous operation
 - Optional caching
 - Batch processing available
 
 ### Pipeline APIs
+
 - Full optimization support
 - Intelligent caching
 - Batch processing
@@ -339,9 +371,11 @@ try {
 ## Support
 
 For migration questions or issues:
+
 1. Check existing documentation
 2. Review test examples
 3. Open GitHub issue
 4. Contact support team
 
-The migration is designed to be **zero-risk** with **maximum benefit** - you can adopt new features at your own pace while existing code continues to work unchanged.
+The migration is designed to be **zero-risk** with **maximum benefit** - you can adopt new features
+at your own pace while existing code continues to work unchanged.

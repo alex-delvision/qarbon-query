@@ -402,19 +402,19 @@ export class AIImpactTrackerAdapter implements EmissionAdapter {
       ) {
         const confLow = Number(input.confidence.low);
         const confHigh = Number(input.confidence.high);
-        
+
         if (isNaN(confLow) || isNaN(confHigh)) {
           throw new Error(
             'AI Impact Tracker "confidence.low" and "confidence.high" must be valid numbers'
           );
         }
-        
+
         if (confLow > confHigh) {
           throw new Error(
             'AI Impact Tracker "confidence.low" must be less than or equal to "confidence.high"'
           );
         }
-        
+
         confidence = { low: confLow, high: confHigh };
       } else {
         throw new Error(
