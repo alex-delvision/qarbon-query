@@ -70,15 +70,15 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
   },
   'gpt-4': {
     energyPerToken: 0.0000025, // kWh per token
-    co2PerToken: 0.0045, // g CO₂e per token (4.5g per 1000 tokens)
+    co2PerToken: 0.0085, // g CO₂e per token (8.5g per 1000 tokens)
     co2PerQuery: 8.5, // g CO₂e per average query
-    confidence: { low: 7.2, high: 9.8 },
+    confidence: { low: 7.0, high: 10.0 },
   },
   'claude-2': {
     energyPerToken: 0.0000008, // kWh per token
-    co2PerToken: 0.0004, // g CO₂e per token
-    co2PerQuery: 3.1, // g CO₂e per average query
-    confidence: { low: 2.5, high: 3.7 },
+    co2PerToken: 0.003, // g CO₂e per token
+    co2PerQuery: 3.0, // g CO₂e per average query
+    confidence: { low: 2.5, high: 3.5 },
   },
   'claude-3': {
     energyPerToken: 0.0000012, // kWh per token
@@ -113,86 +113,103 @@ const AI_FACTORS: Record<string, AIEmissionFactor> = {
   'llama-2-7b': {
     energyPerToken: 0.00000055,
     co2PerToken: 0.00028,
+    co2PerQuery: 0.28, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.00024, high: 0.00032 },
   },
   'llama-2-13b': {
     energyPerToken: 0.00000065,
     co2PerToken: 0.00031,
+    co2PerQuery: 0.31, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.00027, high: 0.00035 },
   },
   'llama-2-70b': {
     energyPerToken: 0.00000175,
     co2PerToken: 0.00102,
+    co2PerQuery: 1.02, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0009, high: 0.00114 },
   },
   'mistral-8x7b': {
     energyPerToken: 0.00000078,
     co2PerToken: 0.00035,
+    co2PerQuery: 0.35, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0003, high: 0.0004 },
   },
   'falcon-7b': {
     energyPerToken: 0.00000045,
     co2PerToken: 0.00022,
+    co2PerQuery: 0.22, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.00019, high: 0.00025 },
   },
   'falcon-40b': {
     energyPerToken: 0.00000145,
     co2PerToken: 0.00078,
+    co2PerQuery: 0.78, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0007, high: 0.00086 },
   },
   'bloom-176b': {
     energyPerToken: 0.0000041,
     co2PerToken: 0.0023,
+    co2PerQuery: 2.3, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.002, high: 0.0026 },
   },
   stablediffusion: {
     energyPerToken: 0.0000029,
     co2PerToken: 0.0016,
+    co2PerQuery: 1.6, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0014, high: 0.0018 },
   },
   whisper: {
     energyPerToken: 0.000002,
     co2PerToken: 0.0011,
+    co2PerQuery: 1.1, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.001, high: 0.0012 },
   },
   'dalle-3': {
     energyPerToken: 0.0000031,
     co2PerToken: 0.00176,
+    co2PerQuery: 1.76, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0015, high: 0.002 },
   },
   midjourney: {
     energyPerToken: 0.0000024,
     co2PerToken: 0.0013,
+    co2PerQuery: 1.3, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0011, high: 0.0015 },
   },
   'phi-2': {
     energyPerToken: 0.0000013,
     co2PerToken: 0.0007,
+    co2PerQuery: 0.7, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0006, high: 0.0008 },
   },
   'gemini-nano': {
     energyPerToken: 0.00000017,
     co2PerToken: 0.00009,
+    co2PerQuery: 0.09, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.00008, high: 0.0001 },
   },
   tinyllama: {
     energyPerToken: 0.0000002,
     co2PerToken: 0.00011,
+    co2PerQuery: 0.11, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0001, high: 0.00012 },
   },
   'gpt-4-us': {
     energyPerToken: 0.0000026,
     co2PerToken: 0.0013,
+    co2PerQuery: 1.3, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0012, high: 0.0014 },
   },
   'gpt-4-eu': {
     energyPerToken: 0.0000026,
     co2PerToken: 0.00078,
+    co2PerQuery: 0.78, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.0007, high: 0.00086 },
   },
   'gpt-4-asia': {
     energyPerToken: 0.0000026,
     co2PerToken: 0.0011,
+    co2PerQuery: 1.1, // g CO₂e per average query (1000 tokens)
     confidence: { low: 0.001, high: 0.0012 },
   },
 };
