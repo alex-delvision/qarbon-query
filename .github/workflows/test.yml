@@ -41,14 +41,14 @@ jobs:
       - name: Run AI emissions unit tests
         run: |
           cd packages/@qarbon/emissions
-          npm test -- --verbose --coverage
+          npm test -- --coverage
         env:
           CI: true
 
       - name: Verify GPT-3.5 emissions calculation
         run: |
           cd packages/@qarbon/emissions
-          npm test -- --testNamePattern="should calculate ≈2.2g CO2e for 1000 tokens"
+          npm test -- --grep="should calculate ≈2.2g CO2e for 1000 tokens"
         env:
           CI: true
 
@@ -84,21 +84,21 @@ jobs:
       - name: Run API emissions integration tests
         run: |
           cd apps/chrome-extension
-          npm test -- test/api-emissions.spec.ts --verbose --coverage
+          npm test
         env:
           CI: true
 
       - name: Verify ±10% emissions tolerance
         run: |
           cd apps/chrome-extension
-          npm test -- --testNamePattern="should assert stored emissions within ±10% tolerance"
+          npm test
         env:
           CI: true
 
       - name: Run token extraction tests
         run: |
           cd apps/chrome-extension
-          npm test -- --testNamePattern="token|extractor"
+          npm test
         env:
           CI: true
 
