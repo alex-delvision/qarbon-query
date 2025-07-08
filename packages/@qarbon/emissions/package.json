@@ -61,7 +61,7 @@
     "test:browser": "vitest run --browser",
     "test:ai": "vitest run --grep='ai|emission|gpt'",
     "test:performance": "node benchmarks/index.js",
-    "clean": "rm -rf dist",
+    "clean": "rm -rf dist/*.js dist/*.js.map dist/*.cjs dist/*.min.js",
     "docs": "typedoc --skipErrorChecking --excludeExternals --out docs src/calculator.ts src/adapters/index.ts src/factors.ts",
     "size-limit": "npm run build && du -sh dist/*",
     "prepare": "npm run build"

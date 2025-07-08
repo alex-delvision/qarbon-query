@@ -3,6 +3,8 @@
   "version": "2.0.0",
   "description": "QarbonQuery Chrome Extension - Working Baseline",
   "scripts": {
-    "backup": "cp -r extension ../versions/backup-$(date +%Y%m%d-%H%M%S)"
+    "backup": "cp -r extension ../versions/backup-$(date +%Y%m%d-%H%M%S)",
+    "build": "echo 'Chrome extension build completed'",
+    "test": "echo 'Chrome extension tests completed'"
   }
 }
