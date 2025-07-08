@@ -26,7 +26,7 @@ export async function trackSampleEmission() {
     deviceType: 'desktop',
   });
 
-  console.log('Tracked emission:', emission);
+  console.warn('Tracked emission:', emission);
   return emission;
 }
 

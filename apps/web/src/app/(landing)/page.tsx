@@ -5,14 +5,11 @@ import { Button } from '@/components/Button';
 import { LiveCounter } from '@/components/LiveCounter';
 import { Section } from '@/components/Section';
 import { Statistic } from '@/components/Statistic';
-import { TestimonialCard } from '@/components/TestimonialCard';
 import { CallToAction } from '@/components/CallToAction';
 
 // Temporarily force dynamic rendering to avoid build issues
 export const dynamic = 'force-dynamic';
 
-// Real testimonials coming soon
-const testimonials = [];
 
 export default function LandingPage() {
   const [npmDownloads, setNpmDownloads] = useState(12500); // Default fallback

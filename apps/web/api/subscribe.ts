@@ -126,7 +126,7 @@ export default async function handler(request: NextRequest) {
 
     // Honeypot check - if website field is filled, it's likely a bot
     if (website && website.trim() !== '') {
-      console.log('Honeypot triggered:', { email, website });
+      console.warn('Honeypot triggered:', { email, website });
       // Return success to avoid revealing the honeypot to bots
       return NextResponse.json({ message: 'Subscription successful' });
     }
@@ -174,7 +174,7 @@ export default async function handler(request: NextRequest) {
         throw new Error('No email service configured');
       }
 
-      console.log(`Subscription successful via ${service}:`, { email, result });
+      console.warn(`Subscription successful via ${service}:`, { email, result });
 
       return NextResponse.json({
         message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',
@@ -189,7 +189,7 @@ export default async function handler(request: NextRequest) {
         if (service === 'convertkit' && MAILCHIMP_API_KEY && MAILCHIMP_AUDIENCE_ID && MAILCHIMP_SERVER_PREFIX) {
           result = await subscribeToMailchimp(email);
           service = 'mailchimp';
-          console.log(`Fallback subscription successful via ${service}:`, { email, result });
+          console.warn(`Fallback subscription successful via ${service}:`, { email, result });
           
           return NextResponse.json({
             message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',
@@ -198,7 +198,7 @@ export default async function handler(request: NextRequest) {
         } else if (service === 'mailchimp' && CONVERTKIT_API_KEY && CONVERTKIT_FORM_ID) {
           result = await subscribeToConvertKit(email);
           service = 'convertkit';
-          console.log(`Fallback subscription successful via ${service}:`, { email, result });
+          console.warn(`Fallback subscription successful via ${service}:`, { email, result });
           
           return NextResponse.json({
             message: 'Thank you for subscribing! You\'ll receive updates about Qarbon Query.',

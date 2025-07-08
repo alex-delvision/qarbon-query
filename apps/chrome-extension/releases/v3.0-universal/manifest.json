@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "QarbonQuery",
+  "version": "2.7.0",
+  "permissions": [
+    "storage",
+    "scripting",
+    "activeTab",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "https://*.claude.ai/*",
+    "https://*.openai.com/*",
+    "https://*.chatgpt.com/*",
+    "https://*.google.com/*",
+    "https://gemini.google.com/*",
+    "https://*.perplexity.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://*.claude.ai/*",
+        "https://chat.openai.com/*",
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://*.gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

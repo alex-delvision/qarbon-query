@@ -33,7 +33,7 @@ export class QarbonClient {
     timeSpent: number;
     deviceType?: 'mobile' | 'desktop' | 'tablet';
   }): Promise<EmissionData> {
-    const emission = this.calculator.calculateDigitalEmissions(
+    const emission = await this.calculator.calculateDigitalEmissions(
       params.dataTransfer,
       params.timeSpent,
       params.deviceType
@@ -53,7 +53,7 @@ export class QarbonClient {
     distance: number;
     mode?: 'car' | 'train' | 'plane' | 'bus';
   }): Promise<EmissionData> {
-    const emission = this.calculator.calculateTransportEmissions(
+    const emission = await this.calculator.calculateTransportEmissions(
       params.distance,
       params.mode
     );
@@ -72,7 +72,7 @@ export class QarbonClient {
     consumption: number;
     source?: 'grid' | 'renewable' | 'fossil';
   }): Promise<EmissionData> {
-    const emission = this.calculator.calculateEnergyEmissions(
+    const emission = await this.calculator.calculateEnergyEmissions(
       params.consumption,
       params.source
     );
